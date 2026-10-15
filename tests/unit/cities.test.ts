@@ -12,7 +12,7 @@ const berkeley = {
 
 describe('city registry', () => {
   it('loads Berkeley from data/cities', () => {
-    expect(cities.map((c) => c.path)).toEqual(['/us/ca/berkeley/']);
+    expect(cities.map((c) => c.path)).toEqual(['/us/ca/berkeley/', '/break/it/']);
     expect(cities[0].slug).toEqual({ country: 'us', state: 'ca', city: 'berkeley' });
   });
 
