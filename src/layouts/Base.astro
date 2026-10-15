@@ -1,0 +1,30 @@
+---
+import type { City } from '../lib/cities';
+
+interface Props {
+  title: string;
+  city?: City;
+}
+
+const { title, city } = Astro.props;
+const fullTitle = title === 'Public Budgets' ? title : `${title} · Public Budgets`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <header>
+      <a href="/">Public Budgets</a>
+      {city && <span> / {city.name}, {city.stateCode}</span>}
+      {city && <p data-independence>Independent. Not affiliated with the {city.government}.</p>}
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

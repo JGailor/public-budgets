@@ -1,0 +1,16 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import { CITY_PAGES, cityStaticPaths, type City } from '../../../../lib/cities';
+
+export const getStaticPaths = cityStaticPaths;
+
+const { city } = Astro.props as { city: City };
+---
+
+<Base title={`${city.name}, ${city.stateCode}`} city={city}>
+  <h1>{city.name}'s budget</h1>
+  <p>Placeholder overview. The real one ships in #7.</p>
+  <ul>
+    {CITY_PAGES.map((p) => <li><a href={`${city.path}${p.slug}/`}>{p.title}</a></li>)}
+  </ul>
+</Base>

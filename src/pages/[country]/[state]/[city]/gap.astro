@@ -1,0 +1,13 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import { cityStaticPaths, type City } from '../../../../lib/cities';
+
+export const getStaticPaths = cityStaticPaths;
+
+const { city } = Astro.props as { city: City };
+---
+
+<Base title={`The gap · ${city.name}`} city={city}>
+  <h1>The gap</h1>
+  <p>Placeholder. Ships in #8.</p>
+</Base>
