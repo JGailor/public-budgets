@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import { cities } from '../lib/cities';
+---
+
+<Base title="Where the Money Went">
+  <h1>Your city's budget, finally readable.</h1>
+  <p>Placeholder landing page. The real one ships in #6.</p>
+  <ul>
+    {cities.map((c) => <li><a href={c.path}>{c.name}, {c.stateCode}</a></li>)}
+  </ul>
+</Base>

@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# bash runs with -eo pipefail, so `cmd | tee` can't hide a failing cmd.
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run test:dist
+      - uses: actions/upload-artifact@v5
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  preview:
+    name: Deploy PR preview
+    needs: check
+    # Fork PRs get no secrets; skip them rather than fail.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Require Cloudflare secrets
+        run: |
+          if [[ -z $CLOUDFLARE_API_TOKEN || -z $CLOUDFLARE_ACCOUNT_ID ]]; then
+            echo "::error::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID repo secrets are not set. See README > Deploying."
+            exit 1
+          fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist/
+      - name: Upload preview version
+        id: upload
+        run: |
+          npx wrangler versions upload --preview-alias "pr-$PR" --message "PR #$PR @ ${GITHUB_SHA::7}" | tee upload.log
+          url=$(grep -oE "https://pr-$PR-[a-z0-9.-]+\.workers\.dev" upload.log | head -1)
+          if [[ -z $url ]]; then echo "::error::no preview alias URL in wrangler output"; exit 1; fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Smoke test preview
+        run: scripts/smoke.sh "${{ steps.upload.outputs.url }}"
+      - name: Comment preview URL
+        run: |
+          gh pr comment "$PR" --edit-last --create-if-none \
+            --body "Preview: ${{ steps.upload.outputs.url }} (commit ${GITHUB_SHA::7}, smoke test passed)"
+
+  production:
+    name: Deploy production
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist/
+      - name: Deploy
+        id: deploy
+        run: |
+          npx wrangler deploy | tee deploy.log
+          url=$(grep -oE "https://wherethemoneywent\.[a-z0-9.-]+\.workers\.dev" deploy.log | head -1)
+          if [[ -z $url ]]; then echo "::error::no workers.dev URL in wrangler output"; exit 1; fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Smoke test workers.dev
+        run: scripts/smoke.sh "${{ steps.deploy.outputs.url }}"
+      - name: Smoke test wherethemoneywent.com
+        run: scripts/smoke.sh https://wherethemoneywent.com
