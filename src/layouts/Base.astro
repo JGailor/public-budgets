@@ -7,7 +7,7 @@ interface Props {
 }
 
 const { title, city } = Astro.props;
-const fullTitle = title === 'Public Budgets' ? title : `${title} · Public Budgets`;
+const fullTitle = title === 'Where the Money Went' ? title : `${title} · Where the Money Went`;
 ---
 
 <!doctype html>
@@ -19,7 +19,7 @@ const fullTitle = title === 'Public Budgets' ? title : `${title} · Public Budge
   </head>
   <body>
     <header>
-      <a href="/">Public Budgets</a>
+      <a href="/">Where the Money Went</a>
       {city && <span> / {city.name}, {city.stateCode}</span>}
       {city && <p data-independence>Independent. Not affiliated with the {city.government}.</p>}
     </header>

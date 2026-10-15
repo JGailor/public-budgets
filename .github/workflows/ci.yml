@@ -106,8 +106,10 @@ jobs:
         id: deploy
         run: |
           npx wrangler deploy | tee deploy.log
-          url=$(grep -oE "https://public-budgets\.[a-z0-9.-]+\.workers\.dev" deploy.log | head -1)
+          url=$(grep -oE "https://wherethemoneywent\.[a-z0-9.-]+\.workers\.dev" deploy.log | head -1)
           if [[ -z $url ]]; then echo "::error::no workers.dev URL in wrangler output"; exit 1; fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
-      - name: Smoke test production
+      - name: Smoke test workers.dev
         run: scripts/smoke.sh "${{ steps.deploy.outputs.url }}"
+      - name: Smoke test wherethemoneywent.com
+        run: scripts/smoke.sh https://wherethemoneywent.com

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Checks a deployed site answers the way the routing promises.
-# Usage: scripts/smoke.sh https://pr-3-public-budgets.example.workers.dev
+# Usage: scripts/smoke.sh https://pr-3-wherethemoneywent.example.workers.dev
 set -euo pipefail
 
 base=${1:?usage: smoke.sh <base-url>}
@@ -34,6 +34,17 @@ if curl -sS --max-time 20 "$base/us/ca/nowhere/" | grep -q 'Page not found'; the
 else
   echo "FAIL 404 body is not dist/404.html"
   fail=1
+fi
+
+# On the production domain, www must 301 to the apex with the path intact.
+if [[ $base == https://wherethemoneywent.com ]]; then
+  loc=$(curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 20 "https://www.wherethemoneywent.com/us/ca/berkeley/")
+  if [[ $loc == "301 https://wherethemoneywent.com/us/ca/berkeley/" ]]; then
+    echo "ok   www redirects to apex"
+  else
+    echo "FAIL www: expected '301 https://wherethemoneywent.com/us/ca/berkeley/', got '$loc'"
+    fail=1
+  fi
 fi
 
 exit $fail
