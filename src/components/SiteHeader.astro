@@ -356,13 +356,17 @@ const explore = cities[0];
     margin-top: 1.25rem;
   }
 
-  @media (min-width: 64rem) {
+  /*
+   * The full nav from 1200px, measured with all seven page links (Overview, Revenue,
+   * The Gap, Departments, Ballot, Capital, Sources): it needs ~1194px with the tight
+   * spacing below and ~1314px with the normal spacing, so tight runs up to 1360px.
+   */
+  @media (min-width: 75rem) {
     .compact {
       display: none;
     }
   }
-  /* 1024–1279px: the full nav, tightened so the long wordmark and every link still fit. */
-  @media (max-width: 79.99rem) {
+  @media (max-width: 84.99rem) {
     .desktop {
       gap: 1rem;
     }
@@ -371,7 +375,7 @@ const explore = cities[0];
       margin-inline-start: 0.5rem;
     }
   }
-  @media (max-width: 63.99rem) {
+  @media (max-width: 74.99rem) {
     .desktop {
       display: none;
     }

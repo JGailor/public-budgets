@@ -1,0 +1,546 @@
+---
+/**
+ * Revenue (D2): where the money comes from. The mix bar's groups come from
+ * revenue-groups.json; every number from revenuePage() in src/lib/revenue.ts.
+ * Sorts and "Show all" are CSS (radios, a checkbox, :has()), so they work
+ * without JavaScript.
+ */
+import SourceChip from '../../../../components/SourceChip.astro';
+import Term from '../../../../components/Term.astro';
+import Base from '../../../../layouts/Base.astro';
+import { budgetFor } from '../../../../lib/budget';
+import { cityStaticPaths, type City } from '../../../../lib/cities';
+import { shortMoney } from '../../../../lib/format';
+import { revenuePage, SORTS, VISIBLE, type Pace } from '../../../../lib/revenue';
+import { revenueGroupsFor } from '../../../../lib/revenue-groups';
+
+export const getStaticPaths = cityStaticPaths;
+
+const { city } = Astro.props as { city: City };
+const budget = budgetFor(city)!;
+const r = revenuePage(budget, revenueGroupsFor(city, budget));
+const pct = (p: number) => `${Math.round(p * 100)}%`;
+const signedPct = (p: number) => `${p > 0 ? '+' : ''}${Math.round(p * 100)}%`;
+const sortLabel = { biggest: 'Biggest first', fastest: 'Fastest growing', az: 'A-Z' } as const;
+const paceLabel: Record<Pace, string> = { behind: 'Behind (under 40%)', 'on-pace': 'On pace (40-60%)', ahead: 'Ahead (over 60%)' };
+
+// Row order and "first 14" per sort, one CSS rule each.
+const sortRules = SORTS.map((s) =>
+  [
+    `.rev-page:has(#sort-${s}:checked) .line { order: var(--rank-${s}); }`,
+    `.rev-page:has(#sort-${s}:checked):not(:has(#show-all:checked)) .line[data-more-${s}] { display: none; }`,
+  ].join('\n'),
+).join('\n');
+const t = r.insights;
+---
+
+<Base title={`Revenue · ${city.name}`} city={city} description={`Where ${city.name}'s ${shortMoney(r.total.value)} in General Fund revenue comes from, line by line, and how much had arrived by mid-year.`}>
+  <div class="rev-page wrap">
+    <section class="intro">
+      <p class="eyebrow">Revenue · FY2026</p>
+      <h1>Where the money comes from</h1>
+      <p class="lede">
+        {city.name} budgeted {shortMoney(r.total.value)} in General Fund revenue for FY2026, including transfers from other funds.
+        {r.totalPace === 'on-pace' ? ' By the halfway point of the year, about half had arrived. That\'s on pace.' : ` By the halfway point of the year, ${pct(r.received)} had arrived.`}
+        <SourceChip city={city} figure={r.total} />
+      </p>
+    </section>
+
+    <section class="mix-section" aria-labelledby="mix-title">
+      <h2 id="mix-title" class="visually-hidden">Revenue by group</h2>
+      <div class="mix">
+        {
+          r.mix.map(({ g, start }) => (
+            <button
+              type="button"
+              class:list={['block', { 'block--end': start > 0.5 }]}
+              style={`flex:${g.adopted};background:${g.color}`}
+              aria-label={`${g.name}: ${pct(g.share)}, ${shortMoney(g.adopted)}`}
+              aria-describedby={`parts-${g.id}`}
+            >
+              <span class="parts" role="tooltip" id={`parts-${g.id}`}>
+                <strong>{g.name}</strong> · {shortMoney(g.adopted)}
+                <span class="parts-list">
+                  {g.lines.map((l) => (
+                    <span>
+                      {l.name} <span class="num">{shortMoney(l.fy2026Adopted)}</span>
+                    </span>
+                  ))}
+                </span>
+              </span>
+            </button>
+          ))
+        }
+      </div>
+      <ul class="legend">
+        {
+          r.mix.map(({ g }) => (
+            <li>
+              <span class="sw" style={`background:${g.color}`} aria-hidden="true" />
+              <span class="g-name">{g.name}</span>
+              <span class="g-pct num">{pct(g.share)}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="hint">Grouped from {r.lineCount} line items in the city's mid-year report. Hover or focus a block for its line items.</p>
+    </section>
+
+    <section class="lines-section" aria-labelledby="lines-title">
+      <div class="lines-head">
+        <h2 id="lines-title">Every line item</h2>
+        <fieldset class="seg">
+          <legend class="visually-hidden">Sort</legend>
+          {SORTS.map((s, i) => (<><input type="radio" name="sort" id={`sort-${s}`} class="visually-hidden" checked={i === 0} /><label for={`sort-${s}`}>{sortLabel[s]}</label></>))}
+        </fieldset>
+      </div>
+      <p class="cols" aria-hidden="true"><span>Source</span><span>Budgeted</span><span>Received by mid-year</span><span>Vs. last year</span></p>
+      <ol class="lines">
+        {
+          r.lines.map(({ l, pace, rank, figures }) => {
+            const more = Object.fromEntries(SORTS.filter((s) => rank[s] >= VISIBLE).map((s) => [`data-more-${s}`, '']));
+            const change = l.changeVsFy2025Pct;
+            return (
+              <li class="line" style={SORTS.map((s) => `--rank-${s}:${rank[s]}`).join(';')} {...more}>
+                <span class="l-name">{l.name}</span>
+                <span class="l-budget">
+                  <span class="num">{shortMoney(l.fy2026Adopted)}</span>
+                  <span class="mag" aria-hidden="true"><span style={`width:${((l.fy2026Adopted / r.max) * 100).toFixed(2)}%`} /></span>
+                </span>
+                <span class={`l-pace pace--${pace}`}>
+                  <span class="visually-hidden">Received by mid-year: </span>
+                  <span class="track" aria-hidden="true"><span class="fill" style={`width:${Math.min(100, (l.pctOfAdoptedReceived ?? 0) * 100).toFixed(2)}%`} /><span class="tick" /></span>
+                  <span class="num">{pct(l.pctOfAdoptedReceived ?? 0)}</span>
+                </span>
+                <span class:list={['l-change', change === null ? 'new' : change >= 0 ? 'up' : 'down']}>
+                  <span class="visually-hidden">Vs. last year: </span>
+                  {change === null ? 'new' : (<><span aria-hidden="true">{change >= 0 ? '▲' : '▼'}</span> <span class="num">{signedPct(change)}</span></>)}
+                </span>
+                <span class="l-chip"><SourceChip city={city} figure={figures.adopted} /></span>
+              </li>
+            );
+          })
+        }
+      </ol>
+      <div class="lines-foot">
+        <input type="checkbox" id="show-all" class="visually-hidden" />
+        <label for="show-all" class="show-all">
+          <span class="when-less">Show all {r.lineCount} line items</span><span class="when-all">Show fewer</span>
+        </label>
+        <ul class="pace-key" aria-label="Received by mid-year">
+          <li class="key-title" aria-hidden="true">Received by mid-year:</li>
+          {(Object.keys(paceLabel) as Pace[]).map((p) => <li class={`pace--${p}`}><span class="dot" aria-hidden="true" />{paceLabel[p]}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <ul class="insights">
+      <li class="card insight insight--bay">
+        <h2>Home sales lifted transfer taxes</h2>
+        <p>
+          Property transfer tax receipts were up {pct(t.transfer.line.changeVsFy2025Pct!)} on last year at mid-year, and the Measure P share was up
+          {' '}{pct(t.transfer.measureP.changeVsFy2025Pct!)}.
+        </p>
+        <p class="chips-row"><SourceChip city={city} figure={t.transfer.figure} /><SourceChip city={city} figure={t.transfer.measurePFigure} /></p>
+      </li>
+      <li class="card insight insight--gold">
+        <h2>Timing isn't trouble</h2>
+        <p>
+          Business license tax shows only {pct(t.timing.line.pctOfAdoptedReceived!)} received by mid-year. A low mid-year number can reflect when a tax is
+          billed, so read it alongside last year's.
+        </p>
+        <p class="chips-row"><SourceChip city={city} figure={t.timing.figure} /></p>
+      </li>
+      <li class="card insight insight--red">
+        <h2>A one-off jump in transfers</h2>
+        <p>
+          <Term city={city} name="Transfers">Transfers</Term> in rose from {shortMoney(t.transfers.line.fy2025MidYearActual)} to {shortMoney(t.transfers.line.fy2026MidYearActual)}{' '}
+          at mid-year, reflecting the Successor Agency wind-down and reserve moves. That money is one-time.
+        </p>
+        <p class="chips-row"><SourceChip city={city} figure={t.transfers.figure} /></p>
+      </li>
+    </ul>
+  </div>
+</Base>
+
+<style is:global set:html={sortRules}></style>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgb(22 25 29 / 0.06), 0 8px 24px rgb(22 25 29 / 0.06);
+  }
+  .intro {
+    padding-block: clamp(2rem, 5vw, 3.5rem) 2rem;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+  }
+  .lede {
+    max-width: 42rem;
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  /* Mix bar */
+  .mix {
+    display: flex;
+    gap: 2px;
+    height: 3.5rem;
+  }
+  .block {
+    position: relative;
+    min-width: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    cursor: help;
+  }
+  .block:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .parts {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 20;
+    width: max-content;
+    max-width: min(20rem, calc(100vw - 2rem));
+    padding: 0.75rem 0.875rem;
+    border-radius: 0.5rem;
+    background: var(--ink);
+    color: #fff;
+    font: 400 0.8125rem/1.45 var(--font-sans);
+    text-align: left;
+  }
+  .block--end .parts {
+    left: auto;
+    right: 0;
+  }
+  .block:hover .parts,
+  .block:focus .parts {
+    display: block;
+  }
+  .parts-list {
+    display: grid;
+    gap: 0.125rem;
+    margin-top: 0.375rem;
+  }
+  .parts-list > span {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0.5rem 1.5rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+  }
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .sw {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 2px;
+  }
+  .g-name {
+    font-weight: 700;
+  }
+  .g-pct {
+    margin-inline-start: auto;
+    color: var(--muted);
+  }
+  .hint {
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+
+  /* Line items */
+  .lines-section {
+    margin-top: 3rem;
+  }
+  .lines-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .lines-head h2 {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+  .seg {
+    display: inline-flex;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0.25rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: rgb(22 25 29 / 0.06);
+  }
+  .seg label {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .seg input:checked + label {
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgb(22 25 29 / 0.12);
+  }
+  .seg input:focus-visible + label {
+    outline: 2px solid var(--bay);
+    outline-offset: 2px;
+  }
+  .cols,
+  .line {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1.3fr) 1.6fr 1.6fr 6rem 2.5rem;
+    gap: 1rem;
+    align-items: center;
+  }
+  .cols {
+    margin: 1.5rem 0 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--rule);
+    color: var(--muted);
+    font-weight: 800;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .cols span:nth-child(4) {
+    text-align: right;
+  }
+  .lines {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .line {
+    padding-block: 0.625rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .l-name {
+    font-weight: 600;
+  }
+  .l-budget,
+  .l-pace {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .l-budget .num {
+    font-weight: 800;
+    text-align: right;
+  }
+  .mag,
+  .track {
+    position: relative;
+    height: 0.75rem;
+    border-radius: 2px;
+    background: #ebe5d8;
+  }
+  .mag span {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--bay);
+  }
+  .l-pace {
+    grid-template-columns: 1fr 3rem;
+  }
+  .fill {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+  }
+  .tick {
+    position: absolute;
+    top: -0.25rem;
+    bottom: -0.25rem;
+    left: 50%;
+    border-left: 2px dashed var(--ink);
+  }
+  .pace--behind .fill,
+  .pace--behind .dot {
+    background: var(--gold);
+  }
+  .pace--on-pace .fill,
+  .pace--on-pace .dot {
+    background: var(--family-people-2);
+  }
+  .pace--ahead .fill,
+  .pace--ahead .dot {
+    background: var(--bay);
+  }
+  .l-pace .num {
+    font-weight: 700;
+  }
+  .l-change {
+    text-align: right;
+    font-weight: 700;
+  }
+  .l-change.up {
+    color: var(--bay);
+  }
+  .l-change.down {
+    color: #b23a24;
+  }
+  .l-change.new {
+    color: var(--muted);
+  }
+  .l-chip :global(.chips) {
+    margin: 0;
+  }
+  .lines-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .show-all {
+    padding: 0.625rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-pill);
+    background: var(--card);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  .when-all,
+  #show-all:checked + .show-all .when-less {
+    display: none;
+  }
+  #show-all:checked + .show-all .when-all {
+    display: inline;
+  }
+  #show-all:focus-visible + .show-all {
+    outline: 2px solid var(--bay);
+    outline-offset: 2px;
+  }
+  .pace-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+  .pace-key li {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .key-title {
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+  }
+  .dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+  }
+
+  /* Insights */
+  .insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.5rem;
+    margin: 3.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .insight {
+    padding: 1.5rem 1.75rem;
+    border-left: 6px solid var(--accent);
+  }
+  .insight--bay {
+    --accent: var(--bay);
+  }
+  .insight--gold {
+    --accent: var(--gold);
+  }
+  .insight--red {
+    --accent: var(--red);
+  }
+  .insight h2 {
+    margin: 0;
+    font-size: 1.375rem;
+  }
+  .insight p {
+    margin: 0.75rem 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .chips-row {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .chips-row :global(.chips) {
+    margin: 0;
+  }
+
+  /* Phones: name and change on top, the two bars below. */
+  @media (max-width: 47.99rem) {
+    .cols {
+      display: none;
+    }
+    .line {
+      grid-template-columns: 1fr auto auto;
+      grid-template-areas: 'name change chip' 'budget budget budget' 'pace pace pace';
+      row-gap: 0.375rem;
+    }
+    .l-name {
+      grid-area: name;
+    }
+    .l-change {
+      grid-area: change;
+    }
+    .l-chip {
+      grid-area: chip;
+    }
+    .l-budget {
+      grid-area: budget;
+    }
+    .l-pace {
+      grid-area: pace;
+    }
+  }
+</style>
