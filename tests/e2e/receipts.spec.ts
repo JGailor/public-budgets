@@ -37,9 +37,11 @@ test.describe('source chips and receipts (desktop)', () => {
     await expect(d.getByRole('link', { name: 'CSV' })).toHaveAttribute('href', '/us/ca/berkeley/data/deficit-bridge.csv');
     await expect(d.locator('.caveat')).toContainText('subject to revision');
     await expect(d.locator('.also')).toHaveText(/Also reported in\s*S15\s*Berkeleyside, April 15, 2026/);
-    // "Used on" lists real pages only (the landing page shows S1); this test page never counts.
-    await expect(d.locator('[data-used-on] dd')).toHaveText('Home');
-    await expect(d.locator('[data-used-on] a')).toHaveAttribute('href', '/');
+    // "Used on" lists real pages where S1's chips appear; this test page never counts.
+    const usedOn = d.locator('[data-used-on] a');
+    await expect(usedOn.filter({ hasText: 'Home' })).toHaveAttribute('href', '/');
+    await expect(usedOn.filter({ hasText: 'Overview' })).toHaveAttribute('href', '/us/ca/berkeley/');
+    await expect(d.locator('[data-used-on]')).not.toContainText('test');
 
     const box = (await d.boundingBox())!;
     expect(box.x + box.width).toBe(1440);

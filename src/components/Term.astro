@@ -45,18 +45,16 @@ const anchor = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, 
     font: 400 0.8125rem/1.45 var(--font-sans);
     text-align: left;
     white-space: normal;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 120ms;
+    /* display, not visibility: a hidden tooltip near the right edge must not widen the page. */
+    display: none;
     transform: translateX(var(--shift, 0px));
   }
   .term:hover .tip,
   .term:focus .tip {
-    visibility: visible;
-    opacity: 1;
+    display: block;
   }
   .term[data-dismissed] .tip {
-    visibility: hidden;
+    display: none;
   }
 </style>
 

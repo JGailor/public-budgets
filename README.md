@@ -61,6 +61,10 @@ Every figure on a page gets a chip that opens its receipt:
 
 `src/pages/index.astro` quotes the first city's headline figures, computed by `headlines()` in `src/lib/headlines.ts`; `tests/dist/landing.test.ts` recomputes each one independently from `budget.json`, and a unit test fails if any of them is typed into the page. Department families (for the waffle colors) are in `data/cities/{city}/families.json`, an editorial grouping that the build checks covers every department exactly once. The link-preview image is `public/og/wherethemoneywent.png`, made by `node scripts/og-image.ts`.
 
+## The overview page
+
+`/{city}/` shows where every $100 goes. Its figures come from `overview()` in `src/lib/overview.ts`; the interactive waffle is `src/components/Waffle.astro` (one Tab stop, arrow keys between squares, Enter or a tap pins a department; a bottom sheet on phones; "Show as a table" is the text alternative). Revenue groups for the mix bar are in `data/cities/{city}/revenue-groups.json`, checked to cover every revenue line exactly once. Figures the workbook states in sentences (the 8%/6.5% growth rates, the 0.5% sales tax, the $300M bond) are extracted into `budget.json` as `citedFacts`, each with its source.
+
 ## Where city data lives
 
 ```
