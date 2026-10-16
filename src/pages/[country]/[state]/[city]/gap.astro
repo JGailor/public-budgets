@@ -1,15 +1,550 @@
 ---
+/**
+ * The Gap (D3): how the city got from its first deficit estimate to the number
+ * it planned around, and how it plans to close it. Figures come from gapPage()
+ * in src/lib/gap.ts; tests/dist checks the story's numbers from budget.json.
+ */
+import SourceChip from '../../../../components/SourceChip.astro';
+import Term from '../../../../components/Term.astro';
 import Base from '../../../../layouts/Base.astro';
+import { budgetFor } from '../../../../lib/budget';
 import { cityStaticPaths, type City } from '../../../../lib/cities';
+import { shortMoney } from '../../../../lib/format';
+import { gapPage } from '../../../../lib/gap';
 
 export const getStaticPaths = cityStaticPaths;
 
 const { city } = Astro.props as { city: City };
+const budget = budgetFor(city)!;
+const g = gapPage(budget);
+const [fy27] = g.years;
+const signed = (v: number) => (v > 0 ? `+${shortMoney(v)}` : v === 0 ? '$0' : shortMoney(v));
+const pct = (p: number) => `${(p * 100).toFixed(1)}%`;
+const headline = Math.round(Math.abs(fy27.final.value) / 1e6);
+
+// Each year's bars are drawn as fractions of that year's deepest point, with gridlines every $10M.
+const geometry = (y: (typeof g.years)[number]) => {
+  const depth = Math.abs(y.lowest);
+  return {
+    depth,
+    lines: Array.from({ length: Math.floor(depth / 10e6) }, (_, i) => (i + 1) * 10e6),
+    steps: y.steps.map((s) => ({ ...s, top: Math.min(-s.from, -s.to) / depth, h: Math.abs(s.to - s.from) / depth })),
+  };
+};
+const notesSource = 'S15';
 ---
 
-<Base title={`The gap · ${city.name}`} city={city}>
-  <div class="wrap">
-    <h1>The gap</h1>
-    <p>Placeholder. Ships in #8.</p>
+<Base title={`The gap · ${city.name}`} city={city} description={`How ${city.name} got from its first deficit estimate to the ${shortMoney(Math.abs(fy27.final.value))} gap it planned around, step by step, and how it plans to close it.`}>
+  <div class="gap-page wrap">
+    <section class="intro">
+      <div>
+        <p class="eyebrow">The structural deficit · FY2027</p>
+        <h1>The ${headline} million gap, step by step</h1>
+        <p class="lede">
+          Each year the city projects what it will cost to keep doing what it does today, and what it expects to collect. Here's how the city's own
+          estimate moved from the first projection to the number it planned around.
+          <SourceChip city={city} figure={fy27.final.figure} />
+        </p>
+      </div>
+      <fieldset class="years">
+        <legend class="visually-hidden">Fiscal year</legend>
+        {
+          g.years.map((y, i) => (
+            <>
+              <input type="radio" name="year" id={`year-${y.year}`} value={y.year} checked={i === 0} class="visually-hidden" />
+              <label for={`year-${y.year}`}>{y.label}</label>
+            </>
+          ))
+        }
+      </fieldset>
+    </section>
+
+    {
+      g.years.map((y) => {
+        const geo = geometry(y);
+        return (
+          <section class="waterfall" data-year={y.year} aria-label={`${y.label} deficit bridge`}>
+            <div class="axis" aria-hidden="true">
+              <span class="zero">$0 (balanced)</span>
+              {geo.lines.map((v) => (
+                <span class="gridline" style={`--at:${v / geo.depth}`}>
+                  <span>{shortMoney(-v, 0)}</span>
+                </span>
+              ))}
+            </div>
+            <ol class="steps">
+              {geo.steps.map((s) => (
+                <li class={`step step--${s.kind}`} style={`--top:${s.top};--h:${s.h}`}>
+                  <span class="track">
+                    <span class="bar" />
+                  </span>
+                  <span class="value num">{signed(s.value)}</span>
+                  <span class="label">
+                    {s.kind === 'one-time' ? (
+                      <Term city={city} name="One-time (one-time resources)">
+                        {s.label}
+                      </Term>
+                    ) : (
+                      s.label
+                    )}
+                  </span>
+                  <span class="chip-cell">
+                    <SourceChip city={city} figure={s.figure} />
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        );
+      })
+    }
+
+    <section class="closing">
+      <div class="plans">
+        <p class="eyebrow">How the city plans to close it</p>
+        <h2>Mostly with ongoing cuts of about {Math.round(g.close.fails.pct * 100)}%.</h2>
+
+        <div class="plan">
+          <p class="plan-head">
+            <span>If the sales tax fails</span>
+            <span class="short">{shortMoney(g.close.fails.cuts.value)} in department cuts ({pct(g.close.fails.pct)})</span>
+            <SourceChip city={city} figure={g.close.fails.cuts} />
+          </p>
+          <div class="plan-bar" role="img" aria-label={`If the sales tax fails: ${shortMoney(g.close.fails.cuts.value)} in department cuts.`}>
+            <span class="cut" style="flex:1"></span>
+          </div>
+        </div>
+
+        <div class="plan">
+          <p class="plan-head">
+            <span>If the sales tax passes</span>
+            <span class="short">{shortMoney(g.close.passes.cuts.value)} in cuts ({pct(g.close.passes.pct)})</span>
+            <SourceChip city={city} figure={g.close.passes.cuts} />
+          </p>
+          <div class="plan-bar" role="img" aria-label={`If the sales tax passes: ${shortMoney(g.close.passes.cuts.value)} in cuts, and ${shortMoney(g.close.passes.softened.value)} of cuts softened by one-time money.`}>
+            <span class="cut" style={`flex:${g.close.passes.cuts.value}`}></span>
+            <span class="softened" style={`flex:${g.close.passes.softened.value}`}>{shortMoney(g.close.passes.softened.value)} softened</span>
+          </div>
+          <p class="plan-chip"><SourceChip city={city} figure={g.close.passes.softened} /></p>
+        </div>
+
+        <p class="note">
+          <SourceChip city={city} figure={g.close.bridge} />
+          <SourceChip city={city} source={notesSource} />
+          In FY27 the tax money is applied as a one-time bridge while ongoing revenue ramps up.
+        </p>
+      </div>
+
+      <aside class="one-time card" aria-labelledby="one-time-title">
+        <h2 id="one-time-title">One-time money, in and out</h2>
+        <p class="years-note">FY2027-28</p>
+        <ul class="flows">
+          {
+            g.oneTime.sources.map((s) => (
+              <li>
+                <span class="sw sw--in" aria-hidden="true" />
+                <span class="flow-label">{s.label}</span>
+                <span class="num">{shortMoney(s.amount, 2)}</span>
+                <SourceChip city={city} figure={s.figure} />
+              </li>
+            ))
+          }
+        </ul>
+        <p class="arrow" aria-hidden="true">↓</p>
+        <ul class="flows">
+          {
+            g.oneTime.uses.map((u) => (
+              <li>
+                <span class="sw sw--out" aria-hidden="true" />
+                <span class="flow-label">{u.label}</span>
+                <span class="num">{shortMoney(u.amount, 2)}</span>
+                <SourceChip city={city} figure={u.figure} />
+              </li>
+            ))
+          }
+        </ul>
+        <p class="left-over">
+          Left over: <span class="num">{shortMoney(g.oneTime.remaining)}</span>
+          <SourceChip city={city} figure={g.oneTime.remainingFigure} />
+        </p>
+      </aside>
+    </section>
   </div>
 </Base>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgb(22 25 29 / 0.06), 0 8px 24px rgb(22 25 29 / 0.06);
+  }
+  .short {
+    color: var(--red);
+    font-weight: 800;
+  }
+
+  /* Intro and year toggle */
+  .intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: clamp(2rem, 5vw, 3.5rem) 2rem;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+  }
+  .lede {
+    max-width: 40rem;
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  .years {
+    display: inline-flex;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0.25rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: rgb(22 25 29 / 0.06);
+  }
+  .years label {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  .years input:checked + label {
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgb(22 25 29 / 0.12);
+  }
+  .years input:focus-visible + label {
+    outline: 2px solid var(--bay);
+    outline-offset: 2px;
+  }
+  /* Show only the chosen year's waterfall (works without JavaScript). */
+  .gap-page:has(#year-fy2027:checked) [data-year='fy2028'],
+  .gap-page:has(#year-fy2028:checked) [data-year='fy2027'] {
+    display: none;
+  }
+
+  /* Waterfall: one list, two layouts. */
+  .waterfall {
+    --chart: 22rem;
+    position: relative;
+    padding-top: 1.75rem;
+  }
+  .steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .bar {
+    position: absolute;
+    border-radius: 3px;
+  }
+  .step--total .bar {
+    background: var(--red);
+  }
+  .step--subtotal .bar {
+    background: color-mix(in srgb, var(--red) 82%, white);
+  }
+  .step--final .bar {
+    background: var(--red);
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .step--up .bar {
+    background: var(--bay);
+  }
+  .step--cost .bar {
+    background: repeating-linear-gradient(135deg, var(--red) 0 2.5px, var(--red-light) 2.5px 6px);
+  }
+  .step--one-time .bar {
+    background: var(--gold);
+  }
+  /* 19px bold is "large text" (3:1), which red on paper meets; at 15px it wouldn't (4.5:1). */
+  .value {
+    font-weight: 800;
+    font-size: 1.1875rem;
+    color: var(--red);
+  }
+  .step--up .value {
+    color: var(--bay);
+  }
+  .step--one-time .value {
+    color: #8a5f0b;
+  }
+  .label {
+    font-weight: 600;
+    font-size: 0.8125rem;
+  }
+  .chip-cell :global(.chips) {
+    margin-inline-start: 0;
+  }
+  .axis {
+    position: absolute;
+    inset: 0 0 auto 0;
+    pointer-events: none;
+    font-size: 0.6875rem;
+    color: var(--muted);
+  }
+
+  /* Wide screens: columns of vertical bars hanging from the $0 line (D3). */
+  @media (min-width: 48rem) {
+    .axis {
+      height: calc(1.75rem + var(--chart));
+    }
+    .zero {
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .axis::after {
+      content: '';
+      position: absolute;
+      top: 1.75rem;
+      left: 0;
+      right: 0;
+      border-top: 2px solid var(--ink);
+    }
+    .gridline {
+      position: absolute;
+      top: calc(1.75rem + var(--at) * var(--chart));
+      left: 0;
+      right: 0;
+      border-top: 1px dashed var(--rule);
+    }
+    .gridline span {
+      position: absolute;
+      top: -1.25rem;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      column-gap: 0.75rem;
+      padding-left: 3.5rem;
+    }
+    .step {
+      display: grid;
+      grid-template-rows: var(--chart) auto auto auto;
+      justify-items: center;
+      text-align: center;
+      row-gap: 0.5rem;
+    }
+    .track {
+      position: relative;
+      width: 100%;
+      max-width: 5.5rem;
+    }
+    .bar {
+      left: 0;
+      right: 0;
+      top: calc(var(--top) * 100%);
+      height: max(calc(var(--h) * 100%), 3px);
+    }
+    .value {
+      margin-top: calc((var(--top) + var(--h)) * var(--chart) - var(--chart) + 0.5rem);
+    }
+    .label {
+      margin-top: 1.5rem;
+      min-height: 2.5em;
+    }
+  }
+
+  /* Narrow screens: one row per step, the bar running right from $0. */
+  @media (max-width: 47.99rem) {
+    .zero,
+    .gridline {
+      display: none;
+    }
+    .waterfall {
+      padding-top: 0;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas: 'label value' 'track track' 'chip chip';
+      gap: 0.375rem 0.75rem;
+      padding-block: 0.75rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .label {
+      grid-area: label;
+      font-size: 0.9375rem;
+    }
+    .value {
+      grid-area: value;
+    }
+    .track {
+      grid-area: track;
+      position: relative;
+      height: 1.25rem;
+      border-left: 2px solid var(--ink);
+    }
+    .bar {
+      top: 0;
+      bottom: 0;
+      left: calc(var(--top) * 100%);
+      width: max(calc(var(--h) * 100%), 3px);
+    }
+    .step--final .bar {
+      outline-offset: 2px;
+    }
+    .chip-cell {
+      grid-area: chip;
+    }
+  }
+
+  /* Closing the gap */
+  .closing {
+    display: grid;
+    gap: 2.5rem;
+    margin-top: 3rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  .closing h2 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  }
+  .plan + .plan {
+    margin-top: 1.5rem;
+  }
+  .plan-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    margin: 0 0 0.5rem;
+    font-weight: 800;
+    font-size: 0.9375rem;
+  }
+  .plan-head > span:first-child {
+    margin-inline-end: auto;
+  }
+  /* Large text, so red on paper meets contrast (see .value). */
+  .plan-head .short {
+    font-size: 1.1875rem;
+  }
+  .plan-head :global(.chips) {
+    margin-inline-start: 0;
+  }
+  .plan-bar {
+    display: flex;
+    height: 2.75rem;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .cut {
+    background: repeating-linear-gradient(135deg, var(--red) 0 2.5px, var(--red-light) 2.5px 6px);
+  }
+  .softened {
+    display: flex;
+    align-items: center;
+    padding-inline: 0.75rem;
+    background: var(--gold);
+    color: var(--ink);
+    font-weight: 800;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .plan-chip {
+    margin: 0.5rem 0 0;
+    text-align: right;
+  }
+  .note {
+    margin: 1.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .note :global(.chips) {
+    margin: 0 0.25rem 0 0;
+  }
+  .one-time {
+    align-self: start;
+    padding: 1.5rem;
+  }
+  .one-time h2 {
+    margin: 0;
+    font-size: 1.375rem;
+  }
+  .years-note {
+    margin: 0.25rem 0 1rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+  .flows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+  }
+  .flows li {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 0.625rem;
+    padding-block: 0.375rem;
+  }
+  .flows .num {
+    font-weight: 700;
+  }
+  .flows :global(.chips) {
+    margin: 0;
+  }
+  .sw {
+    width: 0.625rem;
+    height: 1.125rem;
+    border-radius: 2px;
+  }
+  .sw--in {
+    background: var(--gold);
+  }
+  .sw--out {
+    border: 1.5px solid var(--gold);
+    background: var(--gold-light);
+  }
+  .arrow {
+    margin: 0.25rem 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--rule);
+    text-align: center;
+    color: var(--muted);
+  }
+  .left-over {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 1rem 0 0;
+    color: #8a5f0b;
+    font-weight: 800;
+  }
+  .left-over :global(.chips) {
+    margin-inline-start: auto;
+  }
+  @media (min-width: 64rem) {
+    .closing {
+      grid-template-columns: 1fr 24rem;
+      align-items: start;
+    }
+  }
+</style>
