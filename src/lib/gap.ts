@@ -1,0 +1,121 @@
+/**
+ * Figures for a city's Gap page: the deficit bridge as a waterfall for each
+ * year, how the city plans to close the FY2027 gap, and the one-time money in
+ * and out. All from budget.json; the page only renders.
+ */
+import type { BridgeStep, CityBudget } from '../data/types.ts';
+import type { Figure } from './receipts.ts';
+
+/** Plain-language step names, keyed by bridge step (the workbook's own labels are on each receipt). */
+const LABELS: Record<string, string> = {
+  'initial-estimate': 'Initial estimate',
+  'revenue-projections': 'Revenue came in higher',
+  'center-street-debt-service': '1947 Center St. debt service',
+  'parking-funds-stabilization': 'Propping up parking funds',
+  'non-departmental': 'Non-departmental costs',
+  'before-one-time-resources': 'Before one-time money',
+  'one-time-resources': 'One-time money',
+  'final-gap': 'Gap to close',
+};
+
+export type StepKind = 'total' | 'subtotal' | 'up' | 'cost' | 'one-time' | 'final';
+export type Year = 'fy2027' | 'fy2028';
+
+export interface WaterfallStep {
+  key: string;
+  label: string;
+  kind: StepKind;
+  value: number;
+  /** Running position before and after this step (both ≤ 0 here: a deficit). */
+  from: number;
+  to: number;
+  figure: Figure;
+}
+
+function waterfall(steps: BridgeStep[], year: Year): WaterfallStep[] {
+  const shown = steps.filter((s) => s.key !== 'after-revenue-projections'); // the mockup's 8 steps
+  let running = 0;
+  const out: WaterfallStep[] = [];
+  for (const s of shown) {
+    const value = s[year];
+    const isTotal = s.kind === 'estimate' || s.kind === 'subtotal' || s.kind === 'total';
+    const kind: StepKind =
+      s.key === 'final-gap' ? 'final'
+      : s.kind === 'subtotal' ? 'subtotal'
+      : s.kind === 'estimate' ? 'total'
+      : s.key === 'one-time-resources' ? 'one-time'
+      : value >= 0 ? 'up' : 'cost';
+    const from = isTotal ? 0 : running;
+    const to = isTotal ? value : running + value;
+    if (isTotal && Math.abs(value - running) > 0.5 && out.length) {
+      throw new Error(`${year} ${s.key}: ${value} doesn't follow from the steps before it (${running})`);
+    }
+    running = to;
+    // A subtotal's receipt shows how it's built: the last total and every step since.
+    const since = out.slice(Math.max(0, out.findLastIndex((o) => o.kind === 'total' || o.kind === 'subtotal')));
+    const parts =
+      s.key === 'before-one-time-resources' || s.key === 'final-gap'
+        ? since.map((o) => ({ label: o.label, value: o.value }))
+        : undefined;
+    out.push({
+      key: s.key,
+      label: LABELS[s.key] ?? s.label,
+      kind,
+      value,
+      from,
+      to,
+      figure: {
+        value,
+        label: `${year === 'fy2027' ? 'FY2027' : 'FY2028'}: ${s.label}`,
+        ref: s,
+        tone: kind === 'up' ? 'neutral' : kind === 'one-time' ? 'one-time' : value < 0 ? 'short' : 'neutral',
+        ...(parts ? { parts } : {}),
+      },
+    });
+  }
+  return out;
+}
+
+export function gapPage(b: CityBudget) {
+  const years = (['fy2027', 'fy2028'] as const).map((year) => {
+    const steps = waterfall(b.deficitBridge.steps, year);
+    return { year, label: year === 'fy2027' ? 'FY2027' : 'FY2028', steps, final: steps.at(-1)!, lowest: Math.min(...steps.flatMap((s) => [s.from, s.to])) };
+  });
+
+  const fy27 = b.departmentReductions.find((y) => y.year === 'FY2027')!.total;
+  const ot = b.oneTimeResources;
+  const bridge = ot.uses.find((u) => /sales & use tax/i.test(u.label))!;
+  const item = (i: (typeof ot.sources)[number], label: string): Figure => ({ value: i.amount, label, ref: i, tone: 'one-time' });
+
+  return {
+    years,
+    close: {
+      fails: {
+        cuts: { value: fy27.reduction, label: 'FY2027 department cuts if the sales tax fails', ref: fy27, tone: 'short' } satisfies Figure,
+        pct: fy27.reductionPct,
+      },
+      passes: {
+        cuts: { value: fy27.netReduction, label: 'FY2027 department cuts if the sales tax passes', ref: fy27, tone: 'short' } satisfies Figure,
+        pct: fy27.netReductionPct,
+        softened: { value: fy27.salesTaxAllocation, label: 'FY2027 cuts softened by one-time sales-tax money', ref: fy27, tone: 'one-time' } satisfies Figure,
+      },
+      bridge: item(bridge, 'One-time money used as the sales-tax bridge, FY2027-28'),
+      total: fy27.reduction,
+    },
+    oneTime: {
+      sources: ot.sources.map((s) => ({ ...s, figure: item(s, `One-time source: ${s.label}`) })),
+      uses: ot.uses.map((u) => ({ ...u, figure: item(u, `One-time use: ${u.label}`) })),
+      remaining: ot.remaining,
+      remainingFigure: {
+        value: ot.remaining,
+        label: 'One-time resources left over, FY2027-28',
+        ref: ot.uses.at(-1)!,
+        tone: 'one-time',
+        parts: [
+          ...ot.sources.map((s) => ({ label: s.label, value: s.amount })),
+          ...ot.uses.map((u) => ({ label: `less ${u.label}`, value: -u.amount })),
+        ],
+      } satisfies Figure,
+    },
+  };
+}
