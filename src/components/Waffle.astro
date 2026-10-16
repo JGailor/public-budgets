@@ -1,0 +1,368 @@
+---
+/**
+ * The $100 waffle: one square per dollar of the FY2027 department baseline,
+ * columns filled top to bottom, biggest department first.
+ *
+ * Hover or focus a square: its department is highlighted (the rest dim) and a
+ * tooltip shows the exact dollars per $100, the baseline and a source chip.
+ * Click, Enter or tap pins it; on a phone the pinned tooltip is a bottom sheet.
+ * The grid is one Tab stop; arrow keys move square by square.
+ * "Show as a table" is the text alternative.
+ */
+import SourceChip from './SourceChip.astro';
+import type { DepartmentReduction } from '../data/types';
+import type { City } from '../lib/cities';
+import type { Families } from '../lib/families';
+import { shortMoney } from '../lib/format';
+import type { Share } from '../lib/waffle';
+import { squares } from '../lib/waffle';
+
+interface Props {
+  city: City;
+  shares: Share<DepartmentReduction>[];
+  families: Families;
+}
+
+const { city, shares, families } = Astro.props;
+const cells = squares(shares);
+const firstIndex = new Map<string, number>();
+cells.forEach((d, i) => firstIndex.has(d.id) || firstIndex.set(d.id, i));
+const per100Label = (s: Share<DepartmentReduction>) => `$${s.exact.toFixed(2)}`;
+const byId = new Map(shares.map((s) => [s.item.id, s]));
+---
+
+<div class="waffle" data-waffle>
+  <div class="grid" role="group" aria-label={`${city.name}'s FY2027 department baseline: one square per dollar of every $100. Use the arrow keys to move between squares; press Enter to pin a department.`}>
+    {
+      cells.map((d, i) => (
+        <button
+          type="button"
+          class="sq"
+          data-dept={d.id}
+          data-index={i}
+          tabindex={i === 0 ? 0 : -1}
+          style={`background:${families.color(d.id)}`}
+          aria-label={`${d.name}: ${per100Label(byId.get(d.id)!)} of every $100`}
+          aria-controls={`waffle-panel-${d.id}`}
+        />
+      ))
+    }
+  </div>
+
+  <div class="tip" data-tip hidden>
+    <button type="button" class="tip-close" data-tip-close aria-label="Close">×</button>
+    {
+      shares.map((s) => (
+        <div class="panel" id={`waffle-panel-${s.item.id}`} data-panel={s.item.id} hidden>
+          <p class="panel-name">
+            <span class="dot" style={`background:${families.color(s.item.id)}`} aria-hidden="true" />
+            {s.item.name}
+          </p>
+          <p class="panel-figure">
+            <span class="num">{per100Label(s)}</span> <span class="of">of every $100</span>
+          </p>
+          <p class="panel-meta">
+            {shortMoney(s.item.baseline)} FY27 baseline · {shortMoney(s.item.reduction)} proposed cut
+            <SourceChip city={city} figure={{ value: s.item.baseline, label: `${s.item.name} General Fund baseline, FY2027`, ref: s.item }} />
+          </p>
+          <a class="panel-link" href={`${city.path}departments/#${s.item.id}`}>
+            Department details <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      ))
+    }
+  </div>
+
+  <details class="as-table">
+    <summary>Show as a table</summary>
+    <div class="table-scroll">
+      <table>
+        <caption class="visually-hidden">FY2027 General Fund department baseline, per $100</caption>
+        <thead>
+          <tr>
+            <th scope="col">Department</th>
+            <th scope="col">FY2027 baseline</th>
+            <th scope="col">Of every $100</th>
+            <th scope="col">Squares</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            shares.map((s) => (
+              <tr>
+                <th scope="row">{s.item.name}</th>
+                <td>${s.item.baseline.toLocaleString('en-US')}</td>
+                <td>{per100Label(s)}</td>
+                <td>{s.squares}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-waffle]')) {
+    const grid = root.querySelector<HTMLElement>('.grid')!;
+    const squares = [...grid.querySelectorAll<HTMLButtonElement>('.sq')];
+    const tip = root.querySelector<HTMLElement>('[data-tip]')!;
+    const panels = new Map([...tip.querySelectorAll<HTMLElement>('[data-panel]')].map((p) => [p.dataset.panel!, p]));
+    let pinned: HTMLButtonElement | null = null;
+    // Set while handing focus back to a square after closing, so that focus doesn't reopen the tooltip.
+    let quietFocus = false;
+    const sheet = () => !matchMedia('(hover: hover) and (min-width: 48rem)').matches;
+
+    function show(sq: HTMLButtonElement) {
+      const dept = sq.dataset.dept!;
+      for (const s of squares) s.classList.toggle('dim', s.dataset.dept !== dept);
+      for (const [id, p] of panels) p.hidden = id !== dept;
+      tip.hidden = false;
+      tip.classList.toggle('pinned', !!pinned);
+      tip.classList.toggle('sheet', !!pinned && sheet());
+      if (tip.classList.contains('sheet')) {
+        tip.style.left = tip.style.top = '';
+        return;
+      }
+      // Above the square, kept inside the waffle's box.
+      const box = root.getBoundingClientRect();
+      const r = sq.getBoundingClientRect();
+      const w = tip.offsetWidth;
+      const left = Math.min(Math.max(r.left + r.width / 2 - box.left - w / 2, 0), box.width - w);
+      const above = r.top - box.top - tip.offsetHeight - 10;
+      tip.style.left = `${left}px`;
+      tip.style.top = `${above >= 0 ? above : r.bottom - box.top + 10}px`;
+    }
+
+    function hide() {
+      if (pinned) return;
+      tip.hidden = true;
+      for (const s of squares) s.classList.remove('dim');
+    }
+
+    function unpin() {
+      pinned = null;
+      tip.classList.remove('pinned', 'sheet');
+      hide();
+    }
+
+    function focusSquare(i: number) {
+      const next = squares[Math.max(0, Math.min(squares.length - 1, i))];
+      for (const s of squares) s.tabIndex = s === next ? 0 : -1;
+      next.focus();
+    }
+
+    grid.addEventListener('mouseover', (e) => {
+      const sq = (e.target as Element).closest<HTMLButtonElement>('.sq');
+      if (sq && !pinned) show(sq);
+    });
+    grid.addEventListener('mouseleave', hide);
+    grid.addEventListener('focusin', (e) => {
+      const sq = (e.target as Element).closest<HTMLButtonElement>('.sq');
+      if (!sq) return;
+      for (const s of squares) s.tabIndex = s === sq ? 0 : -1;
+      if (quietFocus) {
+        quietFocus = false;
+        return;
+      }
+      if (!pinned || pinned.dataset.dept !== sq.dataset.dept) {
+        pinned = null;
+        show(sq);
+      }
+    });
+    root.addEventListener('focusout', (e) => {
+      if (!root.contains(e.relatedTarget as Node)) hide();
+    });
+    grid.addEventListener('click', (e) => {
+      const sq = (e.target as Element).closest<HTMLButtonElement>('.sq');
+      if (!sq) return;
+      pinned = pinned?.dataset.dept === sq.dataset.dept ? null : sq;
+      if (pinned) show(sq);
+      else unpin();
+    });
+    grid.addEventListener('keydown', (e) => {
+      const i = squares.indexOf(document.activeElement as HTMLButtonElement);
+      if (i < 0) return;
+      const row = i % 10;
+      const moves: Record<string, number> = {
+        ArrowUp: row > 0 ? i - 1 : i,
+        ArrowDown: row < 9 ? i + 1 : i,
+        ArrowLeft: i - 10,
+        ArrowRight: i + 10,
+        Home: 0,
+        End: squares.length - 1,
+      };
+      if (e.key in moves) {
+        e.preventDefault();
+        if (moves[e.key] >= 0 && moves[e.key] < squares.length) focusSquare(moves[e.key]);
+      } else if (e.key === 'Escape') {
+        unpin();
+      }
+    });
+    tip.querySelector('[data-tip-close]')!.addEventListener('click', () => {
+      const back = pinned;
+      unpin();
+      quietFocus = !!back;
+      back?.focus();
+    });
+    document.addEventListener('click', (e) => {
+      if (pinned && !root.contains(e.target as Node) && !(e.target as Element).closest('dialog')) unpin();
+    });
+  }
+</script>
+
+<style>
+  .waffle {
+    position: relative;
+  }
+  .grid {
+    display: grid;
+    grid-template-rows: repeat(10, 1fr);
+    grid-auto-flow: column;
+    gap: clamp(4px, 0.7vw, 8px);
+    aspect-ratio: 1;
+    width: 100%;
+    max-width: 30rem;
+  }
+  .sq {
+    padding: 0;
+    border: 0;
+    border-radius: clamp(3px, 0.5vw, 6px);
+    cursor: pointer;
+    transition: opacity 120ms;
+  }
+  .sq.dim {
+    opacity: 0.28;
+  }
+  .sq:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .tip {
+    position: absolute;
+    z-index: 15;
+    width: min(18rem, 100%);
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    background: var(--ink);
+    color: #fff;
+    box-shadow: 0 12px 32px rgb(22 25 29 / 0.25);
+    pointer-events: none;
+  }
+  .tip.pinned {
+    pointer-events: auto;
+  }
+  .tip-close {
+    display: none;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .tip.pinned .tip-close {
+    display: block;
+  }
+  .panel p {
+    margin: 0;
+  }
+  .panel-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    padding-right: 2rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    border: 2px solid #fff;
+  }
+  .panel-figure {
+    margin-top: 0.25rem !important;
+  }
+  .panel-figure .num {
+    font-weight: 800;
+    font-size: 1.75rem;
+  }
+  .of {
+    color: rgb(255 255 255 / 0.8);
+    font-size: 0.875rem;
+  }
+  .panel-meta {
+    color: rgb(255 255 255 / 0.85);
+    font-size: 0.8125rem;
+  }
+  .panel-link {
+    display: none;
+    margin-top: 0.75rem;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.875rem;
+  }
+  .tip.pinned .panel-link {
+    display: inline-block;
+  }
+  /* Pinned on a phone (or without hover): a bottom sheet. */
+  .tip.sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: auto;
+    padding: 1.5rem var(--gutter) 2rem;
+    border-radius: 1.25rem 1.25rem 0 0;
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: 0 -12px 40px rgb(22 25 29 / 0.2);
+  }
+  .tip.sheet .of,
+  .tip.sheet .panel-meta {
+    color: var(--muted);
+  }
+  .tip.sheet .panel-link {
+    color: var(--bay);
+  }
+  .tip.sheet .dot {
+    border-color: transparent;
+  }
+
+  .as-table {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+  }
+  .as-table summary {
+    color: var(--bay);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .table-scroll {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    margin-top: 0.75rem;
+    border-collapse: collapse;
+  }
+  th,
+  td {
+    padding: 0.375rem 0.5rem;
+    border-bottom: 1px solid var(--rule);
+    text-align: right;
+    white-space: nowrap;
+  }
+  th[scope='row'],
+  thead th:first-child {
+    text-align: left;
+    font-weight: 600;
+    white-space: normal;
+  }
+</style>

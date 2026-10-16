@@ -480,6 +480,38 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
     };
   })();
 
+  // Figures the workbook states in sentences. Each sentence is pinned and parsed strictly, and
+  // its source was checked against the document's own text (quoted below).
+  const citedFacts = (() => {
+    const fact = (tabName: string, address: string, pattern: RegExp) => {
+      const text = wb.tab(tabName).text(address).replace(/^•\s*/, '');
+      const m = text.match(pattern);
+      if (!m) throw new Error(`${tabName}!${address}: expected ${pattern}, found "${text}"`);
+      return { text, m, row: Number(address.slice(1)) };
+    };
+    // S12 (Berkeley Scanner, May 19 2026): staff "had gone back 10 years … with 8% growth in
+    // spending and 6.5% in revenue, on average." The Sources tab lists S12 for "8%/6.5% growth".
+    wb.tab('GF Expenditure History').expectText('A2', 'Sources: Berkeley budget overview presentations');
+    const g = fact('GF Expenditure History', 'A16', /^Over (\d+) years: spending grew ~([\d.]+)%\/yr vs revenue ~([\d.]+)%\/yr/);
+    // S5 (City of Berkeley): "a City-specific 0.5% sales tax on the November 2026 ballot". S15 reports the same.
+    const t = fact('README', 'B31', /^Proposed ([\d.]+)% sales tax \((Nov \d{4}) ballot\)/);
+    // The capital tab's source line is S3 (Proposed FY27-FY31 CIP presentation).
+    const bd = fact('Capital Program FY27-28', 'A32', /^Proposed \$(\d+)M infrastructure GO bond → (Nov \d{4}) ballot/);
+    return {
+      growth: {
+        text: g.text,
+        years: Number(g.m[1]),
+        spendingRate: Number(g.m[2]) / 100,
+        revenueRate: Number(g.m[3]) / 100,
+        source: 'S12',
+        table: 'GF Expenditure History',
+        row: g.row,
+      },
+      salesTax: { text: t.text, rate: Number(t.m[1]) / 100, election: t.m[2], source: 'S5', related: ['S15'], table: 'README', row: t.row },
+      bond: { text: bd.text, amount: Number(bd.m[1]) * 1e6, election: bd.m[2], source: 'S3', table: 'Capital Program FY27-28', row: bd.row },
+    } satisfies CityBudget['citedFacts'];
+  })();
+
   const budget: CityBudget = {
     schemaVersion: SCHEMA_VERSION,
     workbook: meta,
@@ -493,6 +525,7 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
     capitalProgram,
     personnelAndPension,
     glossary,
+    citedFacts,
   };
   return { budget, checks };
 }

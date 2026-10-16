@@ -1,0 +1,106 @@
+{
+  "note": "Revenue groups for the mix bar: an editorial grouping of the GF Revenue FY26 line items, made in the approved #1 mockups (mockups/build/gen.py rev_groups). Every line item belongs to exactly one group; the build checks it.",
+  "groups": [
+    {
+      "id": "property-tax",
+      "name": "Property tax",
+      "color": "#0E6B6F",
+      "lines": [
+        "Secured Property Tax",
+        "Supplemental Taxes",
+        "Unsecured Property Taxes"
+      ]
+    },
+    {
+      "id": "transfer-tax",
+      "name": "Property transfer tax",
+      "color": "#3E9A8F",
+      "lines": [
+        "Property Transfer Tax",
+        "Property Transfer Tax — Measure P"
+      ]
+    },
+    {
+      "id": "business-license",
+      "name": "Business license tax",
+      "color": "#7CBFB3",
+      "lines": [
+        "Business License Tax"
+      ]
+    },
+    {
+      "id": "transfers",
+      "name": "Transfers in",
+      "color": "#A9D6CC",
+      "lines": [
+        "Transfers"
+      ]
+    },
+    {
+      "id": "vlf",
+      "name": "Vehicle in-lieu (state)",
+      "color": "#23395B",
+      "lines": [
+        "Vehicle In-Lieu Taxes (VLF)"
+      ]
+    },
+    {
+      "id": "utility-users",
+      "name": "Utility users tax",
+      "color": "#3F5E96",
+      "lines": [
+        "Utility Users Taxes"
+      ]
+    },
+    {
+      "id": "sales-tax",
+      "name": "Sales tax",
+      "color": "#7A93C2",
+      "lines": [
+        "Sales Taxes"
+      ]
+    },
+    {
+      "id": "interest",
+      "name": "Interest",
+      "color": "#8C6D46",
+      "lines": [
+        "Interest Income"
+      ]
+    },
+    {
+      "id": "fees",
+      "name": "Fees, fines & charges",
+      "color": "#C2A77F",
+      "lines": [
+        "Parking Fines — Regular",
+        "Moving Violations",
+        "Ambulance Fees",
+        "Franchise Fees",
+        "IDC Reimbursement"
+      ]
+    },
+    {
+      "id": "hotel",
+      "name": "Hotel & short-term rental",
+      "color": "#E3D5BB",
+      "lines": [
+        "Transient Occupancy Taxes (net)",
+        "Short-term Rentals"
+      ]
+    },
+    {
+      "id": "other",
+      "name": "Everything else",
+      "color": "#CFCBC2",
+      "lines": [
+        "Soda Taxes",
+        "Recreational Cannabis",
+        "U1 Revenues",
+        "Residential Vacancy Tax (new FY26)",
+        "Other Taxes (incl. Redemptions)",
+        "Other Revenue"
+      ]
+    }
+  ]
+}

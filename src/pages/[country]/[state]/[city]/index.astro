@@ -1,18 +1,632 @@
 ---
+/**
+ * A city's overview (D1/M1): where every $100 goes, and why there's a gap.
+ * Every number comes from overview() in src/lib/overview.ts; tests/dist
+ * recomputes the story's checks from budget.json.
+ */
+import SourceChip from '../../../../components/SourceChip.astro';
+import Term from '../../../../components/Term.astro';
+import Waffle from '../../../../components/Waffle.astro';
 import Base from '../../../../layouts/Base.astro';
+import { budgetFor } from '../../../../lib/budget';
 import { CITY_PAGES, cityStaticPaths, type City } from '../../../../lib/cities';
+import { familiesFor } from '../../../../lib/families';
+import { shortMoney } from '../../../../lib/format';
+import { overview } from '../../../../lib/overview';
+import { formatValue } from '../../../../lib/receipts';
+import { revenueGroupsFor } from '../../../../lib/revenue-groups';
 
 export const getStaticPaths = cityStaticPaths;
 
 const { city } = Astro.props as { city: City };
+const budget = budgetFor(city)!;
+const families = familiesFor(city, budget);
+const o = overview(budget, families, revenueGroupsFor(city, budget));
+const has = (slug: string) => CITY_PAGES.some((p) => (p.slug as string) === slug);
+const pct = (share: number) => `${Math.round(share * 100)}%`;
+const fte = Math.round(o.fte.value).toLocaleString('en-US');
+
+// Mini waterfall geometry: a shared zero line, bars hanging below it.
+const wf = (() => {
+  let running = 0;
+  const lowest = Math.min(...o.waterfall.map((w) => (w.kind === 'total' ? w.value : 0)), 0);
+  const scale = 70 / Math.abs(lowest);
+  return o.waterfall.map((w) => {
+    const [from, to] = w.kind === 'total' ? [0, w.value] : [running, running + w.value];
+    if (w.kind === 'total') running = w.value;
+    else running += w.value;
+    return { ...w, y: 14 + Math.min(-from, -to) * scale, h: Math.max(Math.abs(to - from) * scale, 3) };
+  });
+})();
+
+// Compounding chart geometry.
+const series = o.growth.series;
+const top = Math.ceil(series.at(-1)!.spending / 50) * 50;
+const X = (year: number) => 40 + (year / (series.length - 1)) * 470;
+const Y = (v: number) => 230 - ((v - 100) / (top - 100)) * 200;
+const line = (k: 'spending' | 'revenue') => series.map((p, i) => `${i ? 'L' : 'M'}${X(p.year).toFixed(1)} ${Y(p[k]).toFixed(1)}`).join(' ');
+const gapArea = `${line('spending')} ${[...series].reverse().map((p) => `L${X(p.year).toFixed(1)} ${Y(p.revenue).toFixed(1)}`).join(' ')} Z`;
+const last = series.at(-1)!;
+const ticks = [100, 150, 200, 250, 300].filter((v) => v <= top);
+const xTicks = [0, Math.floor((series.length - 1) / 2), series.length - 1];
+const labelYear = Math.round((series.length - 1) * 0.8);
+const gapLabelY = (Y(series[labelYear].spending) + Y(series[labelYear].revenue)) / 2 + 4;
+const rate = (r: number) => `${(r * 100).toLocaleString('en-US')}%`;
+const g = o.growth.cited;
+const numberWords: Record<number, string> = { 10: 'ten' };
+const pointsWords: Record<number, string> = { 1.5: 'One and a half' };
+const diff = Math.round((g.spendingRate - g.revenueRate) * 1000) / 10;
+const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
 ---
 
-<Base title={`${city.name}, ${city.stateCode}`} city={city}>
-  <div class="wrap">
-    <h1>{city.name}'s budget</h1>
-    <p>Placeholder overview. The real one ships in #7.</p>
-    <ul>
-      {CITY_PAGES.map((p) => <li><a href={`${city.path}${p.slug}/`}>{p.title}</a></li>)}
-    </ul>
-  </div>
+<Base title={`${city.name}, ${city.stateCode}`} city={city} description={`Where every $100 of ${city.name}'s budget goes, and why there's a gap. Every number links to the public document it came from.`}>
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <p class="eyebrow">{city.government} · General Fund · Fiscal Year 2027</p>
+      <h1>Where every $100 of {city.name}'s budget goes.</h1>
+      <p class="lede">
+        Before this year's cuts, {city.name}'s departments started from a {shortMoney(o.baseline.value)} General Fund baseline: the city's flexible,
+        everyday money. Each square is one dollar out of every hundred. <span class="hover-hint">Hover a square to see the department.</span><span
+          class="tap-hint">Tap a square.</span>
+        <SourceChip city={city} figure={o.baseline} />
+      </p>
+
+    </div>
+
+    <div class="hero-waffle">
+      <Waffle city={city} shares={o.shares} families={families} />
+      <ul class="legend">
+        {
+          o.familyTotals.map((f) => (
+            <li>
+              <span class="swatches" aria-hidden="true">
+                {f.family.colors.slice(0, 3).map((c) => (
+                  <span style={`background:${c}`} />
+                ))}
+              </span>
+              <span class="fam">{f.family.name}</span>
+              <span class="dollars num">${f.dollars}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="hero-more">
+      <dl class="stats">
+        <div>
+          <dt>department baseline, FY27</dt>
+          <dd class="num">{shortMoney(o.baseline.value)}</dd>
+          <dd><SourceChip city={city} figure={o.baseline} /></dd>
+        </div>
+        <div>
+          <dt>staff positions (FTE), FY27</dt>
+          <dd class="num">{fte}</dd>
+          <dd><SourceChip city={city} figure={o.fte} /></dd>
+        </div>
+        <div>
+          <dt>gap the city must close</dt>
+          <dd class="num short">{shortMoney(Math.abs(o.gap.value))}</dd>
+          <dd><SourceChip city={city} figure={o.gap} /></dd>
+        </div>
+      </dl>
+
+      <p class="ctas">
+        <a class="btn btn--ink" href="#three-things">Start the 3-minute tour <span aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href={`${city.path}gap/`}>Jump to the {shortMoney(Math.abs(o.gap.value), 0)} gap</a>
+      </p>
+    </div>
+  </section>
+
+  <section id="three-things" class="wrap section">
+    <p class="eyebrow">Three things to know</p>
+    <ol class="things">
+      <li class="card">
+        <p class="n n--bay">1</p>
+        <h2>It mostly comes from property.</h2>
+        <p class="body">
+          About 1 in {o.revenue.oneIn} dollars is property tax. Taxes on home sales add {pct(o.revenue.transfer.share)}.
+        </p>
+        <div class="mix" role="img" aria-label={`FY2026 General Fund revenue by source: ${o.revenue.mix.map((g) => `${g.name} ${pct(g.share)}`).join(', ')}.`}>
+          {o.revenue.mix.map((g) => <span style={`flex:${g.adopted};background:${g.color}`} title={`${g.name}: ${pct(g.share)}`} />)}
+        </div>
+        <p class="mix-labels">
+          <span class="bay">{o.revenue.property.name} {pct(o.revenue.property.share)}</span>
+          <span>{shortMoney(o.revenue.total.value)} total, FY26</span>
+        </p>
+        <SourceChip city={city} figure={o.revenue.total} />
+        {has('revenue') && <a class="more" href={`${city.path}revenue/`}>Explore revenue <span aria-hidden="true">→</span></a>}
+      </li>
+
+      <li class="card">
+        <p class="n n--red">2</p>
+        <h2>Spending outgrew revenue.</h2>
+        <p class="body">
+          Costs grew about {rate(o.growth.cited.spendingRate)} a year, revenue about {rate(o.growth.cited.revenueRate)}. The gap comes back every year.
+        </p>
+        <svg class="mini-wf" viewBox={`0 0 ${o.waterfall.length * 62} 110`} role="img" aria-label={`FY2027 deficit bridge: ${o.waterfall.map((w) => `${w.label} ${formatValue(w.value)}`).join(', ')}.`}>
+          <defs>
+            <pattern id="wf-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="var(--red-light)"></rect>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="var(--red)" stroke-width="2.5"></line>
+            </pattern>
+          </defs>
+          <line x1="0" y1="14" x2={o.waterfall.length * 62} y2="14" stroke="var(--muted)" stroke-width="1"></line>
+          {
+            wf.map((w, i) => (
+              <g>
+                <rect
+                  x={i * 62 + 8}
+                  y={w.y}
+                  width="46"
+                  height={w.h}
+                  rx="2"
+                  fill={w.kind === 'total' ? 'var(--red)' : w.kind === 'up' ? 'var(--bay)' : w.kind === 'one-time' ? 'var(--gold)' : 'url(#wf-hatch)'}
+                />
+                <text x={i * 62 + 31} y="10" text-anchor="middle" class:list={['wf-label', w.kind]}>
+                  {w.value > 0 ? '+' : ''}
+                  {shortMoney(w.value)}
+                </text>
+              </g>
+            ))
+          }
+        </svg>
+        <p class="chips-row">
+          {wf.map((w) => <SourceChip city={city} figure={w.figure} />)}
+          <SourceChip city={city} figure={o.growth.figure} />
+        </p>
+        <a class="more" href={`${city.path}gap/`}>See the gap step by step <span aria-hidden="true">→</span></a>
+      </li>
+
+      <li class="card">
+        <p class="n n--gold">3</p>
+        <h2>You get a say in November.</h2>
+        <p class="body">
+          A {formatValue(o.ballot.salesTax.value, 'percent')} sales tax <SourceChip city={city} figure={o.ballot.salesTax} /> and a {shortMoney(o.ballot.bond.value, 0)} bond
+          <SourceChip city={city} figure={o.ballot.bond} /> are on the {o.ballot.election} ballot. The plan depends on the tax.
+        </p>
+        <div class="tiles">
+          <div class="tile tile--passes">
+            <p class="tile-n num">{o.ballot.withTax.value}</p>
+            <p>positions cut if it passes</p>
+            <SourceChip city={city} figure={o.ballot.withTax} />
+          </div>
+          <div class="tile tile--fails">
+            <p class="tile-n num">{o.ballot.withoutTax.value}</p>
+            <p>positions cut if it fails</p>
+            <SourceChip city={city} figure={o.ballot.withoutTax} />
+          </div>
+        </div>
+        <a class="more" href={`${city.path}${has('ballot') ? 'ballot' : 'gap'}/`}>Compare both outcomes <span aria-hidden="true">→</span></a>
+      </li>
+    </ol>
+  </section>
+
+  <section class="wrap section compounded">
+    <div>
+      <p class="eyebrow">Why the gap keeps coming back</p>
+      <h2>Small differences, compounded.</h2>
+      <p class="body">
+        City staff say spending grew about {rate(g.spendingRate)} a year over {numberWords[g.years] ?? g.years} years while revenue grew about
+        {rate(g.revenueRate)}. {pointsText} points doesn't sound like much. Compounded over a decade, it adds up to a <Term city={city} name="Structural deficit">structural deficit</Term>.
+        <SourceChip city={city} figure={o.growth.figure} />
+      </p>
+      <p class="illustration-note">
+        Illustration: lines show the cited average rates applied to 100, not actual yearly figures. Year-by-year spending for FY22–FY25 isn't in the
+        sources.
+      </p>
+    </div>
+    <svg class="growth" viewBox="0 0 640 270" role="img" aria-label={`Illustration: starting from 100, spending growing ${rate(o.growth.cited.spendingRate)} a year reaches ${Math.round(last.spending)} after ${last.year} years; revenue growing ${rate(o.growth.cited.revenueRate)} reaches ${Math.round(last.revenue)}.`}>
+      {
+        ticks.map((v) => (
+          <g>
+            <line x1="40" x2="510" y1={Y(v)} y2={Y(v)} stroke="var(--rule)" />
+            <text x="32" y={Y(v) + 4} text-anchor="end" class="axis">{v}</text>
+          </g>
+        ))
+      }
+      <path d={gapArea} fill="var(--red-light)" opacity="0.8"></path>
+      <path d={line('revenue')} fill="none" stroke="var(--bay)" stroke-width="3"></path>
+      <path d={line('spending')} fill="none" stroke="var(--red)" stroke-width="3"></path>
+      <text x={X(last.year) + 8} y={Y(last.spending) + 4} class="end end--spending">Spending {Math.round(last.spending)}</text>
+      <text x={X(last.year) + 8} y={Y(last.revenue) + 4} class="end end--revenue">Revenue {Math.round(last.revenue)}</text>
+      <text x={X(labelYear)} y={gapLabelY} class="gap-label" text-anchor="middle">the gap</text>
+      {
+        xTicks.map((y) => (
+          <text x={X(y)} y="256" text-anchor="middle" class="axis">
+            Year {y}
+          </text>
+        ))
+      }
+    </svg>
+  </section>
+
+  <section class="wrap section">
+    <div class="trust">
+      <div>
+        <h2>Don't take our word for it.</h2>
+        <p>
+          Every number has a source chip. Click one to see the exact city document, the date, and the table it came from, with a link to the original.
+        </p>
+      </div>
+      <div>
+        <p class="chips-row">{o.sourceIds.slice(0, 6).map((id) => <SourceChip city={city} source={id} />)}</p>
+        <p class="counts">
+          {o.sourceIds.length} sources: {o.sourceCounts.city} city documents, {o.sourceCounts.news} news reports
+        </p>
+        <a class="btn btn--light" href={`${city.path}sources/`}>Browse all sources</a>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgb(22 25 29 / 0.06), 0 8px 24px rgb(22 25 29 / 0.06);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0 1.5rem;
+    border-radius: var(--radius-pill);
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn--ink {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn--ghost {
+    border: 1px solid var(--rule);
+    background: var(--card);
+    color: var(--ink);
+  }
+  .btn--light {
+    background: #fff;
+    color: var(--bay);
+  }
+
+  /* Hero */
+  /* Phones: copy, then the waffle, then the stats (M1). Desktop: copy and stats left, waffle right (D1). */
+  .hero {
+    display: grid;
+    grid-template-areas: 'copy' 'waffle' 'more';
+    gap: 2rem;
+    padding-block: clamp(2rem, 5vw, 4rem);
+  }
+  .hero-copy {
+    grid-area: copy;
+  }
+  .hero-waffle {
+    grid-area: waffle;
+  }
+  .hero-more {
+    grid-area: more;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    line-height: 1.1;
+  }
+  .lede {
+    max-width: 32rem;
+    margin: 1.25rem 0 0;
+    color: var(--muted);
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+  .tap-hint {
+    display: none;
+  }
+  @media (hover: none) {
+    .hover-hint {
+      display: none;
+    }
+    .tap-hint {
+      display: inline;
+    }
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    margin: 0;
+  }
+  .stats > div {
+    display: flex;
+    flex-direction: column;
+    padding-inline: 0 clamp(0.75rem, 3vw, 1.5rem);
+    margin-inline-end: clamp(0.75rem, 3vw, 1.5rem);
+    border-right: 1px solid var(--rule);
+  }
+  .stats > div:last-child {
+    border-right: 0;
+  }
+  .stats dt {
+    order: 2;
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+  .stats dd {
+    margin: 0;
+  }
+  .stats dd.num {
+    order: 1;
+    font-weight: 800;
+    font-size: clamp(1.25rem, 5vw, 2rem);
+    line-height: 1.2;
+  }
+  .stats dd:last-child {
+    order: 3;
+    margin-top: 0.25rem;
+  }
+  .short {
+    color: var(--red);
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.75rem 0 0;
+  }
+  .hero-waffle {
+    width: 100%;
+    max-width: 30rem;
+    justify-self: center;
+  }
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 0.5rem 1.5rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+  }
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .swatches {
+    display: flex;
+    gap: 2px;
+  }
+  .swatches span {
+    width: 0.5rem;
+    height: 0.875rem;
+    border-radius: 1px;
+  }
+  .fam {
+    font-weight: 700;
+  }
+  .dollars {
+    margin-inline-start: auto;
+    color: var(--muted);
+  }
+  @media (min-width: 64rem) {
+    .hero {
+      grid-template-columns: 1fr minmax(24rem, 30rem);
+      grid-template-areas: 'copy waffle' 'more waffle';
+      grid-template-rows: auto 1fr;
+      column-gap: 3rem;
+      row-gap: 0;
+      align-items: start;
+    }
+    .hero-more {
+      margin-top: 2rem;
+    }
+  }
+
+  /* Three things */
+  .section {
+    padding-top: clamp(3rem, 6vw, 5rem);
+  }
+  .things {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .things > li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+  }
+  .n {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .n--bay {
+    color: var(--bay);
+  }
+  .n--red {
+    color: var(--red);
+  }
+  .n--gold {
+    color: var(--gold);
+  }
+  .things h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .body {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .mix {
+    display: flex;
+    gap: 2px;
+    height: 2rem;
+    margin-top: 0.5rem;
+  }
+  .mix span {
+    border-radius: 2px;
+  }
+  .mix-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+  .bay {
+    color: var(--bay);
+    font-weight: 700;
+  }
+  .mini-wf {
+    width: 100%;
+    max-width: 20rem;
+    overflow: visible;
+  }
+  .wf-label {
+    font: 800 10px var(--font-sans);
+    fill: var(--red);
+  }
+  .wf-label.up {
+    fill: var(--bay);
+  }
+  .wf-label.one-time {
+    fill: #8a5f0b;
+  }
+  .chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+  }
+  .chips-row :global(.chips) {
+    margin-inline-start: 0;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .tile {
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+  }
+  .tile p {
+    margin: 0;
+    font-size: 0.8125rem;
+  }
+  .tile .tile-n {
+    font-weight: 800;
+    font-size: 1.75rem;
+  }
+  .tile :global(.chips) {
+    margin: 0.5rem 0 0;
+  }
+  /* Passes = the one-time sales-tax bridge (gold); fails = deeper cuts (red). */
+  .tile--passes {
+    background: var(--gold-light);
+  }
+  .tile--fails {
+    background: var(--red-light);
+  }
+  .more {
+    margin-top: auto;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+
+  /* Small differences, compounded */
+  .compounded {
+    display: grid;
+    gap: 2rem;
+  }
+  .compounded h2 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.75rem, 3.5vw, 2.375rem);
+  }
+  .illustration-note {
+    margin: 1.5rem 0 0;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--gold-light);
+    color: #5c4210;
+    font-size: 0.875rem;
+  }
+  .growth {
+    width: 100%;
+    overflow: visible;
+  }
+  .axis {
+    font: 600 11px var(--font-sans);
+    fill: var(--muted);
+  }
+  .end {
+    font: 800 13px var(--font-sans);
+  }
+  .end--spending {
+    fill: var(--red);
+  }
+  .end--revenue {
+    fill: var(--bay);
+  }
+  .gap-label {
+    font: italic 14px var(--font-serif);
+    fill: var(--red);
+  }
+  @media (min-width: 64rem) {
+    .compounded {
+      grid-template-columns: 1fr 1.2fr;
+      align-items: center;
+    }
+  }
+
+  /* Trust block */
+  .trust {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1.5rem 3rem;
+    align-items: center;
+    padding: clamp(1.75rem, 4vw, 2.75rem);
+    border-radius: 1.125rem;
+    background: var(--bay);
+    color: #fff;
+  }
+  .trust h2 {
+    margin: 0;
+    font-size: clamp(1.75rem, 3vw, 2.125rem);
+  }
+  .trust p {
+    margin: 0.75rem 0 0;
+    color: #d7e9e7;
+    line-height: 1.6;
+  }
+  .trust .chips-row :global(.chip--city) {
+    background: #fff;
+    color: var(--bay);
+  }
+  .counts {
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+  .trust .btn {
+    margin-top: 1rem;
+  }
+</style>

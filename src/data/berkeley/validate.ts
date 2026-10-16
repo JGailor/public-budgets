@@ -99,6 +99,14 @@ export function validateBerkeley(budget: CityBudget, checks: CrossCheck[] = []):
     rev.total.fy2026Adopted,
   );
 
+  // Cited facts parse to sensible values.
+  const { growth, salesTax, bond } = budget.citedFacts;
+  if (!(growth.spendingRate > growth.revenueRate && growth.revenueRate > 0 && growth.years > 0)) {
+    errors.push(`cited growth rates look wrong: spending ${growth.spendingRate}, revenue ${growth.revenueRate}, ${growth.years} years`);
+  }
+  if (!(salesTax.rate > 0 && salesTax.rate < 0.05)) errors.push(`cited sales-tax rate looks wrong: ${salesTax.rate}`);
+  if (!(bond.amount >= 1e6)) errors.push(`cited bond amount looks wrong: ${bond.amount}`);
+
   // Our arithmetic matches Excel's wherever Excel stored a result.
   for (const c of checks) {
     if (c.computed === null || Math.abs(c.computed - c.cached) > 1e-6 * Math.max(1, Math.abs(c.cached))) {
@@ -142,5 +150,8 @@ export function allRefs(b: CityBudget): Ref[] {
     b.personnelAndPension.compositionTotal,
     b.personnelAndPension.personnelSubtotal,
     ...b.personnelAndPension.unfundedLiabilities,
+    b.citedFacts.growth,
+    b.citedFacts.salesTax,
+    b.citedFacts.bond,
   ];
 }

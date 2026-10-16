@@ -209,6 +209,21 @@ export interface GlossaryEntry {
   row: number;
 }
 
+/** A figure stated in a sentence of the workbook rather than a table cell. */
+export interface CitedFact extends Ref {
+  /** The sentence, verbatim. */
+  text: string;
+}
+
+export interface CitedFacts {
+  /** "Over 10 years: spending grew ~8%/yr vs revenue ~6.5%/yr". */
+  growth: CitedFact & { years: number; spendingRate: number; revenueRate: number };
+  /** The proposed local sales tax on the ballot: rate 0.005 = 0.5%. */
+  salesTax: CitedFact & { rate: number; election: string };
+  /** The proposed infrastructure bond on the ballot. */
+  bond: CitedFact & { amount: number; election: string };
+}
+
 export interface CityBudget {
   schemaVersion: number;
   workbook: { file: string; sha256: string };
@@ -232,6 +247,7 @@ export interface CityBudget {
   capitalProgram: CapitalProgram;
   personnelAndPension: PersonnelAndPension;
   glossary: GlossaryEntry[];
+  citedFacts: CitedFacts;
 }
 
 /** A formula cell the workbook computed, next to what we computed for it. */

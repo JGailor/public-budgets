@@ -1785,5 +1785,35 @@
       "table": "Glossary",
       "row": 40
     }
-  ]
+  ],
+  "citedFacts": {
+    "growth": {
+      "text": "Over 10 years: spending grew ~8%/yr vs revenue ~6.5%/yr — the root of the structural deficit.",
+      "years": 10,
+      "spendingRate": 0.08,
+      "revenueRate": 0.065,
+      "source": "S12",
+      "table": "GF Expenditure History",
+      "row": 16
+    },
+    "salesTax": {
+      "text": "Proposed 0.5% sales tax (Nov 2026 ballot) would raise ~$9.0–9.4M/yr; would bring Berkeley rate to 10.75%.",
+      "rate": 0.005,
+      "election": "Nov 2026",
+      "source": "S5",
+      "related": [
+        "S15"
+      ],
+      "table": "README",
+      "row": 31
+    },
+    "bond": {
+      "text": "Proposed $300M infrastructure GO bond → Nov 2026 ballot (needs 2/3 vote). Funded by property tax.",
+      "amount": 300000000,
+      "election": "Nov 2026",
+      "source": "S3",
+      "table": "Capital Program FY27-28",
+      "row": 32
+    }
+  }
 }
