@@ -1,0 +1,1782 @@
+{
+  "schemaVersion": 1,
+  "workbook": {
+    "file": "source/Berkeley_Budget_FY25-FY28.xlsx",
+    "sha256": "81c2fbcb5574f3b555228ef4bb32981adf59a0e1a10c46071afc30d6d1b5c858"
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "number": 1,
+      "publisher": "City of Berkeley",
+      "title": "FY27-FY28 Budget Balancing Plan",
+      "committee": "Budget & Finance Cmte",
+      "date": "2026-04-16",
+      "dateLabel": "Apr 16 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/legislative-body-meeting-attachments/Item%2002%20Budget&Finance-FY2728%20Budget%20Update__04.16.26%20(3).pdf",
+      "type": "city",
+      "usedFor": "Deficit bridge, dept reductions, FTE, one-time resources",
+      "row": 5
+    },
+    {
+      "id": "S2",
+      "number": 2,
+      "publisher": "City of Berkeley",
+      "title": "FY2026 Mid-Year General Fund Revenue Report",
+      "date": "2026-02-26",
+      "dateLabel": "Feb 26 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/legislative-body-meeting-attachments/Item%2002%20General%20Fund%20Revenue%20Update%20and%20Overview%20of%20Revenue%20Enhancements%20(FY%202026%20Mid-Year%20General%20Fund%20Revenue%20Report-Final).pdf",
+      "type": "city",
+      "usedFor": "GF revenue line items (adopted vs actual)",
+      "row": 6
+    },
+    {
+      "id": "S3",
+      "number": 3,
+      "publisher": "City of Berkeley",
+      "title": "Proposed FY27-FY31 CIP Budget Presentation",
+      "date": "2026-05-28",
+      "dateLabel": "May 28 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/legislative-body-meeting-attachments/Item%2002%20Proposed%20FY27-FY31%20Proposed%20CIP%20Budget%20Presentation.pdf",
+      "type": "city",
+      "usedFor": "Capital program funding by source; Measure FF/T1",
+      "row": 7
+    },
+    {
+      "id": "S4",
+      "number": 4,
+      "publisher": "City of Berkeley",
+      "title": "City Budget page (document hub)",
+      "url": "https://berkeleyca.gov/your-government/financial-information/city-budget",
+      "type": "city",
+      "usedFor": "FY25-26 adopted budget & CIP links",
+      "row": 8
+    },
+    {
+      "id": "S5",
+      "number": 5,
+      "publisher": "City of Berkeley",
+      "title": "Proposed budget looks to stabilize City finances",
+      "date": "2026-04",
+      "dateLabel": "Apr 2026",
+      "url": "https://berkeleyca.gov/community-recreation/news/proposed-budget-looks-stabilize-city-finances",
+      "type": "city",
+      "usedFor": "Funds in deficit; sales-tax context; layoffs",
+      "row": 9
+    },
+    {
+      "id": "S6",
+      "number": 6,
+      "publisher": "City of Berkeley",
+      "title": "Infrastructure Projects for Potential Bond Measure",
+      "url": "https://berkeleyca.gov/your-government/our-work/bond-revenue-measures/infrastructure-projects-potential-bond-measure",
+      "type": "city",
+      "usedFor": "$1.65–2B unfunded infrastructure; asset inventory",
+      "row": 10
+    },
+    {
+      "id": "S7",
+      "number": 7,
+      "publisher": "City of Berkeley",
+      "title": "FY2020-2021 Adopted Biennial Budget",
+      "url": "https://berkeleyca.gov/sites/default/files/2022-01/FY-2020-2021-Adopted-Budget-Book.pdf",
+      "type": "city",
+      "usedFor": "Historical GF expenditure baseline",
+      "row": 11
+    },
+    {
+      "id": "S8",
+      "number": 8,
+      "publisher": "City of Berkeley",
+      "title": "Financial Condition FY2012–FY2021 (Auditor)",
+      "url": "https://berkeleyca.gov/sites/default/files/documents/Berkeley's%20Financial%20Condition%20(FY%202012%20-%20FY%202021)-%20Pension%20Liabilities%20and%20Infrastructure%20Need%20Attention.pdf",
+      "type": "city",
+      "usedFor": "Unfunded liability / pension history",
+      "row": 12
+    },
+    {
+      "id": "S9",
+      "number": 9,
+      "publisher": "City of Berkeley",
+      "title": "Marina Fund Update",
+      "date": "2018-04-12",
+      "dateLabel": "Apr 12 2018",
+      "url": "https://berkeleyca.gov/sites/default/files/documents/Marina%20Fund%20Update%20041218.pdf",
+      "type": "city",
+      "usedFor": "Marina structural deficit detail",
+      "row": 13
+    },
+    {
+      "id": "S10",
+      "number": 10,
+      "publisher": "City of Berkeley",
+      "title": "Potential Ballot Measures discussion",
+      "date": "2025-12-02",
+      "dateLabel": "Dec 2 2025",
+      "url": "https://berkeleyca.gov/sites/default/files/documents/2025-12-02%20Special%20Item%2002%20Discussion%20Regarding%20Potential%20Ballot.pdf",
+      "type": "city",
+      "usedFor": "Asset inventory; GO bond / tax context",
+      "row": 14
+    },
+    {
+      "id": "S11",
+      "number": 11,
+      "publisher": "Berkeley Scanner",
+      "title": "considers 10% budget cuts, $29M deficit",
+      "date": "2026-01-01",
+      "dateLabel": "Jan 1 2026",
+      "url": "https://www.berkeleyscanner.com/2026/01/01/community/berkeley-budget-cuts-deficit-expected/",
+      "type": "news",
+      "usedFor": "Expenditure growth; personnel/pension split",
+      "row": 15
+    },
+    {
+      "id": "S12",
+      "number": 12,
+      "publisher": "Berkeley Scanner",
+      "title": "new budget strategy will curb rising costs",
+      "date": "2026-05-19",
+      "dateLabel": "May 19 2026",
+      "url": "https://www.berkeleyscanner.com/2026/05/19/community/berkeley-new-budget-strategy-rising-costs-deficit/",
+      "type": "news",
+      "usedFor": "Baseline reset; 8%/6.5% growth; $600M liabilities",
+      "row": 16
+    },
+    {
+      "id": "S13",
+      "number": 13,
+      "publisher": "Berkeley Scanner",
+      "title": "tough choices as budget talks continue",
+      "date": "2025-05-22",
+      "dateLabel": "May 22 2025",
+      "url": "https://www.berkeleyscanner.com/2025/05/22/community/berkeley-budget-tough-choices-city-council/",
+      "type": "news",
+      "usedFor": "Enterprise funds; Measure P/U1 deficits",
+      "row": 17
+    },
+    {
+      "id": "S14",
+      "number": 14,
+      "publisher": "Berkeley Scanner",
+      "title": "hiring freeze, $27M deficit",
+      "date": "2025-04-25",
+      "dateLabel": "Apr 25 2025",
+      "url": "https://www.berkeleyscanner.com/2025/04/25/community/berkeley-hiring-freeze-27-million-deficit/",
+      "type": "news",
+      "usedFor": "One-time reliance; affected funds",
+      "row": 18
+    },
+    {
+      "id": "S15",
+      "number": 15,
+      "publisher": "Berkeleyside",
+      "title": "$30M deficit: layoffs, service cuts, sales tax",
+      "date": "2026-04-15",
+      "dateLabel": "Apr 15 2026",
+      "url": "https://www.berkeleyside.org/2026/04/15/berkeley-budget-deficit-sales-tax-layoffs",
+      "type": "news",
+      "usedFor": "Sales-tax scenario; service cuts",
+      "row": 19
+    },
+    {
+      "id": "S16",
+      "number": 16,
+      "publisher": "Berkeleyside",
+      "title": "fire station / budget plan",
+      "date": "2026-05-20",
+      "dateLabel": "May 20 2026",
+      "url": "https://www.berkeleyside.org/2026/05/20/berkeley-budget-deficit-fire-station-close-city-council",
+      "type": "news",
+      "usedFor": "Cuts detail; sales-tax & FTE",
+      "row": 20
+    },
+    {
+      "id": "S17",
+      "number": 17,
+      "publisher": "Berkeleyside",
+      "title": "finance audit: pension & infrastructure",
+      "date": "2022-05",
+      "dateLabel": "May 2022",
+      "url": "https://www.berkeleyside.org/2022/05/10/berkeley-finance-audit-pension-infrastructure-covid",
+      "type": "news",
+      "usedFor": "Unfunded liability $773.1M; reserves",
+      "row": 21
+    },
+    {
+      "id": "S18",
+      "number": 18,
+      "publisher": "Daily Cal",
+      "title": "how Berkeley is trying to fix its $30M deficit",
+      "url": "https://www.dailycal.org/news/city/here-s-how-berkeley-is-trying-to-fix-its-30m-deficit/article_22ae4aa9-b34b-4acb-8d33-6fbeb70c70ac.html",
+      "type": "news",
+      "usedFor": "Auditor findings; enterprise-fund transfers",
+      "row": 22
+    },
+    {
+      "id": "S19",
+      "number": 19,
+      "publisher": "Berkeley Scanner",
+      "title": "Measure FF Safe Streets explainer",
+      "date": "2025-10",
+      "dateLabel": "Oct 2025",
+      "url": "https://www.berkeleyscanner.com/2025/10/14/traffic-safety/berkeley-measure-ff-safe-streets-whats-happening/",
+      "type": "news",
+      "usedFor": "Measure FF $270M / allocation split",
+      "row": 23
+    }
+  ],
+  "revenue": {
+    "title": "General Fund Revenue — FY2026 Adopted vs Mid-Year Actuals (and FY2025 comparison)",
+    "note": "Note: Mid-year = first half of fiscal year (Jul–Dec). 'Adopted' is full-year budget; %Received compares half-year actual to full-year budget.",
+    "lines": [
+      {
+        "name": "Secured Property Tax",
+        "fy2026Adopted": 95236939,
+        "fy2026MidYearActual": 47402611,
+        "fy2025MidYearActual": 45385988,
+        "pctOfAdoptedReceived": 0.49773345823304965,
+        "changeVsFy2025": 2016623,
+        "changeVsFy2025Pct": 0.04443272227543003,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 5
+      },
+      {
+        "name": "Supplemental Taxes",
+        "fy2026Adopted": 3400000,
+        "fy2026MidYearActual": 684808,
+        "fy2025MidYearActual": 727555,
+        "pctOfAdoptedReceived": 0.20141411764705883,
+        "changeVsFy2025": -42747,
+        "changeVsFy2025Pct": -0.05875432097916996,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 6
+      },
+      {
+        "name": "Unsecured Property Taxes",
+        "fy2026Adopted": 4973066,
+        "fy2026MidYearActual": 4439145,
+        "fy2025MidYearActual": 4165858,
+        "pctOfAdoptedReceived": 0.892637459466655,
+        "changeVsFy2025": 273287,
+        "changeVsFy2025Pct": 0.06560161196084936,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 7
+      },
+      {
+        "name": "Property Transfer Tax",
+        "fy2026Adopted": 22000000,
+        "fy2026MidYearActual": 14079634,
+        "fy2025MidYearActual": 11918015,
+        "pctOfAdoptedReceived": 0.6399833636363637,
+        "changeVsFy2025": 2161619,
+        "changeVsFy2025Pct": 0.18137407949226445,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 8
+      },
+      {
+        "name": "Property Transfer Tax — Measure P",
+        "fy2026Adopted": 9100000,
+        "fy2026MidYearActual": 6586501,
+        "fy2025MidYearActual": 4833858,
+        "pctOfAdoptedReceived": 0.7237913186813186,
+        "changeVsFy2025": 1752643,
+        "changeVsFy2025Pct": 0.3625764348063183,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 9
+      },
+      {
+        "name": "Sales Taxes",
+        "fy2026Adopted": 19106713,
+        "fy2026MidYearActual": 9623130,
+        "fy2025MidYearActual": 9364937,
+        "pctOfAdoptedReceived": 0.5036517793510584,
+        "changeVsFy2025": 258193,
+        "changeVsFy2025Pct": 0.027570180130416254,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 10
+      },
+      {
+        "name": "Soda Taxes",
+        "fy2026Adopted": 1147387,
+        "fy2026MidYearActual": 405897,
+        "fy2025MidYearActual": 512817,
+        "pctOfAdoptedReceived": 0.35375771208842355,
+        "changeVsFy2025": -106920,
+        "changeVsFy2025Pct": -0.20849542819368314,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 11
+      },
+      {
+        "name": "Utility Users Taxes",
+        "fy2026Adopted": 19396728,
+        "fy2026MidYearActual": 8351808,
+        "fy2025MidYearActual": 9047804,
+        "pctOfAdoptedReceived": 0.4305781882387586,
+        "changeVsFy2025": -695996,
+        "changeVsFy2025Pct": -0.07692430118954831,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 12
+      },
+      {
+        "name": "Transient Occupancy Taxes (net)",
+        "fy2026Adopted": 6500000,
+        "fy2026MidYearActual": 4679395,
+        "fy2025MidYearActual": 3583976,
+        "pctOfAdoptedReceived": 0.719906923076923,
+        "changeVsFy2025": 1095419,
+        "changeVsFy2025Pct": 0.3056435087734963,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 13
+      },
+      {
+        "name": "Short-term Rentals",
+        "fy2026Adopted": 1400000,
+        "fy2026MidYearActual": 641433,
+        "fy2025MidYearActual": 661730,
+        "pctOfAdoptedReceived": 0.4581664285714286,
+        "changeVsFy2025": -20297,
+        "changeVsFy2025Pct": -0.03067263083130582,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 14
+      },
+      {
+        "name": "Business License Tax",
+        "fy2026Adopted": 24480000,
+        "fy2026MidYearActual": 2336893,
+        "fy2025MidYearActual": 1338858,
+        "pctOfAdoptedReceived": 0.09546131535947712,
+        "changeVsFy2025": 998035,
+        "changeVsFy2025Pct": 0.7454375295961185,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 15
+      },
+      {
+        "name": "Recreational Cannabis",
+        "fy2026Adopted": 18000,
+        "fy2026MidYearActual": 0,
+        "fy2025MidYearActual": 19017,
+        "pctOfAdoptedReceived": 0,
+        "changeVsFy2025": -19017,
+        "changeVsFy2025Pct": -1,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 16
+      },
+      {
+        "name": "U1 Revenues",
+        "fy2026Adopted": 6500000,
+        "fy2026MidYearActual": 298004,
+        "fy2025MidYearActual": 128163,
+        "pctOfAdoptedReceived": 0.04584676923076923,
+        "changeVsFy2025": 169841,
+        "changeVsFy2025Pct": 1.3251952591621607,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 17
+      },
+      {
+        "name": "Residential Vacancy Tax (new FY26)",
+        "fy2026Adopted": 3500000,
+        "fy2026MidYearActual": 363780,
+        "fy2025MidYearActual": 0,
+        "pctOfAdoptedReceived": 0.10393714285714285,
+        "changeVsFy2025": 363780,
+        "changeVsFy2025Pct": null,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 18
+      },
+      {
+        "name": "Other Taxes (incl. Redemptions)",
+        "fy2026Adopted": 5453059,
+        "fy2026MidYearActual": 3852627,
+        "fy2025MidYearActual": 1987429,
+        "pctOfAdoptedReceived": 0.7065074850648049,
+        "changeVsFy2025": 1865198,
+        "changeVsFy2025Pct": 0.938497928731039,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 19
+      },
+      {
+        "name": "Vehicle In-Lieu Taxes (VLF)",
+        "fy2026Adopted": 20055853,
+        "fy2026MidYearActual": 9904792,
+        "fy2025MidYearActual": 9500999,
+        "pctOfAdoptedReceived": 0.49386042069614294,
+        "changeVsFy2025": 403793,
+        "changeVsFy2025Pct": 0.04250005709925872,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 20
+      },
+      {
+        "name": "Parking Fines — Regular",
+        "fy2026Adopted": 5900000,
+        "fy2026MidYearActual": 3666656,
+        "fy2025MidYearActual": 2932701,
+        "pctOfAdoptedReceived": 0.6214671186440678,
+        "changeVsFy2025": 733955,
+        "changeVsFy2025Pct": 0.2502658811791587,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 21
+      },
+      {
+        "name": "Moving Violations",
+        "fy2026Adopted": 132600,
+        "fy2026MidYearActual": 77236,
+        "fy2025MidYearActual": 73119,
+        "pctOfAdoptedReceived": 0.582473604826546,
+        "changeVsFy2025": 4117,
+        "changeVsFy2025Pct": 0.05630547463723519,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 22
+      },
+      {
+        "name": "Ambulance Fees",
+        "fy2026Adopted": 8900000,
+        "fy2026MidYearActual": 4593148,
+        "fy2025MidYearActual": 3768540,
+        "pctOfAdoptedReceived": 0.5160840449438202,
+        "changeVsFy2025": 824608,
+        "changeVsFy2025Pct": 0.21881365197132047,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 23
+      },
+      {
+        "name": "Interest Income",
+        "fy2026Adopted": 14000000,
+        "fy2026MidYearActual": 6849335,
+        "fy2025MidYearActual": 7735188,
+        "pctOfAdoptedReceived": 0.4892382142857143,
+        "changeVsFy2025": -885853,
+        "changeVsFy2025Pct": -0.1145224912439103,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 24
+      },
+      {
+        "name": "Franchise Fees",
+        "fy2026Adopted": 1822528,
+        "fy2026MidYearActual": 246401,
+        "fy2025MidYearActual": 268424,
+        "pctOfAdoptedReceived": 0.13519737419672015,
+        "changeVsFy2025": -22023,
+        "changeVsFy2025Pct": -0.0820455696957053,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 25
+      },
+      {
+        "name": "Other Revenue",
+        "fy2026Adopted": 8000000,
+        "fy2026MidYearActual": 4619244,
+        "fy2025MidYearActual": 4308571,
+        "pctOfAdoptedReceived": 0.5774055,
+        "changeVsFy2025": 310673,
+        "changeVsFy2025Pct": 0.07210580955959645,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 26
+      },
+      {
+        "name": "IDC Reimbursement",
+        "fy2026Adopted": 7070256,
+        "fy2026MidYearActual": 3045997,
+        "fy2025MidYearActual": 3200593,
+        "pctOfAdoptedReceived": 0.43081848804343154,
+        "changeVsFy2025": -154596,
+        "changeVsFy2025Pct": -0.048302298980220225,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 27
+      },
+      {
+        "name": "Transfers",
+        "fy2026Adopted": 23842130,
+        "fy2026MidYearActual": 18763010,
+        "fy2025MidYearActual": 2090961,
+        "pctOfAdoptedReceived": 0.7869686978470464,
+        "changeVsFy2025": 16672049,
+        "changeVsFy2025Pct": 7.973390704082955,
+        "source": "S2",
+        "table": "GF Revenue FY26",
+        "row": 28
+      }
+    ],
+    "total": {
+      "name": "TOTAL General Fund Revenue & Transfers",
+      "fy2026Adopted": 311935259,
+      "fy2026MidYearActual": 155511485,
+      "fy2025MidYearActual": 127555101,
+      "pctOfAdoptedReceived": 0.49853769496445416,
+      "changeVsFy2025": 27956384,
+      "changeVsFy2025Pct": 0.21917103887519168,
+      "source": "S2",
+      "table": "GF Revenue FY26",
+      "row": 29
+    }
+  },
+  "deficitBridge": {
+    "title": "General Fund Deficit Bridge — FY2027 & FY2028",
+    "note": "Reduction achieved before sales tax: $29.25M (FY27, 10.3%) / $29.77M (FY28, 10.5%). After sales-tax allocation (one-time): ~$19.8M / $20.1M.",
+    "steps": [
+      {
+        "key": "initial-estimate",
+        "label": "Initial Estimate of General Fund Deficit",
+        "kind": "estimate",
+        "fy2027": -32256300,
+        "fy2028": -33206801,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 5
+      },
+      {
+        "key": "revenue-projections",
+        "label": "Additional Income from Revenue Projections",
+        "kind": "change",
+        "fy2027": 5111718,
+        "fy2028": 8291028,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 6
+      },
+      {
+        "key": "after-revenue-projections",
+        "label": "Revised Deficit after Revenue Projections",
+        "kind": "subtotal",
+        "fy2027": -27144582,
+        "fy2028": -24915773,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 7
+      },
+      {
+        "key": "center-street-debt-service",
+        "label": "Adjustment: 1947 Center Street Debt Service",
+        "kind": "change",
+        "fy2027": -1630454,
+        "fy2028": -1623581,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 8
+      },
+      {
+        "key": "parking-funds-stabilization",
+        "label": "Adjustment: Parking Funds Stabilization",
+        "kind": "change",
+        "fy2027": -1050938,
+        "fy2028": -1050938,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 9
+      },
+      {
+        "key": "non-departmental",
+        "label": "Adjustment: Non-Departmental",
+        "kind": "change",
+        "fy2027": -1523365,
+        "fy2028": -1942666,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 10
+      },
+      {
+        "key": "before-one-time-resources",
+        "label": "Total Deficit Before Use of One-Time Resources",
+        "kind": "subtotal",
+        "fy2027": -31349339,
+        "fy2028": -29532958,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 11
+      },
+      {
+        "key": "one-time-resources",
+        "label": "Use of One-Time Resources",
+        "kind": "change",
+        "fy2027": 2100000,
+        "fy2028": 0,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 12
+      },
+      {
+        "key": "final-gap",
+        "label": "GF Deficit after Revenue & Expenditure Adjustments",
+        "kind": "total",
+        "fy2027": -29249339,
+        "fy2028": -29532958,
+        "source": "S1",
+        "table": "Deficit Bridge FY27-28",
+        "row": 13
+      }
+    ]
+  },
+  "departmentReductions": [
+    {
+      "year": "FY2027",
+      "title": "Department GF Reductions — FY2027 (Proposed)",
+      "note": "Note: Charter offices (City Attorney, Auditor, ODPA, Mayor & Council) set reductions first; remaining gap (~$28M) met by City-Manager-managed departments. S&U Tax allocation = one-time bridge pending Nov 2026 sales-tax vote.",
+      "departments": [
+        {
+          "id": "city-attorney",
+          "name": "City Attorney",
+          "charter": true,
+          "baseline": 7696001,
+          "reduction": 0,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 7696001,
+          "reductionPct": 0,
+          "netReduction": 0,
+          "netReductionPct": 0,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 5
+        },
+        {
+          "id": "city-auditor",
+          "name": "City Auditor",
+          "charter": true,
+          "baseline": 3929199,
+          "reduction": 288560,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 3640639,
+          "reductionPct": 0.07343990467268265,
+          "netReduction": 288560,
+          "netReductionPct": 0.07343990467268265,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 6
+        },
+        {
+          "id": "odpa",
+          "name": "Office of Dir. of Police Accountability (ODPA)",
+          "charter": true,
+          "baseline": 1289953,
+          "reduction": 71708,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 1218245,
+          "reductionPct": 0.05558962225755512,
+          "netReduction": 71708,
+          "netReductionPct": 0.05558962225755512,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 7
+        },
+        {
+          "id": "mayor-council",
+          "name": "Mayor & Council",
+          "charter": true,
+          "baseline": 6899331,
+          "reduction": 863145,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 6036186,
+          "reductionPct": 0.12510560806547766,
+          "netReduction": 863145,
+          "netReductionPct": 0.12510560806547766,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 8
+        },
+        {
+          "id": "city-clerk",
+          "name": "City Clerk",
+          "charter": false,
+          "baseline": 3952847,
+          "reduction": 210456,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 3742391,
+          "reductionPct": 0.05324162559289545,
+          "netReduction": 210456,
+          "netReductionPct": 0.05324162559289545,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 9
+        },
+        {
+          "id": "cmo",
+          "name": "City Manager's Office (CMO)",
+          "charter": false,
+          "baseline": 18713660,
+          "reduction": 2489487,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 16224173,
+          "reductionPct": 0.13303047078978672,
+          "netReduction": 2489487,
+          "netReductionPct": 0.13303047078978672,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 10
+        },
+        {
+          "id": "finance",
+          "name": "Finance",
+          "charter": false,
+          "baseline": 9887235,
+          "reduction": 684356,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 9202879,
+          "reductionPct": 0.06921611552673725,
+          "netReduction": 684356,
+          "netReductionPct": 0.06921611552673725,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 11
+        },
+        {
+          "id": "fire",
+          "name": "Fire",
+          "charter": false,
+          "baseline": 55650689,
+          "reduction": 6653092,
+          "salesTaxAllocation": 3631106,
+          "budgetAfterReduction": 48997597,
+          "reductionPct": 0.11955093673682998,
+          "netReduction": 3021986,
+          "netReductionPct": 0.05430275984543516,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 12
+        },
+        {
+          "id": "hhcs",
+          "name": "Health, Housing & Community Svcs (HHCS)",
+          "charter": false,
+          "baseline": 37548665,
+          "reduction": 3561672,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 33986993,
+          "reductionPct": 0.0948548237334137,
+          "netReduction": 3561672,
+          "netReductionPct": 0.0948548237334137,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 13
+        },
+        {
+          "id": "human-resources",
+          "name": "Human Resources",
+          "charter": false,
+          "baseline": 5212918,
+          "reduction": 625774,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 4587144,
+          "reductionPct": 0.1200429394822631,
+          "netReduction": 625774,
+          "netReductionPct": 0.1200429394822631,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 14
+        },
+        {
+          "id": "information-technology",
+          "name": "Information Technology",
+          "charter": false,
+          "baseline": 1150454,
+          "reduction": 185391,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 965063,
+          "reductionPct": 0.16114594759981712,
+          "netReduction": 185391,
+          "netReductionPct": 0.16114594759981712,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 15
+        },
+        {
+          "id": "prw",
+          "name": "Parks, Recreation & Waterfront (PRW)",
+          "charter": false,
+          "baseline": 13233201,
+          "reduction": 1190950,
+          "salesTaxAllocation": 466004,
+          "budgetAfterReduction": 12042251,
+          "reductionPct": 0.08999712163368485,
+          "netReduction": 724946,
+          "netReductionPct": 0.05478236142562937,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 16
+        },
+        {
+          "id": "planning-development",
+          "name": "Planning & Development",
+          "charter": false,
+          "baseline": 3666161,
+          "reduction": 458269,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 3207892,
+          "reductionPct": 0.12499969313949932,
+          "netReduction": 458269,
+          "netReductionPct": 0.12499969313949932,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 17
+        },
+        {
+          "id": "police",
+          "name": "Police",
+          "charter": false,
+          "baseline": 106198574,
+          "reduction": 10588717,
+          "salesTaxAllocation": 5345885,
+          "budgetAfterReduction": 95609857,
+          "reductionPct": 0.09970677195722044,
+          "netReduction": 5242832,
+          "netReductionPct": 0.049368195847902814,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 18
+        },
+        {
+          "id": "public-works",
+          "name": "Public Works",
+          "charter": false,
+          "baseline": 8135147,
+          "reduction": 779771,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 7355376,
+          "reductionPct": 0.09585210937184048,
+          "netReduction": 779771,
+          "netReductionPct": 0.09585210937184048,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 19
+        },
+        {
+          "id": "it-cost-allocation-plan",
+          "name": "IT Cost Allocation Plan",
+          "charter": false,
+          "baseline": 600000,
+          "reduction": 600000,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 0,
+          "reductionPct": 1,
+          "netReduction": 600000,
+          "netReductionPct": 1,
+          "source": "S1",
+          "table": "Dept Reductions FY27",
+          "row": 20
+        }
+      ],
+      "total": {
+        "baseline": 283764035,
+        "reduction": 29251348,
+        "salesTaxAllocation": 9442995,
+        "budgetAfterReduction": 254512687,
+        "reductionPct": 0.10308335233533031,
+        "netReduction": 19808353,
+        "netReductionPct": 0.06980572079897299,
+        "source": "S1",
+        "table": "Dept Reductions FY27",
+        "row": 21
+      }
+    },
+    {
+      "year": "FY2028",
+      "title": "Department GF Reductions — FY2028 (Proposed)",
+      "note": "Note: Charter offices (City Attorney, Auditor, ODPA, Mayor & Council) set reductions first; remaining gap (~$28M) met by City-Manager-managed departments. S&U Tax allocation = one-time bridge pending Nov 2026 sales-tax vote.",
+      "departments": [
+        {
+          "id": "city-attorney",
+          "name": "City Attorney",
+          "charter": true,
+          "baseline": 7696001,
+          "reduction": 0,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 7696001,
+          "reductionPct": 0,
+          "netReduction": 0,
+          "netReductionPct": 0,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 5
+        },
+        {
+          "id": "city-auditor",
+          "name": "City Auditor",
+          "charter": true,
+          "baseline": 3929199,
+          "reduction": 288560,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 3640639,
+          "reductionPct": 0.07343990467268265,
+          "netReduction": 288560,
+          "netReductionPct": 0.07343990467268265,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 6
+        },
+        {
+          "id": "odpa",
+          "name": "Office of Dir. of Police Accountability (ODPA)",
+          "charter": true,
+          "baseline": 1289953,
+          "reduction": 71708,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 1218245,
+          "reductionPct": 0.05558962225755512,
+          "netReduction": 71708,
+          "netReductionPct": 0.05558962225755512,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 7
+        },
+        {
+          "id": "mayor-council",
+          "name": "Mayor & Council",
+          "charter": true,
+          "baseline": 6899331,
+          "reduction": 863145,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 6036186,
+          "reductionPct": 0.12510560806547766,
+          "netReduction": 863145,
+          "netReductionPct": 0.12510560806547766,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 8
+        },
+        {
+          "id": "city-clerk",
+          "name": "City Clerk",
+          "charter": false,
+          "baseline": 3998036,
+          "reduction": 94456,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 3903580,
+          "reductionPct": 0.023625600169683316,
+          "netReduction": 94456,
+          "netReductionPct": 0.023625600169683316,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 9
+        },
+        {
+          "id": "cmo",
+          "name": "City Manager's Office (CMO)",
+          "charter": false,
+          "baseline": 19041413,
+          "reduction": 2432623,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 16608790,
+          "reductionPct": 0.12775433209709805,
+          "netReduction": 2432623,
+          "netReductionPct": 0.12775433209709805,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 10
+        },
+        {
+          "id": "finance",
+          "name": "Finance",
+          "charter": false,
+          "baseline": 10178435,
+          "reduction": 715714,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 9462721,
+          "reductionPct": 0.07031670389406623,
+          "netReduction": 715714,
+          "netReductionPct": 0.07031670389406623,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 11
+        },
+        {
+          "id": "fire",
+          "name": "Fire",
+          "charter": false,
+          "baseline": 57206818,
+          "reduction": 6800791,
+          "salesTaxAllocation": 3703328,
+          "budgetAfterReduction": 50406027,
+          "reductionPct": 0.11888077746257447,
+          "netReduction": 3097463,
+          "netReductionPct": 0.054144997192467514,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 12
+        },
+        {
+          "id": "hhcs",
+          "name": "Health, Housing & Community Svcs (HHCS)",
+          "charter": false,
+          "baseline": 38021381,
+          "reduction": 3455468,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 34565913,
+          "reductionPct": 0.0908822328152678,
+          "netReduction": 3455468,
+          "netReductionPct": 0.0908822328152678,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 13
+        },
+        {
+          "id": "human-resources",
+          "name": "Human Resources",
+          "charter": false,
+          "baseline": 5387455,
+          "reduction": 622032,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 4765423,
+          "reductionPct": 0.11545934026363097,
+          "netReduction": 622032,
+          "netReductionPct": 0.11545934026363097,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 14
+        },
+        {
+          "id": "information-technology",
+          "name": "Information Technology",
+          "charter": false,
+          "baseline": 1150454,
+          "reduction": 185391,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 965063,
+          "reductionPct": 0.16114594759981712,
+          "netReduction": 185391,
+          "netReductionPct": 0.16114594759981712,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 15
+        },
+        {
+          "id": "prw",
+          "name": "Parks, Recreation & Waterfront (PRW)",
+          "charter": false,
+          "baseline": 13382163,
+          "reduction": 1205810,
+          "salesTaxAllocation": 477313,
+          "budgetAfterReduction": 12176353,
+          "reductionPct": 0.09010576242420601,
+          "netReduction": 728497,
+          "netReductionPct": 0.0544379111209451,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 16
+        },
+        {
+          "id": "planning-development",
+          "name": "Planning & Development",
+          "charter": false,
+          "baseline": 3763360,
+          "reduction": 470419,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 3292941,
+          "reductionPct": 0.1249997342800051,
+          "netReduction": 470419,
+          "netReductionPct": 0.1249997342800051,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 17
+        },
+        {
+          "id": "police",
+          "name": "Police",
+          "charter": false,
+          "baseline": 107356946,
+          "reduction": 10789378,
+          "salesTaxAllocation": 5453304,
+          "budgetAfterReduction": 96567568,
+          "reductionPct": 0.10050004589363039,
+          "netReduction": 5336074,
+          "netReductionPct": 0.04970404057507374,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 18
+        },
+        {
+          "id": "public-works",
+          "name": "Public Works",
+          "charter": false,
+          "baseline": 8302692,
+          "reduction": 1084523,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 7218169,
+          "reductionPct": 0.13062305575107447,
+          "netReduction": 1084523,
+          "netReductionPct": 0.13062305575107447,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 19
+        },
+        {
+          "id": "it-cost-allocation-plan",
+          "name": "IT Cost Allocation Plan",
+          "charter": false,
+          "baseline": 600000,
+          "reduction": 600000,
+          "salesTaxAllocation": 0,
+          "budgetAfterReduction": 0,
+          "reductionPct": 1,
+          "netReduction": 600000,
+          "netReductionPct": 1,
+          "source": "S1",
+          "table": "Dept Reductions FY28",
+          "row": 20
+        }
+      ],
+      "total": {
+        "baseline": 288203637,
+        "reduction": 29680018,
+        "salesTaxAllocation": 9633945,
+        "budgetAfterReduction": 258523619,
+        "reductionPct": 0.10298280170558709,
+        "netReduction": 20046073,
+        "netReductionPct": 0.06955523951281711,
+        "source": "S1",
+        "table": "Dept Reductions FY28",
+        "row": 21
+      }
+    }
+  ],
+  "fte": {
+    "title": "Staffing & Reduction-in-Force (RIF) Impact — All Funds",
+    "note": "Positions allocated to Sales & Use Tax = 33.0 FTE (15.0 vacant + 18.0 filled). City total workforce ~1,600.",
+    "scenarios": [
+      {
+        "key": "without-sales-tax",
+        "label": "Without Sales & Use Tax",
+        "fy2026AdoptedFte": 1608.99,
+        "fy2026Rif": 45,
+        "fy2027BaselineFte": 1559.54,
+        "fy2027Reduction": 138,
+        "fy2027NetFte": 1421.54,
+        "cumulativeRif": 183,
+        "cumulativeReductionPct": 0.11373594615255533,
+        "source": "S1",
+        "table": "FTE & Positions",
+        "row": 5
+      },
+      {
+        "key": "with-sales-tax",
+        "label": "With Sales & Use Tax",
+        "fy2026AdoptedFte": 1608.99,
+        "fy2026Rif": 45,
+        "fy2027BaselineFte": 1559.54,
+        "fy2027Reduction": 105,
+        "fy2027NetFte": 1454.54,
+        "cumulativeRif": 150,
+        "cumulativeReductionPct": 0.09322618537094698,
+        "source": "S1",
+        "table": "FTE & Positions",
+        "row": 6
+      }
+    ],
+    "positions": [
+      {
+        "key": "without-sales-tax",
+        "label": "No Sales & Use Tax",
+        "vacant": 100,
+        "filled": 38,
+        "total": 138,
+        "source": "S1",
+        "table": "FTE & Positions",
+        "row": 11
+      },
+      {
+        "key": "with-sales-tax",
+        "label": "With Sales & Use Tax",
+        "vacant": 85,
+        "filled": 20,
+        "total": 105,
+        "source": "S1",
+        "table": "FTE & Positions",
+        "row": 12
+      }
+    ]
+  },
+  "oneTimeResources": {
+    "title": "One-Time Resources — Sources & Uses (FY2027–FY2028)",
+    "sources": [
+      {
+        "label": "Operating Reserve (2025 AAO #1)",
+        "amount": 4177541,
+        "source": "S1",
+        "table": "One-Time Resources",
+        "row": 5
+      },
+      {
+        "label": "Dissolution of Successor Agency — Transfer to City",
+        "amount": 7877572,
+        "source": "S1",
+        "table": "One-Time Resources",
+        "row": 6
+      }
+    ],
+    "uses": [
+      {
+        "label": "Proposed Sales & Use Tax (bridge)",
+        "amount": 9443000,
+        "source": "S1",
+        "table": "One-Time Resources",
+        "row": 10
+      },
+      {
+        "label": "Smooth Difference in FY27/FY28 Deficit",
+        "amount": 2100000,
+        "source": "S1",
+        "table": "One-Time Resources",
+        "row": 11
+      },
+      {
+        "label": "Carrying Costs — Impacted Employees",
+        "amount": 500000,
+        "source": "S1",
+        "table": "One-Time Resources",
+        "row": 12
+      }
+    ],
+    "totalSources": 12055113,
+    "totalUses": 12043000,
+    "remaining": 12113
+  },
+  "capitalProgram": {
+    "title": "Five-Year Capital Improvement Program (CIP) — FY2027 & FY2028 Funding by Source",
+    "lines": [
+      {
+        "name": "General Fund / CIP — Streets",
+        "category": "GF/CIP",
+        "fy2027": 1925000,
+        "fy2028": 1925000,
+        "total": 3850000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 5
+      },
+      {
+        "name": "General Fund / CIP — Streets PCI Improvement",
+        "category": "GF/CIP",
+        "fy2027": 8487000,
+        "fy2028": 8741000,
+        "total": 17228000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 6
+      },
+      {
+        "name": "General Fund / CIP — Sidewalks",
+        "category": "GF/CIP",
+        "fy2027": 185000,
+        "fy2028": 185000,
+        "total": 370000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 7
+      },
+      {
+        "name": "General Fund / CIP — Facilities",
+        "category": "GF/CIP",
+        "fy2027": 900000,
+        "fy2028": 900000,
+        "total": 1800000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 8
+      },
+      {
+        "name": "General Fund / CIP — Parks",
+        "category": "GF/CIP",
+        "fy2027": 400000,
+        "fy2028": 400000,
+        "total": 800000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 9
+      },
+      {
+        "name": "General Fund / CIP — ADA",
+        "category": "GF/CIP",
+        "fy2027": 100000,
+        "fy2028": 100000,
+        "total": 200000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 10
+      },
+      {
+        "name": "Parks Tax",
+        "category": "Special (PRW)",
+        "fy2027": 6125000,
+        "fy2028": 2750000,
+        "total": 8875000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 11
+      },
+      {
+        "name": "Camps Fund",
+        "category": "Special (PRW)",
+        "fy2027": 585000,
+        "fy2028": 415000,
+        "total": 1000000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 12
+      },
+      {
+        "name": "Marina Fund",
+        "category": "Special (PRW)",
+        "fy2027": 350000,
+        "fy2028": 350000,
+        "total": 700000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 13
+      },
+      {
+        "name": "IT Cost Allocation Fund",
+        "category": "Special (IT)",
+        "fy2027": 485000,
+        "fy2028": 685000,
+        "total": 1170000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 14
+      },
+      {
+        "name": "Measure BB Sales Tax",
+        "category": "Special (PW)",
+        "fy2027": 3380000,
+        "fy2028": 3538000,
+        "total": 6918000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 15
+      },
+      {
+        "name": "Vehicle Registration Fee",
+        "category": "Special (PW)",
+        "fy2027": 255000,
+        "fy2028": 255000,
+        "total": 510000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 16
+      },
+      {
+        "name": "State Transportation (Gas) Tax",
+        "category": "Special (PW)",
+        "fy2027": 3430000,
+        "fy2028": 3830000,
+        "total": 7260000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 17
+      },
+      {
+        "name": "Streetlight Assessment",
+        "category": "Special (PW)",
+        "fy2027": 200000,
+        "fy2028": 680000,
+        "total": 880000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 18
+      },
+      {
+        "name": "Zero Waste",
+        "category": "Special (PW)",
+        "fy2027": 3750000,
+        "fy2028": 2900000,
+        "total": 6650000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 19
+      },
+      {
+        "name": "Sanitary Sewer",
+        "category": "Special (PW)",
+        "fy2027": 25150000,
+        "fy2028": 22920000,
+        "total": 48070000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 20
+      },
+      {
+        "name": "Clean Storm Water",
+        "category": "Special (PW)",
+        "fy2027": 4460000,
+        "fy2028": 6390000,
+        "total": 10850000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 21
+      },
+      {
+        "name": "Measure FF (Safe Streets)",
+        "category": "Bond/Parcel (PW)",
+        "fy2027": 24128066,
+        "fy2028": 14476515,
+        "total": 38604581,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 22
+      },
+      {
+        "name": "Equipment Replacement",
+        "category": "Internal Service (PW)",
+        "fy2027": 9560000,
+        "fy2028": 4890000,
+        "total": 14450000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 23
+      },
+      {
+        "name": "Capital Grant — Federal",
+        "category": "Grant",
+        "fy2027": 500000,
+        "fy2028": 0,
+        "total": 500000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 24
+      },
+      {
+        "name": "Capital Grant — State",
+        "category": "Grant",
+        "fy2027": 1447000,
+        "fy2028": 4681000,
+        "total": 6128000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 25
+      },
+      {
+        "name": "Capital Grant — Local",
+        "category": "Grant",
+        "fy2027": 758000,
+        "fy2028": 1026000,
+        "total": 1784000,
+        "source": "S3",
+        "table": "Capital Program FY27-28",
+        "row": 26
+      }
+    ],
+    "total": {
+      "name": "TOTAL CIP Funding",
+      "category": "",
+      "fy2027": 96560066,
+      "fy2028": 82037515,
+      "total": 178597581,
+      "source": "S3",
+      "table": "Capital Program FY27-28",
+      "row": 27
+    }
+  },
+  "personnelAndPension": {
+    "title": "Personnel Cost Composition & Unfunded Liabilities",
+    "note": "Note: Unfunded-liability figures are not directly comparable across years — they shift with discount-rate assumptions, asset returns, and whether OPEB is included. Treat as directional. Pension trust (est. 2018) target contribution was $5.5M/yr; city contributed <$1.5M in FY2020 & FY2021.",
+    "composition": [
+      {
+        "label": "Personnel — Salaries",
+        "amount": 105000000,
+        "note": "~50% of GF; cited by staff",
+        "source": "S11",
+        "table": "Personnel & Pension",
+        "row": 6
+      },
+      {
+        "label": "Personnel — Pension, health & other benefits",
+        "amount": 106000000,
+        "note": "Balance of the $211M personnel total",
+        "source": "S11",
+        "table": "Personnel & Pension",
+        "row": 7
+      },
+      {
+        "label": "Non-personnel (contracts, supplies, services)",
+        "amount": 100935259,
+        "note": "Remainder of GF",
+        "source": "S11",
+        "table": "Personnel & Pension",
+        "row": 8
+      }
+    ],
+    "compositionTotal": {
+      "label": "Total General Fund",
+      "amount": 311935259,
+      "note": "Ties to adopted GF rev/transfers $311.9M",
+      "source": "S2",
+      "related": [
+        "S11"
+      ],
+      "table": "Personnel & Pension",
+      "row": 9
+    },
+    "personnelSubtotal": {
+      "label": "of which Personnel (subtotal)",
+      "amount": 211000000,
+      "note": "City cites ~70% of GF tied to staffing ($211M)",
+      "source": "S11",
+      "table": "Personnel & Pension",
+      "row": 10
+    },
+    "unfundedLiabilities": [
+      {
+        "asOf": "FY2012",
+        "amount": 567400000,
+        "note": "City Auditor baseline",
+        "source": "S8",
+        "table": "Personnel & Pension",
+        "row": 14
+      },
+      {
+        "asOf": "FY2021",
+        "amount": 773100000,
+        "note": "Pension funded ratio ~66% (FY2020) — CA Auditor 'high risk'",
+        "source": "S17",
+        "related": [
+          "S8"
+        ],
+        "table": "Personnel & Pension",
+        "row": 15
+      },
+      {
+        "asOf": "Recent (cited 2026)",
+        "amount": 600000000,
+        "note": "Staff cited ~$600M unfunded liabilities; figures vary by measure & date",
+        "source": "S12",
+        "table": "Personnel & Pension",
+        "row": 16
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "General Fund (GF)",
+      "definition": "The city's main operating fund. Money here is unrestricted — the Council can spend it on almost any city purpose (police, fire, parks, admin). This is where the ~$30M structural deficit lives.",
+      "table": "Glossary",
+      "row": 5
+    },
+    {
+      "term": "Structural deficit",
+      "definition": "An ongoing, recurring gap where normal expenses exceed normal revenues year after year — as opposed to a one-time shortfall. It doesn't go away on its own and can't be permanently fixed with one-time money.",
+      "table": "Glossary",
+      "row": 6
+    },
+    {
+      "term": "One-time (one-time resources)",
+      "definition": "Money available only once — e.g., reserves, a fund transfer, sale proceeds. Useful to bridge a single year but dangerous to rely on for recurring costs, because the gap reappears next year.",
+      "table": "Glossary",
+      "row": 7
+    },
+    {
+      "term": "Baseline",
+      "definition": "The starting-point budget built from actual spending and service needs BEFORE any proposed cuts. The FY27-28 plan rebuilt baselines from actual expenditures rather than prior budgets.",
+      "table": "Glossary",
+      "row": 8
+    },
+    {
+      "term": "Adopted Budget",
+      "definition": "The final budget formally approved by the City Council. The FY25-26 biennial budget is current; the FY27-28 biennial budget was adopted June 23, 2026.",
+      "table": "Glossary",
+      "row": 9
+    },
+    {
+      "term": "Proposed Budget",
+      "definition": "The City Manager's recommended budget before Council adoption — subject to change through hearings.",
+      "table": "Glossary",
+      "row": 10
+    },
+    {
+      "term": "Biennial budget",
+      "definition": "A two-year budget. Berkeley budgets in two-year cycles with a mid-cycle update.",
+      "table": "Glossary",
+      "row": 11
+    },
+    {
+      "term": "Mid-year / Mid-biennial",
+      "definition": "A check-in partway through. 'Mid-year' here = first half of the fiscal year (Jul–Dec). 'Mid-biennial' = the update between the two years of a biennial budget.",
+      "table": "Glossary",
+      "row": 12
+    },
+    {
+      "term": "Fiscal Year (FY)",
+      "definition": "Berkeley's budget year runs July 1 – June 30. 'FY2026' = July 1, 2025 to June 30, 2026. 'FY2027' begins July 1, 2026.",
+      "table": "Glossary",
+      "row": 13
+    },
+    {
+      "term": "Enterprise Fund",
+      "definition": "A fund for a service expected to pay for itself through its own fees/charges (e.g., Marina berths, parking). When it can't, it leans on the General Fund.",
+      "table": "Glossary",
+      "row": 14
+    },
+    {
+      "term": "Special Fund / Special Revenue Fund",
+      "definition": "Money legally restricted to a specific purpose, often from a dedicated tax or grant (e.g., Measure P for homelessness, Parks Tax). Can't be freely redirected.",
+      "table": "Glossary",
+      "row": 15
+    },
+    {
+      "term": "Internal Service Fund",
+      "definition": "A fund where one city department 'charges' others for shared services (e.g., IT, building maintenance, workers' comp). Revenue comes from internal transfers.",
+      "table": "Glossary",
+      "row": 16
+    },
+    {
+      "term": "Capital Improvement Program (CIP)",
+      "definition": "The multi-year plan for big physical projects — streets, sidewalks, buildings, docks. Separate from day-to-day operating costs. Berkeley's is a 5-year plan, updated each biennium.",
+      "table": "Glossary",
+      "row": 17
+    },
+    {
+      "term": "Capital Budget (CIP Years 1-2)",
+      "definition": "The actionable, appropriated portion of the CIP — actual funding for that year's projects. Years 3-5 are planning estimates only.",
+      "table": "Glossary",
+      "row": 18
+    },
+    {
+      "term": "Unfunded liability",
+      "definition": "A future obligation the city owes (mainly pensions and retiree health / OPEB) for which it has NOT yet set aside enough money. Grows or shrinks with investment returns and assumptions.",
+      "table": "Glossary",
+      "row": 19
+    },
+    {
+      "term": "OPEB",
+      "definition": "Other Post-Employment Benefits — chiefly retiree health care, separate from pensions. Often lumped with pensions in 'unfunded liabilities.'",
+      "table": "Glossary",
+      "row": 20
+    },
+    {
+      "term": "Pension funded ratio",
+      "definition": "Assets ÷ liabilities for the pension plan. 100% = fully funded. Berkeley was ~66% (FY2020), which the state classified as 'high risk.'",
+      "table": "Glossary",
+      "row": 21
+    },
+    {
+      "term": "Reduction in Force (RIF)",
+      "definition": "Eliminating positions — both layoffs of filled jobs and removal of vacant (unfilled) positions.",
+      "table": "Glossary",
+      "row": 22
+    },
+    {
+      "term": "FTE (Full-Time Equivalent)",
+      "definition": "A way to count staffing where 1.0 = one full-time position. Two half-time staff = 1.0 FTE. Lets the city compare headcount consistently.",
+      "table": "Glossary",
+      "row": 23
+    },
+    {
+      "term": "Vacant vs Filled positions",
+      "definition": "Vacant = budgeted but no one in the seat (cheaper to cut — no layoff). Filled = an actual employee, so cutting means a layoff.",
+      "table": "Glossary",
+      "row": 24
+    },
+    {
+      "term": "Charter Officers / Offices",
+      "definition": "Positions/offices established by the City Charter and somewhat independent of the City Manager: City Attorney, City Auditor, the Director of Police Accountability (ODPA), and the Mayor & Council. They set their own reductions first.",
+      "table": "Glossary",
+      "row": 25
+    },
+    {
+      "term": "CM-Managed Departments",
+      "definition": "Departments under the City Manager's authority (Police, Fire, Public Works, etc.) — distinct from Charter offices.",
+      "table": "Glossary",
+      "row": 26
+    },
+    {
+      "term": "Sales & Use Tax (S&U Tax) measure",
+      "definition": "Proposed 0.5% local sales-tax increase for the Nov 2026 ballot. Would raise ~$9.0–9.4M/yr, bring Berkeley to 10.75%, and (if passed) reduce the depth of cuts. Needs simple majority.",
+      "table": "Glossary",
+      "row": 27
+    },
+    {
+      "term": "GO Bond (General Obligation Bond)",
+      "definition": "Borrowing repaid through a dedicated property tax. Needs 2/3 voter approval. The proposed $300M infrastructure bond is a GO bond.",
+      "table": "Glossary",
+      "row": 28
+    },
+    {
+      "term": "Measure FF (2024)",
+      "definition": "Voter-approved ~$270M, 14-year funding stream (~$15M/yr) for streets, sidewalks, safety, and environmental work ('Safe Streets').",
+      "table": "Glossary",
+      "row": 29
+    },
+    {
+      "term": "Measure T1 (2016)",
+      "definition": "Voter-approved $100M infrastructure bond, now fully allocated across two phases.",
+      "table": "Glossary",
+      "row": 30
+    },
+    {
+      "term": "Measure P",
+      "definition": "Property-transfer-tax measure funding homelessness services; currently spending more than it brings in.",
+      "table": "Glossary",
+      "row": 31
+    },
+    {
+      "term": "Measure U1",
+      "definition": "Tax measure supporting affordable housing; finance staff note it ultimately 'rolls up to' the General Fund.",
+      "table": "Glossary",
+      "row": 32
+    },
+    {
+      "term": "Successor Agency",
+      "definition": "The entity winding down the dissolved Redevelopment Agency. Its liquidation produces a one-time $7.88M transfer to the city used in the FY27-28 bridge.",
+      "table": "Glossary",
+      "row": 33
+    },
+    {
+      "term": "Transfers",
+      "definition": "Money moved between funds. In the GF revenue tab, the large FY26 transfers increase reflects the Successor Agency dissolution and reserve movements.",
+      "table": "Glossary",
+      "row": 34
+    },
+    {
+      "term": "Budgetary / cash basis",
+      "definition": "Accounting that records money when cash actually changes hands (vs accrual, which records when earned/owed). The mid-year revenue report is on this basis.",
+      "table": "Glossary",
+      "row": 35
+    },
+    {
+      "term": "Reserves (Operating / Stability / Catastrophic)",
+      "definition": "Savings set aside for emergencies or smoothing. Drawing them down is a one-time fix. Berkeley's GF available cash fell from $85.4M to $30.6M between 2023 and 2025.",
+      "table": "Glossary",
+      "row": 36
+    },
+    {
+      "term": "PCI (Pavement Condition Index)",
+      "definition": "0–100 score of street quality. Berkeley targets a citywide PCI of 70, ideally no street below 50.",
+      "table": "Glossary",
+      "row": 37
+    },
+    {
+      "term": "% Received (revenue tab)",
+      "definition": "Mid-year actual ÷ full-year adopted budget. Around 50% mid-year is roughly on pace; well above/below flags timing or trend issues.",
+      "table": "Glossary",
+      "row": 38
+    },
+    {
+      "term": "% of Baseline (dept tabs)",
+      "definition": "The proposed dollar reduction ÷ that department's baseline budget — i.e., how deep the cut is in percentage terms.",
+      "table": "Glossary",
+      "row": 39
+    },
+    {
+      "term": "S&U Tax Allocation (dept tabs)",
+      "definition": "One-time money assigned to a department to soften its cut in FY27 while awaiting the Nov 2026 sales-tax vote. Mainly Police, Fire, and PRW.",
+      "table": "Glossary",
+      "row": 40
+    }
+  ]
+}
