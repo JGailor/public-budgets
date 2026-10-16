@@ -31,9 +31,16 @@ npm run preview      # build, then serve dist/ through wrangler, exactly as Clou
 | `npm run data` | Rebuilds each city's `budget.json` from its workbook and validates it |
 | `npm run build` | Checks `budget.json` is current and valid, then builds the site into `dist/` |
 | `npm run test:dist` | Tests against the built site (`tests/dist/`); run after `build` |
+| `npm run test:e2e` | Browser tests against the built site via `wrangler dev`: no horizontal scroll at 390px/768px, no nav overlap at 1024px+, fonts, menus. Run after `build` |
 | `scripts/smoke.sh <url>` | HTTP checks against a running or deployed site: 200s for real pages, 404s for unknown cities |
 
 CI (`.github/workflows/ci.yml`) runs lint, unit tests, build and dist tests on every PR and on `main`. Every step runs under `bash` with `pipefail`, so a failure can't be hidden behind a pipe.
+
+## Design tokens and the shell
+
+`src/styles/tokens.css` holds the epic's colors, fonts and layout values as CSS custom properties. Red means only "money short" (deficits and cuts) and gold only one-time money; don't use either for decoration. Headlines are set in Gelasio (metric-compatible with Georgia) and UI and numbers in Nunito Sans (an open stand-in for Avenir Next), both self-hosted from `@fontsource`. Tables and `.num` use tabular numerals.
+
+Every page renders inside `src/layouts/Base.astro`: the dark top strip (path, independence line, "Report an error"), the header (full nav at 1024px and up, compact `WTMW` header with a menu below), and the footer. Nav links come from `CITY_PAGES` in `src/lib/city-pages.ts`; the "19 sources" pill counts the city's sources from its data. At 1024px the nav has about 50px to spare, so adding pages to the nav needs a layout change; the browser tests will fail if items overlap.
 
 ## Where city data lives
 

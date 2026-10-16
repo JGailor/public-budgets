@@ -20,14 +20,8 @@ export interface City extends CityMeta {
   path: string;
 }
 
-/** Sub-pages every city gets, besides its overview at the city root. */
-export const CITY_PAGES = [
-  { slug: 'gap', title: 'The gap' },
-  { slug: 'departments', title: 'Departments' },
-  { slug: 'sources', title: 'Sources & methods' },
-] as const;
+export { CITY_PAGES, type CityPageSlug } from './city-pages';
 
-export type CityPageSlug = (typeof CITY_PAGES)[number]['slug'];
 
 const SEGMENT = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const REQUIRED: (keyof CityMeta)[] = ['name', 'state', 'stateCode', 'country', 'countryCode', 'government'];
