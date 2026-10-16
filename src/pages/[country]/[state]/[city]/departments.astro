@@ -8,6 +8,8 @@ const { city } = Astro.props as { city: City };
 ---
 
 <Base title={`Departments · ${city.name}`} city={city}>
-  <h1>Departments</h1>
-  <p>Placeholder. Ships in #9.</p>
+  <div class="wrap">
+    <h1>Departments</h1>
+    <p>Placeholder. Ships in #9.</p>
+  </div>
 </Base>

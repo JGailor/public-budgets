@@ -1,0 +1,51 @@
+/*
+ * Design tokens from epic 1. Color meanings are strict:
+ *   red  = only "money short": deficits and cuts.
+ *   gold = only one-time money: reserves, the sales-tax bridge.
+ * Don't use either for decoration or emphasis.
+ */
+:root {
+  /* Surfaces and text */
+  --paper: #f7f3ea;
+  --card: #ffffff;
+  --ink: #16191d;
+  --muted: #5d6168;
+  --faint: #8c9096;
+  --rule: #e4ddcf;
+
+  /* Brand, links, source chips */
+  --bay: #0e6b6f;
+  --bay-light: #dcedeb;
+
+  /* Money short: deficits and cuts (drawn as red diagonal hatching; deficit bars solid) */
+  --red: #c8432b;
+  --red-light: #f6ded6;
+
+  /* One-time money */
+  --gold: #d99a1e;
+  --gold-light: #f8eacb;
+
+  /* Department families, darkest first */
+  --family-safety-1: #23395b;
+  --family-safety-2: #3f5e96;
+  --family-people-1: #0e6b6f;
+  --family-people-2: #3e9a8f;
+  --family-people-3: #7cbfb3;
+  --family-people-4: #a9d6cc;
+  --family-running-start: #6f5536; /* ramps to the end color */
+  --family-running-end: #ede3cf;
+  --family-oversight-1: #7a4e7e;
+  --family-oversight-2: #a57ba8;
+  --family-oversight-3: #c9a9cb;
+
+  /* Type: an editorial serif for headlines, a humanist sans for UI and numbers */
+  --font-serif: 'Gelasio', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Nunito Sans Variable', 'Avenir Next', Avenir, 'Segoe UI', system-ui, sans-serif;
+
+  /* Layout */
+  --content-max: 75rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
+  --radius-card: 0.75rem;
+  --radius-pill: 999px;
+  --shell-break: 64rem; /* desktop nav at 1024px and up; mirrored in the media queries */
+}

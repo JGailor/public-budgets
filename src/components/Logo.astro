@@ -1,0 +1,23 @@
+---
+/** 3×3 squares, one red: a tiny waffle. Decorative; the wordmark beside it carries the name. */
+interface Props {
+  size?: number;
+}
+const { size = 22 } = Astro.props;
+const cells = [
+  'var(--family-people-1)', 'var(--family-people-1)', 'var(--family-people-1)',
+  'var(--family-people-2)', 'var(--family-people-2)', 'var(--family-people-3)',
+  'var(--family-people-3)', 'var(--family-people-4)', 'var(--red)',
+];
+---
+
+<svg class="logo" width={size} height={size} viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+  {cells.map((fill, i) => <rect x={(i % 3) * 7.5} y={Math.floor(i / 3) * 7.5} width="6.5" height="6.5" rx="1.2" fill={fill} />)}
+</svg>
+
+<style>
+  .logo {
+    flex: none;
+    display: block;
+  }
+</style>

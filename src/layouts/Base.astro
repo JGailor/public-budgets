@@ -1,5 +1,14 @@
 ---
+import '@fontsource/gelasio/400.css';
+import '@fontsource/gelasio/700.css';
+import '@fontsource-variable/nunito-sans';
+import '../styles/base.css';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import TopStrip from '../components/TopStrip.astro';
+import { budgetFor } from '../lib/budget';
 import type { City } from '../lib/cities';
+import { SITE } from '../lib/site';
 
 interface Props {
   title: string;
@@ -7,7 +16,23 @@ interface Props {
 }
 
 const { title, city } = Astro.props;
-const fullTitle = title === 'Where the Money Went' ? title : `${title} · Where the Money Went`;
+const fullTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// The sub-page under the city, for the breadcrumb: /us/ca/berkeley/gap/ → "gap".
+const page = city && Astro.url.pathname.startsWith(city.path) ? Astro.url.pathname.slice(city.path.length).replace(/\/$/, '') : '';
+
+// "Figures from city documents through May 2026": the newest dated City document in the sources.
+const newest = city
+  ? budgetFor(city)
+      ?.sources.filter((s) => s.type === 'city' && s.date)
+      .map((s) => s.date!)
+      .sort()
+      .at(-1)
+  : undefined;
+const figuresThrough = newest
+  ? new Date(`${newest.slice(0, 7)}-01T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  : undefined;
 ---
 
 <!doctype html>
@@ -16,15 +41,32 @@ const fullTitle = title === 'Where the Money Went' ? title : `${title} · Where 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
+    <link rel="canonical" href={canonical} />
   </head>
   <body>
-    <header>
-      <a href="/">Where the Money Went</a>
-      {city && <span> / {city.name}, {city.stateCode}</span>}
-      {city && <p data-independence>Independent. Not affiliated with the {city.government}.</p>}
-    </header>
-    <main>
+    <a class="skip visually-hidden" href="#main">Skip to content</a>
+    <TopStrip city={city} figuresThrough={figuresThrough} page={page || undefined} />
+    <SiteHeader city={city} />
+    <main id="main">
       <slot />
     </main>
+    <SiteFooter city={city} />
   </body>
 </html>
+
+<style>
+  .skip:focus {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+    width: auto;
+    height: auto;
+    padding: 0.5rem 1rem;
+    clip-path: none;
+    background: var(--card);
+  }
+  main {
+    display: block;
+  }
+</style>

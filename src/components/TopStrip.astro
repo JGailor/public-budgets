@@ -1,0 +1,83 @@
+---
+import type { City } from '../lib/cities';
+import { SITE, reportErrorUrl } from '../lib/site';
+
+interface Props {
+  city?: City;
+  /** "May 2026": the newest City document the figures come from. */
+  figuresThrough?: string;
+  page?: string;
+}
+
+const { city, figuresThrough, page } = Astro.props;
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
+const crumbs = city ? [city.slug.country, city.slug.state, city.slug.city] : [];
+---
+
+<div class="strip">
+  <div class="wrap strip-row">
+    <p class="strip-text">
+      <span class="crumbs">
+        <a href="/">{SITE.domain}</a>
+        {crumbs.map((c, i) => (
+          <>
+            <span aria-hidden="true"> / </span>
+            {city && i === crumbs.length - 1 ? <a href={city.path}>{c}</a> : <span>{c}</span>}
+          </>
+        ))}
+        {page && (
+          <>
+            <span aria-hidden="true"> / </span>
+            <span>{page}</span>
+          </>
+        )}
+        {city && <span class="sep" aria-hidden="true"> · </span>}
+      </span>
+      {city && <span data-independence>Independent. Not affiliated with the {city.government}.</span>}
+      {figuresThrough && <span class="through"> Figures from city documents through {figuresThrough}.</span>}
+    </p>
+    <a class="report" href={reportErrorUrl(pageUrl)} rel="noopener">Report an error</a>
+  </div>
+</div>
+
+<style>
+  .strip {
+    background: var(--ink);
+    color: rgb(255 255 255 / 0.82);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+  .strip-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+    padding-block: 0.5rem;
+  }
+  .strip-text {
+    margin: 0;
+    min-width: 0;
+  }
+  .strip a {
+    color: #fff;
+    text-decoration: none;
+  }
+  .strip a:hover {
+    text-decoration: underline;
+  }
+  .report {
+    flex: none;
+  }
+  /* Narrower screens drop the date note, then (phones) the path; the independence line always stays. */
+  @media (max-width: 74.99rem) {
+    .through {
+      display: none;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .crumbs {
+      display: none;
+    }
+  }
+</style>

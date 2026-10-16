@@ -1,0 +1,57 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import { budgetFor } from '../../../../lib/budget';
+import { cityStaticPaths, type City } from '../../../../lib/cities';
+
+export const getStaticPaths = cityStaticPaths;
+
+const { city } = Astro.props as { city: City };
+const glossary = budgetFor(city)?.glossary ?? [];
+const anchor = (term: string) => term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+---
+
+<Base title={`Glossary · ${city.name}`} city={city}>
+  <div class="wrap">
+    <h1>Glossary</h1>
+    <p class="lede">Plain-language definitions for the budget terms used on these pages.</p>
+    <dl>
+      {
+        glossary.map((g) => (
+          <div id={anchor(g.term)}>
+            <dt>{g.term}</dt>
+            <dd>{g.definition}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</Base>
+
+<style>
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 2.5rem 0 0.5rem;
+  }
+  .lede {
+    color: var(--muted);
+    margin: 0 0 2rem;
+  }
+  dl {
+    margin: 0;
+    max-width: 48rem;
+  }
+  dl > div {
+    padding-block: 1rem;
+    border-top: 1px solid var(--rule);
+  }
+  dt {
+    font-weight: 700;
+  }
+  dd {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+  }
+  :target {
+    background: var(--bay-light);
+  }
+</style>
