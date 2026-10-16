@@ -65,6 +65,12 @@ Every figure on a page gets a chip that opens its receipt:
 
 `/{city}/` shows where every $100 goes. Its figures come from `overview()` in `src/lib/overview.ts`; the interactive waffle is `src/components/Waffle.astro` (one Tab stop, arrow keys between squares, Enter or a tap pins a department; a bottom sheet on phones; "Show as a table" is the text alternative). Revenue groups for the mix bar are in `data/cities/{city}/revenue-groups.json`, checked to cover every revenue line exactly once. Figures the workbook states in sentences (the 8%/6.5% growth rates, the 0.5% sales tax, the $300M bond) are extracted into `budget.json` as `citedFacts`, each with its source.
 
+## The ballot page
+
+`/{city}/ballot/` shows what the city's own plan says happens if the sales tax passes and if it fails. It is strictly neutral: both outcomes are built by one function (`ballotPage()` in `src/lib/ballot.ts`) and rendered by the same markup, in the same colors. Tests fail if the two cards differ in structure or weight, or if the page uses advocacy words. Facts the workbook doesn't hold (the fire-station status, from news reporting and labeled "as reported") are in `data/cities/{city}/ballot.json`.
+
+**After the election**, set `measures.salesTax.status` in `ballot.json` to `"passed"` or `"failed"`. The heading switches to the result and that outcome's card gets a "Result" badge; both scenarios stay on the page.
+
 ## Where city data lives
 
 ```
@@ -73,7 +79,7 @@ data/cities/{country}/{state}/{city}/city.json
 
 Each folder is one city, and its path is its URL: `data/cities/us/ca/berkeley/` is served at `/us/ca/berkeley/`. `src/lib/cities.ts` loads the registry at build time and fails the build if a `city.json` is missing a field or its `countryCode`/`stateCode` disagree with the folder.
 
-Every city gets an overview at its root plus the sub-pages in `CITY_PAGES` (`/gap/`, `/departments/`, `/sources/`). A path that isn't in the registry is a 404.
+Every city gets an overview at its root plus the sub-pages in `CITY_PAGES` (`/revenue/`, `/gap/`, `/departments/`, `/ballot/`, `/sources/`). A path that isn't in the registry is a 404.
 
 **To add a city**, create its folder and `city.json` (copy Berkeley's). The budget data for each city lives in the same folder.
 

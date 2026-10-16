@@ -494,9 +494,13 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
     wb.tab('GF Expenditure History').expectText('A2', 'Sources: Berkeley budget overview presentations');
     const g = fact('GF Expenditure History', 'A16', /^Over (\d+) years: spending grew ~([\d.]+)%\/yr vs revenue ~([\d.]+)%\/yr/);
     // S5 (City of Berkeley): "a City-specific 0.5% sales tax on the November 2026 ballot". S15 reports the same.
-    const t = fact('README', 'B31', /^Proposed ([\d.]+)% sales tax \((Nov \d{4}) ballot\)/);
+    const t = fact('README', 'B31', /^Proposed ([\d.]+)% sales tax \((Nov \d{4}) ballot\) would raise ~\$([\d.]+)–([\d.]+)M\/yr; would bring Berkeley rate to ([\d.]+)%/);
+    // The threshold is stated on the Glossary tab; S15 and S16 both report "simple majority".
+    const majority = fact('Glossary', 'B27', /Needs (simple majority)\./);
     // The capital tab's source line is S3 (Proposed FY27-FY31 CIP presentation).
-    const bd = fact('Capital Program FY27-28', 'A32', /^Proposed \$(\d+)M infrastructure GO bond → (Nov \d{4}) ballot/);
+    const bd = fact('Capital Program FY27-28', 'A32', /^Proposed \$(\d+)M infrastructure GO bond → (Nov \d{4}) ballot \(needs ([\d/]+) vote\)\. Funded by ([a-z ]+)\./);
+    // The Sources tab lists S6 for "$1.65–2B unfunded infrastructure".
+    const bl = fact('Capital Program FY27-28', 'A33', /estimated at \$([\d.]+)–([\d.]+) billion/);
     return {
       growth: {
         text: g.text,
@@ -507,8 +511,31 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
         table: 'GF Expenditure History',
         row: g.row,
       },
-      salesTax: { text: t.text, rate: Number(t.m[1]) / 100, election: t.m[2], source: 'S5', related: ['S15'], table: 'README', row: t.row },
-      bond: { text: bd.text, amount: Number(bd.m[1]) * 1e6, election: bd.m[2], source: 'S3', table: 'Capital Program FY27-28', row: bd.row },
+      salesTax: {
+        text: t.text,
+        rate: Number(t.m[1]) / 100,
+        election: t.m[2],
+        revenueLow: Number(t.m[3]) * 1e6,
+        revenueHigh: Number(t.m[4]) * 1e6,
+        newRate: Number(t.m[5]) / 100,
+        threshold: majority.m[1],
+        source: 'S5',
+        related: ['S15', 'S16'],
+        table: 'README',
+        row: t.row,
+      },
+      bond: {
+        text: bd.text,
+        amount: Number(bd.m[1]) * 1e6,
+        election: bd.m[2],
+        threshold: bd.m[3],
+        repaidBy: bd.m[4],
+        source: 'S3',
+        related: ['S10'],
+        table: 'Capital Program FY27-28',
+        row: bd.row,
+      },
+      backlog: { text: bl.text, low: Number(bl.m[1]) * 1e9, high: Number(bl.m[2]) * 1e9, source: 'S6', table: 'Capital Program FY27-28', row: bl.row },
     } satisfies CityBudget['citedFacts'];
   })();
 
