@@ -1,15 +1,450 @@
 ---
+/**
+ * Sources & methods (D8): every document the site cites, where each is used,
+ * the known gaps in the data, and the downloads. "Used on" is filled in after
+ * the build from where each source's chips actually appear
+ * (src/integrations/source-usage.ts); the list's own S-badges are labels, not
+ * chips, so the page doesn't count itself.
+ */
+import { basename } from 'node:path';
+import SourceChip from '../../../../components/SourceChip.astro';
 import Base from '../../../../layouts/Base.astro';
+import { csvTables } from '../../../../data/csv';
+import { budgetFor } from '../../../../lib/budget';
 import { cityStaticPaths, type City } from '../../../../lib/cities';
+import { shortMoney } from '../../../../lib/format';
+import { sourcesById } from '../../../../lib/receipts';
 
 export const getStaticPaths = cityStaticPaths;
 
 const { city } = Astro.props as { city: City };
+const budget = budgetFor(city)!;
+const sources = [...sourcesById(budget).values()];
+const counts = { all: sources.length, city: sources.filter((s) => s.type === 'city').length, news: sources.filter((s) => s.type === 'news').length };
+const raw = new Map(budget.sources.map((s) => [s.id, s]));
+const data = `${city.path}data/`;
+const workbook = basename(budget.workbook.file);
+const tables = csvTables(budget).map((t) => t.name);
+
+// Figures the known-gaps cards quote, where the data has them.
+const liabilities = budget.personnelAndPension.unfundedLiabilities;
+const liability = (asOf: string) => liabilities.find((l) => l.asOf.startsWith(asOf))!;
+const itAllocation = budget.departmentReductions[0].departments.find((d) => d.id === 'it-cost-allocation-plan')!;
+const fy = (asOf: string) => `FY${asOf.slice(-2)}`;
+const humanize = (name: string) =>
+  name
+    .replace(/^one-time/, 'one‑time')
+    .replace(/-/g, ' ')
+    .replace(/\bfy(\d{4})\b/, 'FY$1')
+    .replace(/^fte\b/, 'FTE')
+    .replace(/^./, (c) => c.toUpperCase());
 ---
 
-<Base title={`Sources & methods · ${city.name}`} city={city}>
-  <div class="wrap">
-    <h1>Sources &amp; methods</h1>
-    <p>Placeholder. Ships in #10.</p>
+<Base title={`Sources & methods · ${city.name}`} city={city} description={`The ${sources.length} public documents behind every number on ${city.name}'s pages, the known gaps in the data, and the downloads.`}>
+  <div class="sources-page wrap">
+    <section class="intro">
+      <p class="eyebrow">Sources &amp; methods</p>
+      <h1>Every number has a receipt</h1>
+      <p class="lede">
+        Each figure on this site traces to one of these {counts.all} documents. City documents are primary; news reports are used for context and are
+        labeled as such.
+      </p>
+    </section>
+
+    <div class="layout">
+      <section class="list" aria-labelledby="list-title">
+        <h2 id="list-title" class="visually-hidden">All sources</h2>
+        <fieldset class="filters">
+          <legend class="visually-hidden">Show</legend>
+          <input type="radio" name="filter" id="filter-all" class="visually-hidden" checked />
+          <label for="filter-all">All {counts.all}</label>
+          <input type="radio" name="filter" id="filter-city" class="visually-hidden" />
+          <label for="filter-city">City documents ({counts.city})</label>
+          <input type="radio" name="filter" id="filter-news" class="visually-hidden" />
+          <label for="filter-news">News reports ({counts.news})</label>
+        </fieldset>
+
+        <p class="list-head" aria-hidden="true"><span>#</span><span>Document</span><span>Used on</span></p>
+        <ol class="rows">
+          {
+            sources.map((s) => (
+              <li class="src-row" id={s.id} data-type={s.type}>
+                <span class={`badge badge--${s.type}`}>{s.id}</span>
+                <span class="doc">
+                  <span class="title">{s.title}</span>
+                  <span class="meta">
+                    {[s.publisher, s.date, raw.get(s.id)!.usedFor].filter(Boolean).join(' · ')}
+                  </span>
+                </span>
+                <span class="used">
+                  <span class="visually-hidden">Used on: </span>
+                  <span data-used-on={s.id}></span>
+                </span>
+                <a class="out" href={s.url} target="_blank" rel="noopener" aria-label={`Open ${s.id}, ${s.title} (${s.format}, ${s.host}, opens in a new tab)`}>
+                  ↗
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+
+        <section id="downloads" class="downloads" aria-labelledby="downloads-title">
+          <h2 id="downloads-title">Download the data</h2>
+          <p>Everything on these pages, as published. Each row keeps its receipt: source, table and row.</p>
+          <ul>
+            <li><a href={`${data}budget.json`} download>Everything, combined (JSON)</a></li>
+            <li><a href={`${data}${workbook}`} download>The original workbook (.xlsx)</a></li>
+            {tables.map((t) => (
+              <li>
+                <a href={`${data}${t}.csv`} download>
+                  {humanize(t)} (CSV)
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </section>
+
+      <aside class="side">
+        <p class="buttons">
+          <a class="btn btn--ink" href="#downloads">Download data</a>
+          <a class="btn btn--ghost" href={`${data}${workbook}`} download>Original workbook</a>
+        </p>
+
+        <h2 class="side-title">Known gaps in the data</h2>
+        <ul class="gaps">
+          <li class="gap card">
+            <h3>Two different FY2020 spending figures</h3>
+            <p>The FY20-21 adopted budget says $191.2M; city staff cite ~$236M from a later actuals baseline. We show both and say which is which.</p>
+            <p class="chips-row"><SourceChip city={city} source="S7" /><SourceChip city={city} source="S11" /></p>
+          </li>
+          <li class="gap card">
+            <h3>No year-by-year spending for FY22-FY25</h3>
+            <p>The gathered sources don't publish these years separately. Charts leave a visible gap rather than drawing a line through it.</p>
+            <p class="chips-row"><SourceChip city={city} source="S12" /></p>
+          </li>
+          <li class="gap card">
+            <h3>Revenue and departments are different years</h3>
+            <p>Revenue is FY2026 adopted; department figures are the FY2027 baseline. No clean FY25-26 department table was published.</p>
+            <p class="chips-row"><SourceChip city={city} source="S1" /><SourceChip city={city} source="S2" /></p>
+          </li>
+          <li class="gap card" data-gap="liabilities">
+            <h3>Unfunded liabilities aren't comparable</h3>
+            <p>
+              {`${shortMoney(liability('FY2012').amount, 0)} (${fy('FY2012')}), ${shortMoney(liability('FY2021').amount, 0)} (${fy('FY2021')}), ~${shortMoney(liability('Recent').amount, 0)} (2026)`}{' '}
+              use different assumptions. Treat the trend as directional.
+            </p>
+            <p class="chips-row"><SourceChip city={city} source="S8" /><SourceChip city={city} source="S12" /><SourceChip city={city} source="S17" /></p>
+          </li>
+          <li class="gap card" data-gap="it-allocation">
+            <h3>Department totals differ by {shortMoney(itAllocation.baseline)}</h3>
+            <p>The comparison table leaves out the {itAllocation.name}. Totals reconcile once it's added back.</p>
+            <p class="chips-row"><SourceChip city={city} source="S1" /></p>
+          </li>
+        </ul>
+
+        <section class="methods" aria-labelledby="methods-title">
+          <h2 id="methods-title">How we build this site</h2>
+          <p>
+            Numbers are copied from the city's workbook, never retyped. Groupings (like 'property tax') are sums of the city's own line items, and each
+            group lists its parts.
+          </p>
+          <p class="basis">{budget.notes.caveat}</p>
+        </section>
+      </aside>
+    </div>
   </div>
 </Base>
+
+<style>
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgb(22 25 29 / 0.06), 0 8px 24px rgb(22 25 29 / 0.06);
+  }
+  .intro {
+    padding-block: clamp(2rem, 5vw, 3.5rem) 2rem;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+  }
+  .lede {
+    max-width: 40rem;
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  .layout {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  /* Filters, CSS only. */
+  .filters {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0 0 1.5rem;
+    padding: 0.25rem;
+    border: 0;
+    border-radius: 1.25rem;
+    background: rgb(22 25 29 / 0.06);
+  }
+  .filters label {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  .filters input:checked + label {
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgb(22 25 29 / 0.12);
+  }
+  .filters input:focus-visible + label {
+    outline: 2px solid var(--bay);
+    outline-offset: 2px;
+  }
+  .sources-page:has(#filter-city:checked) .src-row[data-type='news'],
+  .sources-page:has(#filter-news:checked) .src-row[data-type='city'] {
+    display: none;
+  }
+
+  /* The list */
+  .list-head,
+  .src-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr 11rem 2rem;
+    gap: 1rem;
+    align-items: start;
+  }
+  .list-head {
+    margin: 0;
+    padding: 0 0.5rem 0.5rem;
+    border-bottom: 2px solid var(--rule);
+    color: var(--muted);
+    font-weight: 800;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .list-head span:last-child {
+    grid-column: 3;
+    text-align: right;
+  }
+  .rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .src-row {
+    padding: 0.875rem 0.5rem;
+    border-bottom: 1px solid var(--rule);
+    border-radius: 0.375rem;
+    scroll-margin-top: 1.5rem;
+  }
+  /* #S12 highlights its row. */
+  .src-row:target {
+    background: var(--bay-light);
+    box-shadow: inset 3px 0 0 var(--bay);
+  }
+  .badge {
+    justify-self: start;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-pill);
+    font-weight: 800;
+    font-size: 0.6875rem;
+  }
+  .badge--city {
+    background: var(--bay);
+    color: #fff;
+  }
+  .badge--news {
+    background: var(--bay-light);
+    color: var(--bay);
+  }
+  .doc {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  .title {
+    font-weight: 700;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+  .used {
+    text-align: right;
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+  .used :global(a) {
+    color: var(--bay);
+    text-decoration: none;
+  }
+  .used :global(a:hover) {
+    text-decoration: underline;
+  }
+  .used :global(.unused) {
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .out {
+    justify-self: end;
+    color: var(--muted);
+    font-size: 1.125rem;
+    text-decoration: none;
+  }
+  .out:hover {
+    color: var(--bay);
+  }
+
+  /* Downloads */
+  .downloads {
+    margin-top: 2.5rem;
+    scroll-margin-top: 1.5rem;
+  }
+  .downloads h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .downloads p {
+    margin: 0.5rem 0 1rem;
+    color: var(--muted);
+  }
+  .downloads ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+  }
+  .downloads a {
+    color: var(--bay);
+    font-weight: 700;
+  }
+
+  /* Side column */
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0 0 2rem;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    border-radius: var(--radius-pill);
+    font-weight: 800;
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+  .btn--ink {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn--ghost {
+    border: 1px solid var(--rule);
+    background: var(--card);
+    color: var(--ink);
+  }
+  .side-title {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+  }
+  .gaps {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gap {
+    padding: 1.25rem 1.5rem;
+    border-left: 4px solid var(--gold);
+  }
+  .gap h3 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 1rem;
+  }
+  .gap p {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .chips-row {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .chips-row :global(.chips) {
+    margin: 0;
+  }
+  .methods {
+    margin-top: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 0.875rem;
+    background: #efeadf;
+  }
+  .methods h2 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    font-size: 1.125rem;
+  }
+  .methods p {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  @media (min-width: 64rem) {
+    .layout {
+      grid-template-columns: 1fr 20rem;
+      align-items: start;
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .list-head {
+      display: none;
+    }
+    .src-row {
+      grid-template-columns: 2.75rem 1fr 1.5rem;
+      grid-template-areas: 'badge doc out' '. used used';
+      row-gap: 0.375rem;
+    }
+    .badge {
+      grid-area: badge;
+    }
+    .doc {
+      grid-area: doc;
+    }
+    .out {
+      grid-area: out;
+    }
+    .used {
+      grid-area: used;
+      text-align: left;
+    }
+  }
+</style>

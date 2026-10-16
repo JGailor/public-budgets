@@ -3,6 +3,8 @@
  * so a receipt's "Used on" line (and the Sources page) can't drift from the
  * pages themselves. Writes dist/{city}/data/source-usage.json:
  *   { "S1": [{ "path": "/us/ca/berkeley/gap/", "label": "The Gap" }], "S2": [], … }
+ * and fills every <span data-used-on="S1"></span> placeholder in the city's
+ * pages with links to those pages, so the Sources page's column is static HTML.
  */
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -24,6 +26,8 @@ function label(cityPath: string, pagePath: string): string {
   if (pagePath === '/') return 'Home';
   const slug = pagePath.slice(cityPath.length).replace(/\/$/, '');
   if (!slug) return 'Overview';
+  // Chips on the Sources page sit in its methods and known-gaps cards (its own list uses plain badges).
+  if (slug === 'sources') return 'Methods';
   return CITY_PAGES.find((p) => p.slug === slug)?.label ?? slug;
 }
 
@@ -49,17 +53,36 @@ export function buildUsage(dist: string) {
     const out = join(dist, cityPath, 'data/source-usage.json');
     writeFileSync(out, JSON.stringify(usage, null, 2) + '\n');
     written.push(out);
+    for (const file of htmlFiles(join(dist, cityPath))) fillPlaceholders(file, usage);
   }
   return written;
 }
 
+const PLACEHOLDER = /(<span[^>]*\bdata-used-on="(S\d+)"[^>]*>)(<\/span>)/g;
+
+/** Writes the "used on" links into a built page's placeholders. */
+export function fillPlaceholders(file: string, usage: Record<string, { path: string; label: string }[]>) {
+  const html = readFileSync(file, 'utf8');
+  if (!html.includes('data-used-on=')) return;
+  const filled = html.replace(PLACEHOLDER, (_, open: string, id: string, close: string) => {
+    const pages = usage[id];
+    if (!pages) throw new Error(`${file}: "used on" placeholder for ${id}, which isn't a source`);
+    const body = pages.length
+      ? pages.map((p) => `<a href="${p.path}">${p.label}</a>`).join('<span aria-hidden="true"> · </span>')
+      : '<span class="unused">Not cited on a page yet</span>';
+    return `${open}${body}${close}`;
+  });
+  writeFileSync(file, filled);
+}
+
 /** dist/{country}/{state}/{city}/data/budget.json for every city with data. */
 function findBudgets(dist: string): string[] {
-  return htmlFiles(dist)
-    .map((f) => join(f, '..'))
-    .filter((d, i, all) => all.indexOf(d) === i)
-    .map((d) => join(d, 'data/budget.json'))
-    .filter((f) => existsSync(f));
+  const walk = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+      const p = join(dir, e.name);
+      return e.isDirectory() ? walk(p) : e.name === 'budget.json' && dir.endsWith(`${sep}data`) ? [p] : [];
+    });
+  return walk(dist);
 }
 
 export default function sourceUsage(): AstroIntegration {
