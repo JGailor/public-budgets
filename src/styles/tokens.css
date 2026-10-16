@@ -10,7 +10,7 @@
   --card: #ffffff;
   --ink: #16191d;
   --muted: #5d6168;
-  --faint: #8c9096;
+  --faint: #8c9096; /* 3.3:1 on paper: for rules, icons and large text, never small text */
   --rule: #e4ddcf;
 
   /* Brand, links, source chips */

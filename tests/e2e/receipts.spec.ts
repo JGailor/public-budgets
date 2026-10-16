@@ -9,7 +9,7 @@ test.describe('source chips and receipts (desktop)', () => {
 
   test('chips are buttons named after their document; city dark, news light', async ({ page }) => {
     await page.goto(PAGE);
-    await expect(page.getByRole('button', { name: 'Source 1: FY27-FY28 Budget Balancing Plan' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'S1 — Source 1: FY27-FY28 Budget Balancing Plan', exact: true }).first()).toBeVisible();
     await expect(chip(page, 'gap', 'S1')).toHaveCSS('background-color', 'rgb(14, 107, 111)');
     await expect(chip(page, 'gap', 'S15')).toHaveCSS('background-color', 'rgb(220, 237, 235)');
   });

@@ -47,7 +47,7 @@ export interface SourceView {
   /** "PDF" or "Web page", from the URL. */
   format: string;
   host: string;
-  /** "Source 1: FY27-FY28 Budget Balancing Plan", the chip's accessible name. */
+  /** "S1 — Source 1: FY27-FY28 Budget Balancing Plan": the chip's accessible name, which starts with its visible label (WCAG 2.5.3). */
   name: string;
   citation: string;
 }
@@ -104,7 +104,7 @@ export function sourceView(s: Source): SourceView {
     url: s.url,
     format: /\.pdf$/i.test(url.pathname) ? 'PDF' : 'Web page',
     host: url.hostname.replace(/^www\./, ''),
-    name: `Source ${s.number}: ${s.title}`,
+    name: `${s.id} — Source ${s.number}: ${s.title}`,
     citation: `${by}. "${s.title}."${date ? ` ${date}.` : ''} ${s.url}`,
   };
 }
