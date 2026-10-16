@@ -45,6 +45,19 @@ jobs:
           path: dist/
           retention-days: 7
 
+  links:
+    name: Source links resolve
+    # Non-blocking: news sites and city servers are sometimes slow or block robots.
+    # A failure shows as a warning on the run; look at it, but it doesn't stop a merge.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: node scripts/check-links.ts
+
   preview:
     name: Deploy PR preview
     needs: check
