@@ -38,10 +38,10 @@ export function validateBerkeley(budget: CityBudget, checks: CrossCheck[] = []):
     PINNED.fy2027NetReductionsWithSalesTax,
   );
   for (const year of [fy27, fy28]) {
-    expectEqual(`${year.year} TOTAL row baseline vs sum`, year.total.baseline, sum(year.departments, (d) => d.baseline));
-    expectEqual(`${year.year} TOTAL row reduction vs sum`, year.total.reduction, sum(year.departments, (d) => d.reduction));
+    expectEqual(`${year.year} TOTAL row baseline (expected = sum of department rows)`, year.total.baseline, sum(year.departments, (d) => d.baseline));
+    expectEqual(`${year.year} TOTAL row reduction (expected = sum of department rows)`, year.total.reduction, sum(year.departments, (d) => d.reduction));
     expectEqual(
-      `${year.year} TOTAL row sales-tax allocation vs sum`,
+      `${year.year} TOTAL row sales-tax allocation (expected = sum of department rows)`,
       year.total.salesTaxAllocation,
       sum(year.departments, (d) => d.salesTaxAllocation),
     );
