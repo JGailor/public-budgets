@@ -461,9 +461,26 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
     return entries;
   })();
 
+  // README note: the accounting basis and the revision caveat for every figure in the workbook.
+  const notes = (() => {
+    const tab = wb.tab('README');
+    tab.expectText('B40', 'Note: figures are from budget/planning documents (');
+    const text = tab.text('B40');
+    const basis = text.match(/\(([^)]*basis)\)/)?.[1];
+    if (!basis) throw new Error(`README!B40: no "(… basis)" in "${text}"`);
+    const caveat = text.replace(/^Note:\s*/, '');
+    return {
+      basis: basis[0].toUpperCase() + basis.slice(1),
+      caveat: caveat[0].toUpperCase() + caveat.slice(1),
+      table: 'README',
+      row: 40,
+    };
+  })();
+
   const budget: CityBudget = {
     schemaVersion: SCHEMA_VERSION,
     workbook: meta,
+    notes,
     sources,
     revenue,
     deficitBridge,

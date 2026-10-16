@@ -1,0 +1,162 @@
+/**
+ * Receipts: everything the drawer shows for a figure, resolved at build time
+ * from budget.json. Nothing here is typed in by hand. Labels and parts come
+ * from the page that shows the figure; everything about the source comes from
+ * the data.
+ */
+import { csvTables } from '../data/csv.ts';
+import type { CityBudget, Ref, Source, SourceId } from '../data/types.ts';
+import type { City } from './cities.ts';
+import { SITE } from './site.ts';
+
+export type FigureFormat = 'usd' | 'number' | 'percent';
+
+export interface FigurePart {
+  label: string;
+  value: number;
+}
+
+/** A number shown on a page, and where it came from. */
+export interface Figure {
+  value: number;
+  /** What the number is: "FY2027 General Fund gap, after adjustments". */
+  label: string;
+  /** The budget.json record it was read from (source, related, table, row). */
+  ref: Ref;
+  format?: FigureFormat;
+  /** Color meaning: 'short' (deficits and cuts, red) or 'one-time' (gold). Negative values default to 'short'. */
+  tone?: 'short' | 'one-time' | 'neutral';
+  /** Sources the page adds, e.g. news that also reported the figure. */
+  related?: SourceId[];
+  /** For a derived figure: how it's built ("How this number is built"). */
+  parts?: FigurePart[];
+}
+
+export interface SourceView {
+  id: SourceId;
+  number: number;
+  type: Source['type'];
+  /** "Primary source" for City documents, "Reporting" for news. */
+  badge: string;
+  publisher: string;
+  title: string;
+  committee?: string;
+  /** "April 16, 2026" or "May 2022". */
+  date?: string;
+  url: string;
+  /** "PDF" or "Web page", from the URL. */
+  format: string;
+  host: string;
+  /** "Source 1: FY27-FY28 Budget Balancing Plan", the chip's accessible name. */
+  name: string;
+  citation: string;
+}
+
+/** Serialized onto a chip and rendered by the drawer. */
+export interface Receipt {
+  kind: 'figure' | 'source';
+  value?: string;
+  tone?: 'short' | 'one-time' | 'neutral';
+  label?: string;
+  /** Primary source first, then the rest in the order given. */
+  sources: SourceId[];
+  table?: string;
+  row?: number;
+  /** Download for the table this figure came from. */
+  csv?: string;
+  parts?: { label: string; value: string }[];
+  citation: string;
+}
+
+const MINUS = '−';
+
+/** Full precision, with a real minus sign: −$29,249,339. */
+export function formatValue(value: number, format: FigureFormat = 'usd'): string {
+  const sign = value < 0 ? MINUS : '';
+  const abs = Math.abs(value);
+  if (format === 'percent') return `${sign}${(abs * 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}%`;
+  const digits = abs.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  return format === 'usd' ? `${sign}$${digits}` : `${sign}${digits}`;
+}
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+/** "2026-04-16" → "April 16, 2026"; "2022-05" → "May 2022". */
+export function longDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return d ? `${MONTHS[m - 1]} ${d}, ${y}` : `${MONTHS[m - 1]} ${y}`;
+}
+
+export function sourceView(s: Source): SourceView {
+  const url = new URL(s.url);
+  const committee = s.committee?.replace(/\bCmte\b/, 'Committee');
+  const date = s.date ? longDate(s.date) : undefined;
+  const by = [s.publisher, committee].filter(Boolean).join(', ');
+  return {
+    id: s.id,
+    number: s.number,
+    type: s.type,
+    badge: s.type === 'city' ? 'Primary source' : 'Reporting',
+    publisher: s.publisher,
+    title: s.title,
+    committee,
+    date,
+    url: s.url,
+    format: /\.pdf$/i.test(url.pathname) ? 'PDF' : 'Web page',
+    host: url.hostname.replace(/^www\./, ''),
+    name: `Source ${s.number}: ${s.title}`,
+    citation: `${by}. "${s.title}."${date ? ` ${date}.` : ''} ${s.url}`,
+  };
+}
+
+export function sourcesById(budget: CityBudget): Map<SourceId, SourceView> {
+  return new Map(budget.sources.map((s) => [s.id, sourceView(s)]));
+}
+
+/** "/us/ca/berkeley/data/deficit-bridge.csv" for the table a record came from. */
+export function csvHref(budget: CityBudget, city: City, ref: Ref): string | undefined {
+  for (const t of csvTables(budget)) {
+    if ((t.rows as Ref[]).some((r) => r.table === ref.table && r.row === ref.row)) return `${city.path}data/${t.name}.csv`;
+  }
+  return undefined;
+}
+
+export function figureReceipt(budget: CityBudget, city: City, figure: Figure, pageUrl: URL): Receipt {
+  const ids = [...new Set([figure.ref.source, ...(figure.ref.related ?? []), ...(figure.related ?? [])])];
+  const views = sourcesById(budget);
+  for (const id of ids) if (!views.has(id)) throw new Error(`figure "${figure.label}": unknown source ${id}`);
+  if (figure.parts) {
+    const sum = figure.parts.reduce((a, p) => a + p.value, 0);
+    if (Math.abs(sum - figure.value) > 0.5) {
+      throw new Error(`figure "${figure.label}": parts sum to ${sum}, not ${figure.value}`);
+    }
+  }
+  const value = formatValue(figure.value, figure.format);
+  const where = `${figure.ref.table}, row ${figure.ref.row}`;
+  const citation = [
+    `${figure.label}: ${value}.`,
+    ...ids.map((id, i) => `${i === 0 ? 'Source' : 'Also'}: ${views.get(id)!.citation}${i === 0 ? ` (${where})` : ''}.`),
+    `Via ${SITE.name}, ${pageUrl.href}`,
+  ].join('\n');
+  return {
+    kind: 'figure',
+    value,
+    tone: figure.tone ?? (figure.value < 0 ? 'short' : 'neutral'),
+    label: figure.label,
+    sources: ids,
+    table: figure.ref.table,
+    row: figure.ref.row,
+    csv: csvHref(budget, city, figure.ref),
+    parts: figure.parts?.map((p, i) => ({
+      label: `${i === 0 ? '' : '+ '}${p.label}`,
+      value: formatValue(p.value, figure.format),
+    })),
+    citation,
+  };
+}
+
+export function sourceReceipt(budget: CityBudget, id: SourceId, pageUrl: URL): Receipt {
+  const view = sourcesById(budget).get(id);
+  if (!view) throw new Error(`unknown source ${id}`);
+  return { kind: 'source', sources: [id], citation: `${view.citation}.\nVia ${SITE.name}, ${pageUrl.href}` };
+}

@@ -1,0 +1,469 @@
+---
+/**
+ * The source receipt: one modal <dialog> per page, opened by any SourceChip.
+ * A right-hand drawer from 768px, a bottom sheet below. Esc or the close
+ * button closes it and focus returns to the chip; Tab stays inside while
+ * it's open. ?source=S1 opens that source's receipt on load.
+ */
+import { budgetFor } from '../lib/budget';
+import type { City } from '../lib/cities';
+import { sourceReceipt, sourcesById } from '../lib/receipts';
+
+interface Props {
+  city: City;
+}
+
+const { city } = Astro.props;
+const budget = budgetFor(city)!;
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
+const views = [...sourcesById(budget).values()];
+const data = {
+  sources: Object.fromEntries(views.map((v) => [v.id, v])),
+  // Deep links (?source=S1) open a whole-document receipt.
+  sourceReceipts: Object.fromEntries(views.map((v) => [v.id, sourceReceipt(budget, v.id, pageUrl)])),
+  basis: budget.notes.basis,
+  caveat: budget.notes.caveat,
+  usage: `${city.path}data/source-usage.json`,
+};
+---
+
+<dialog class="receipt" aria-labelledby="receipt-heading" data-receipt-dialog>
+  <div class="receipt-body">
+    <div class="grabber" aria-hidden="true"></div>
+    <div class="top">
+      <p class="eyebrow" id="receipt-heading">Source receipt</p>
+      <button type="button" class="close" data-close aria-label="Close receipt">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4 4l12 12M16 4 4 16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+    <div data-content></div>
+  </div>
+</dialog>
+<script type="application/json" id="receipt-data" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+
+<script>
+  import type { Receipt, SourceView } from '../lib/receipts';
+
+  interface Data {
+    sources: Record<string, SourceView>;
+    sourceReceipts: Record<string, Receipt>;
+    basis: string;
+    caveat: string;
+    usage: string;
+  }
+  type Usage = Record<string, { path: string; label: string }[]>;
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-receipt-dialog]')!;
+  const content = dialog.querySelector<HTMLElement>('[data-content]')!;
+  const data: Data = JSON.parse(document.getElementById('receipt-data')!.textContent!);
+  let opener: HTMLElement | null = null;
+  let usage: Promise<Usage | null> | undefined;
+
+  // Tiny DOM builder: text only, never innerHTML.
+  function h(tag: string, attrs: Record<string, string> = {}, ...kids: (Node | string | null | undefined | false)[]) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    for (const k of kids) if (k) el.append(k);
+    return el;
+  }
+
+  function row(term: string, def: Node | string) {
+    return h('div', {}, h('dt', {}, term), h('dd', {}, def));
+  }
+
+  function sourceLine(s: SourceView) {
+    return h(
+      'li',
+      {},
+      h('span', { class: `mini mini--${s.type}` }, s.id),
+      h('a', { href: s.url, target: '_blank', rel: 'noopener' }, `${s.publisher}${s.date ? `, ${s.date}` : ''}: ${s.title}`),
+    );
+  }
+
+  function render(r: Receipt) {
+    const [primary, ...others] = r.sources.map((id) => data.sources[id]);
+    const usedOn = h('dd', {}, '…');
+    const copyStatus = h('span', { class: 'copy-status', role: 'status' });
+    const copy = h('button', { type: 'button', class: 'btn btn--ghost' }, 'Copy citation');
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(r.citation);
+      } catch {
+        const ta = h('textarea', { readonly: '' }, r.citation) as HTMLTextAreaElement;
+        dialog.append(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      copyStatus.textContent = 'Citation copied';
+      setTimeout(() => (copyStatus.textContent = ''), 3000);
+    });
+
+    const sections: (Node | null | undefined | false)[] = [
+      ...(r.kind === 'figure'
+        ? [
+            h('p', { class: `figure figure--${r.tone}` }, r.value!),
+            h('p', { class: 'figure-label' }, r.label!),
+            h('hr', { class: 'dashed' }),
+          ]
+        : []),
+      h(
+        'p',
+        { class: 'badges' },
+        h('span', { class: `badge badge--${primary.type}` }, primary.badge),
+        h('span', { class: 'badge badge--publisher' }, primary.publisher),
+      ),
+      h('h2', { class: 'doc-title' }, primary.title),
+      h('p', { class: 'doc-meta' }, [primary.committee, primary.date].filter(Boolean).join(' · ')),
+      h(
+        'dl',
+        { class: 'facts' },
+        row('Document', `${primary.id} · ${primary.format} · ${primary.host}`),
+        r.table ? row('Table', `${r.table}, row ${r.row}`) : null,
+        row('Basis', data.basis),
+        h('div', { 'data-used-on': '' }, h('dt', {}, 'Used on'), usedOn),
+      ),
+      r.parts &&
+        h(
+          'div',
+          { class: 'built' },
+          h('p', { class: 'built-title' }, 'How this number is built'),
+          h('dl', {}, ...r.parts.map((p) => h('div', {}, h('dt', {}, p.label), h('dd', { class: 'num' }, p.value)))),
+        ),
+      h(
+        'p',
+        { class: 'actions' },
+        h('a', { class: 'btn btn--primary', href: primary.url, target: '_blank', rel: 'noopener' }, primary.format === 'PDF' ? 'Open the PDF ↗' : 'Open the source ↗'),
+        copy,
+        r.csv ? h('a', { class: 'btn btn--ghost', href: r.csv, download: '' }, 'CSV') : null,
+        copyStatus,
+      ),
+      h('p', { class: 'caveat' }, data.caveat),
+      ...(['city', 'news'] as const).map((type) => {
+        const list = others.filter((s) => s.type === type);
+        return list.length
+          ? h('div', { class: 'also' }, h('p', { class: 'also-title' }, type === 'city' ? 'Also from' : 'Also reported in'), h('ul', {}, ...list.map(sourceLine)))
+          : null;
+      }),
+    ];
+    content.replaceChildren(...sections.filter((n): n is Node => !!n));
+
+    // "Used on": pages where this source's chips appear, computed after the build.
+    usage ??= fetch(data.usage)
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null);
+    usage.then((u) => {
+      const pages = u?.[primary.id] ?? [];
+      if (!pages.length) return usedOn.parentElement?.remove();
+      usedOn.replaceChildren(
+        ...pages.flatMap((p, i) => [i ? ' · ' : '', h('a', { href: p.path }, p.label)]),
+      );
+    });
+  }
+
+  function open(r: Receipt, from: HTMLElement | null) {
+    opener = from;
+    render(r);
+    dialog.showModal();
+    dialog.querySelector<HTMLElement>('[data-close]')!.focus();
+  }
+
+  dialog.addEventListener('close', () => opener?.focus());
+  dialog.querySelector('[data-close]')!.addEventListener('click', () => dialog.close());
+  // A click on the backdrop (outside the panel) closes too.
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+  // Keep Tab inside the receipt.
+  dialog.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const focusable = [...dialog.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')].filter((el) => el.checkVisibility());
+    const first = focusable[0];
+    const last = focusable.at(-1)!;
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const chip = (e.target as Element).closest<HTMLElement>('[data-source-chip]');
+    if (!chip) return;
+    const receipt: Receipt = JSON.parse(chip.closest<HTMLElement>('[data-receipt]')!.dataset.receipt!);
+    open(receipt, chip);
+  });
+
+  const deepLink = new URLSearchParams(location.search).get('source')?.toUpperCase();
+  if (deepLink && data.sourceReceipts[deepLink]) {
+    open(data.sourceReceipts[deepLink], document.querySelector<HTMLElement>(`[data-source-chip="${deepLink}"]`));
+  }
+</script>
+
+<style>
+  .receipt {
+    --pad: clamp(1.25rem, 4vw, 2rem);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--card);
+    color: var(--ink);
+    max-width: none;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .receipt::backdrop {
+    background: rgb(22 25 29 / 0.45);
+  }
+  /* Phones: a bottom sheet. */
+  .receipt {
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 1.25rem 1.25rem 0 0;
+  }
+  /* Tablets and up: a drawer on the right. */
+  @media (min-width: 48rem) {
+    .receipt {
+      inset: 0 0 0 auto;
+      width: min(30rem, 100vw);
+      height: 100%;
+      max-height: none;
+      border-radius: 0;
+    }
+    .grabber {
+      display: none;
+    }
+  }
+  .receipt-body {
+    padding: 0.75rem var(--pad) var(--pad);
+  }
+  .grabber {
+    width: 2.5rem;
+    height: 0.25rem;
+    margin: 0 auto 0.75rem;
+    border-radius: 2px;
+    background: var(--rule);
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+  }
+  .eyebrow {
+    margin: 0;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .close {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-inline-end: -0.5rem;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .close:hover {
+    background: rgb(22 25 29 / 0.06);
+  }
+  .receipt :global(.figure) {
+    margin: 0.5rem 0 0;
+    font-weight: 800;
+    font-size: clamp(2rem, 6vw, 2.5rem);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .receipt :global(.figure--short) {
+    color: var(--red);
+  }
+  .receipt :global(.figure--one-time) {
+    color: var(--gold);
+  }
+  .receipt :global(.figure-label) {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+  }
+  .receipt :global(.dashed) {
+    margin: 1.25rem 0;
+    border: 0;
+    border-top: 2px dashed var(--rule);
+  }
+  .receipt :global(.badges) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+  }
+  .receipt :global(.badge) {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+  .receipt :global(.badge--city) {
+    background: var(--bay-light);
+    color: var(--bay);
+  }
+  /* Neutral on purpose: gold is reserved for one-time money. */
+  .receipt :global(.badge--news) {
+    background: var(--rule);
+    color: var(--ink);
+  }
+  .receipt :global(.badge--publisher) {
+    background: #efe9dc;
+    color: var(--ink);
+  }
+  .receipt :global(.doc-title) {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .receipt :global(.doc-meta) {
+    margin: 0.375rem 0 1rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .receipt :global(.facts) {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  .receipt :global(.facts > div) {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.75rem;
+    padding-block: 0.375rem;
+  }
+  .receipt :global(.facts dt) {
+    color: var(--faint);
+    font-weight: 800;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding-top: 0.15rem;
+  }
+  .receipt :global(.facts dd) {
+    margin: 0;
+    min-width: 0;
+  }
+  .receipt :global(.built) {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border-radius: var(--radius-card);
+    background: var(--paper);
+    font-size: 0.8125rem;
+  }
+  .receipt :global(.built-title) {
+    margin: 0 0 0.5rem;
+    font-weight: 800;
+    font-size: 0.875rem;
+  }
+  .receipt :global(.built dl) {
+    margin: 0;
+  }
+  .receipt :global(.built dl > div) {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.125rem;
+  }
+  .receipt :global(.built dt) {
+    color: var(--muted);
+  }
+  .receipt :global(.built dd) {
+    margin: 0;
+    font-weight: 700;
+  }
+  .receipt :global(.actions) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.25rem 0 0;
+  }
+  .receipt :global(.btn) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: var(--radius-pill);
+    font: 700 0.9375rem var(--font-sans);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .receipt :global(.btn--primary) {
+    border: 0;
+    background: var(--bay);
+    color: #fff;
+  }
+  .receipt :global(.btn--ghost) {
+    border: 1px solid var(--rule);
+    background: var(--card);
+    color: var(--ink);
+  }
+  .receipt :global(.copy-status) {
+    color: var(--bay);
+    font-weight: 700;
+    font-size: 0.8125rem;
+  }
+  .receipt :global(.caveat) {
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+  .receipt :global(.also) {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+  }
+  .receipt :global(.also-title) {
+    margin: 0 0 0.5rem;
+    color: var(--faint);
+    font-weight: 800;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .receipt :global(.also ul) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+  }
+  .receipt :global(.also li) {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding-block: 0.25rem;
+  }
+  .receipt :global(.also a) {
+    color: var(--ink);
+  }
+  .receipt :global(.mini) {
+    flex: none;
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-pill);
+    font-weight: 800;
+    font-size: 0.625rem;
+  }
+  .receipt :global(.mini--city) {
+    background: var(--bay);
+    color: #fff;
+  }
+  .receipt :global(.mini--news) {
+    background: var(--bay-light);
+    color: var(--bay);
+  }
+</style>
