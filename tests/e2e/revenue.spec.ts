@@ -57,6 +57,8 @@ test.describe('revenue page', () => {
     await page.goto(PAGE);
     const pace = (name: string) => page.locator('.line', { hasText: name }).first().locator('.l-pace');
     await expect(pace('Business License Tax')).toHaveClass(/pace--behind/);
+    // Behind is neutral gray, never gold (gold means one-time money).
+    await expect(pace('Business License Tax').locator('.fill')).toHaveCSS('background-color', 'rgb(140, 144, 150)');
     await expect(pace('Secured Property Tax')).toHaveClass(/pace--on-pace/);
     await expect(pace('Transfers')).toHaveClass(/pace--ahead/);
   });
