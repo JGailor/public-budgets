@@ -28,7 +28,8 @@ npm run preview      # build, then serve dist/ through wrangler, exactly as Clou
 | --- | --- |
 | `npm run lint` | ESLint plus `astro check` (types in `.astro` and `.ts`) |
 | `npm test` | Unit tests (`tests/unit/`), no build needed |
-| `npm run build` | Builds the site into `dist/` |
+| `npm run data` | Rebuilds each city's `budget.json` from its workbook and validates it |
+| `npm run build` | Checks `budget.json` is current and valid, then builds the site into `dist/` |
 | `npm run test:dist` | Tests against the built site (`tests/dist/`); run after `build` |
 | `scripts/smoke.sh <url>` | HTTP checks against a running or deployed site: 200s for real pages, 404s for unknown cities |
 
@@ -45,6 +46,27 @@ Each folder is one city, and its path is its URL: `data/cities/us/ca/berkeley/` 
 Every city gets an overview at its root plus the sub-pages in `CITY_PAGES` (`/gap/`, `/departments/`, `/sources/`). A path that isn't in the registry is a 404.
 
 **To add a city**, create its folder and `city.json` (copy Berkeley's). The budget data for each city lives in the same folder.
+
+### Budget data: workbook → `budget.json`
+
+Nothing on the site is typed in by hand. Each city's numbers come from a source workbook committed beside it:
+
+```
+data/cities/us/ca/berkeley/
+  city.json
+  source/Berkeley_Budget_FY25-FY28.xlsx   the workbook (compiled from public documents)
+  budget.json                            generated from it: commit both together
+```
+
+`npm run data` extracts the workbook into `budget.json` (`src/data/berkeley/extract.ts`) and validates it (`src/data/berkeley/validate.ts`). `npm run build` first runs `npm run data:check`, which fails the build if any check breaks or if `budget.json` doesn't match the workbook. So **after editing the workbook, run `npm run data` and commit both files.**
+
+- **Every record carries a receipt:** `source` (S1–S19, rows of the *Sources & Links* tab; S1–S10 are City documents, S11–S19 news), optional `related` sources, and the workbook `table` and `row` it came from.
+- **Derived numbers are computed, not read.** The workbook doesn't store results for all of its formulas, so the extractor reads typed-in inputs and TOTAL rows, computes everything else, and checks its arithmetic against every result Excel did store.
+- **Validation** ties every TOTAL row to its lines and pins the City's headline figures (FY27 department baselines $283,764,035, the FY27 gap −$29,249,339, …). A moved column, a changed source line, or a formula typed over an input cell stops the build with the cell address.
+- **Skipped on purpose:** the *Scenario Model* tab (its "gap remaining" counts the sales-tax money twice).
+- **Downloads:** the build publishes `/us/ca/berkeley/data/budget.json`, one CSV per table, and the original workbook.
+
+Pages read the data with `budgetFor(city)` from `src/lib/budget.ts`.
 
 ## Deploying
 
