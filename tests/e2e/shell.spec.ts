@@ -55,7 +55,7 @@ async function overlaps(page: Page, scope: string, selectors: string) {
   }, selectors);
 }
 
-for (const width of [390, 768]) {
+for (const width of [390, 768, 1024, 1199]) {
   test.describe(`at ${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
@@ -108,7 +108,7 @@ for (const width of [390, 768]) {
   });
 }
 
-for (const width of [1024, 1280, 1440, 1920]) {
+for (const width of [1200, 1280, 1440, 1920]) {
   test.describe(`at ${width}px`, () => {
     test.use({ viewport: { width, height: 900 } });
 
@@ -116,6 +116,9 @@ for (const width of [1024, 1280, 1440, 1920]) {
       test(`${route}: nav items don't overlap and stay on screen`, async ({ page }) => {
         await page.goto(route);
         await page.evaluate(() => document.fonts.ready);
+        // A hidden nav has no boxes to overlap, so make sure this width really shows it.
+        await expect(page.locator('nav.desktop')).toBeVisible();
+        await expect(page.locator('.compact')).toBeHidden();
         const boxes = await page.locator('nav.desktop').evaluate((nav) =>
           [...nav.querySelectorAll<HTMLElement>('.brand, .switcher > summary, .links a, .sources-pill, .cta')].map((el) => {
             const r = el.getBoundingClientRect();
