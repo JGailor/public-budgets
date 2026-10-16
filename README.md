@@ -71,6 +71,10 @@ Every figure on a page gets a chip that opens its receipt:
 
 **After the election**, set `measures.salesTax.status` in `ballot.json` to `"passed"` or `"failed"`. The heading switches to the result and that outcome's card gets a "Result" badge; both scenarios stay on the page.
 
+## The capital page
+
+`/{city}/capital/` sets the two-year capital program against the repair backlog on one axis, then shows where the program's money comes from as a squarified treemap (`squarify()` in `src/lib/capital.ts`, laid out at build time for a wide box and a tall phone box). Legend groups are editorial, in `data/cities/{city}/capital-groups.json`, keyed by the workbook's fund category; the build fails if a category has no group. Groups marked `merge` (the General Fund programs) draw as one block, and sources under `otherBelowShare` of the total roll into "Other sources (n)". Whether a block's label fits is estimated from its text at the smallest size each layout is shown at; blocks too small to label are named in a key under the treemap.
+
 ## Where city data lives
 
 ```
@@ -79,7 +83,7 @@ data/cities/{country}/{state}/{city}/city.json
 
 Each folder is one city, and its path is its URL: `data/cities/us/ca/berkeley/` is served at `/us/ca/berkeley/`. `src/lib/cities.ts` loads the registry at build time and fails the build if a `city.json` is missing a field or its `countryCode`/`stateCode` disagree with the folder.
 
-Every city gets an overview at its root plus the sub-pages in `CITY_PAGES` (`/revenue/`, `/gap/`, `/departments/`, `/ballot/`, `/sources/`). A path that isn't in the registry is a 404.
+Every city gets an overview at its root plus the sub-pages in `CITY_PAGES` (`/revenue/`, `/gap/`, `/departments/`, `/ballot/`, `/capital/`, `/sources/`). A path that isn't in the registry is a 404.
 
 **To add a city**, create its folder and `city.json` (copy Berkeley's). The budget data for each city lives in the same folder.
 
