@@ -214,6 +214,8 @@ export interface CityBudget {
   workbook: { file: string; sha256: string };
   /** From the workbook's README note; shown on every receipt. */
   notes: {
+    /** Years the workbook covers, from its title: "FY2025–FY2028". */
+    coverage: string;
     /** "Budgetary/cash basis" */
     basis: string;
     /** "Figures are from budget/planning documents … subject to revision. Not for investment-decision use." */

@@ -6,16 +6,18 @@ import { SITE } from '../lib/site';
 
 interface Props {
   city?: City;
+  /** In-page links for non-city pages (the landing page's sections). */
+  sections?: { href: string; label: string }[];
 }
 
-const { city } = Astro.props;
+const { city, sections = [] } = Astro.props;
 const here = Astro.url.pathname.replace(/\/?$/, '/');
 const links = city
   ? [
       { href: city.path, label: 'Overview' },
       ...CITY_PAGES.filter((p) => p.nav).map((p) => ({ href: `${city.path}${p.slug}/`, label: p.label })),
     ]
-  : [];
+  : sections;
 const sourceCount = city ? budgetFor(city)?.sources.length : undefined;
 const sourcesHref = city ? `${city.path}sources/` : undefined;
 const cityLabel = city ? `${city.name}, ${city.stateCode}` : undefined;
@@ -71,7 +73,7 @@ const explore = cities[0];
         </a>
       )
     }
-    {!city && explore && <a class="cta" href={explore.path}>Explore {explore.name} →</a>}
+    {!city && explore && <a class:list={['cta', { 'cta--after-links': links.length }]} href={explore.path}>Explore {explore.name} →</a>}
   </nav>
 
   <!-- Below 1024px -->
@@ -258,6 +260,9 @@ const explore = cities[0];
     border-bottom-color: var(--bay);
   }
 
+  .cta--after-links {
+    margin-inline-start: 0;
+  }
   .sources-pill {
     margin-inline-start: auto;
     display: inline-flex;
@@ -275,6 +280,7 @@ const explore = cities[0];
     white-space: nowrap;
   }
   .cta {
+    flex: none;
     margin-inline-start: auto;
     padding: 0.5rem 1.125rem;
     border-radius: var(--radius-pill);

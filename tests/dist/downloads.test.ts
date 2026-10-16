@@ -31,11 +31,11 @@ describe('Berkeley data downloads', () => {
     expect(createHash('sha256').update(readFileSync(file)).digest('hex')).toBe(committed.workbook.sha256);
   });
 
-  it('publishes the "Used on" index with every source, and only city pages in it', () => {
+  it('publishes the "Used on" index with every source, counting only city pages and the home page', () => {
     const usage = JSON.parse(readFileSync(join(data, 'source-usage.json'), 'utf8'));
     expect(Object.keys(usage)).toEqual(committed.sources.map((s) => s.id));
     for (const pages of Object.values(usage) as { path: string }[][]) {
-      for (const p of pages) expect(p.path.startsWith('/us/ca/berkeley/')).toBe(true);
+      for (const p of pages) expect(p.path === '/' || p.path.startsWith('/us/ca/berkeley/'), p.path).toBe(true);
     }
   });
 });
