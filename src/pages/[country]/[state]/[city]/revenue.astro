@@ -143,7 +143,7 @@ const t = r.insights;
         </p>
         <p class="chips-row"><SourceChip city={city} figure={t.transfer.figure} /><SourceChip city={city} figure={t.transfer.measurePFigure} /></p>
       </li>
-      <li class="card insight insight--gold">
+      <li class="card insight insight--neutral">
         <h2>Timing isn't trouble</h2>
         <p>
           Business license tax shows only {pct(t.timing.line.pctOfAdoptedReceived!)} received by mid-year. A low mid-year number can reflect when a tax is
@@ -392,9 +392,11 @@ const t = r.insights;
     left: 50%;
     border-left: 2px dashed var(--ink);
   }
+  /* Behind is neutral gray, not gold (gold means one-time money; PM, on #11): a slow
+     mid-year number is usually timing, and the legend label carries the meaning. */
   .pace--behind .fill,
   .pace--behind .dot {
-    background: var(--gold);
+    background: var(--faint);
   }
   .pace--on-pace .fill,
   .pace--on-pace .dot {
@@ -494,8 +496,8 @@ const t = r.insights;
   .insight--bay {
     --accent: var(--bay);
   }
-  .insight--gold {
-    --accent: var(--gold);
+  .insight--neutral {
+    --accent: var(--faint);
   }
   .insight--red {
     --accent: var(--red);
