@@ -1,0 +1,10 @@
+{
+  "note": "Shorter display names for long department names, from the approved #1 mockups (mockups/build/gen.py SHORT). Receipts and tables keep the official names.",
+  "shortNames": {
+    "odpa": "Police Accountability",
+    "hhcs": "Health, Housing & Community",
+    "prw": "Parks, Rec & Waterfront",
+    "cmo": "City Manager's Office",
+    "it-cost-allocation-plan": "IT Cost Allocation"
+  }
+}
