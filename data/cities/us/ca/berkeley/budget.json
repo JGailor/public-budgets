@@ -1800,9 +1800,14 @@
       "text": "Proposed 0.5% sales tax (Nov 2026 ballot) would raise ~$9.0–9.4M/yr; would bring Berkeley rate to 10.75%.",
       "rate": 0.005,
       "election": "Nov 2026",
+      "revenueLow": 9000000,
+      "revenueHigh": 9400000,
+      "newRate": 0.1075,
+      "threshold": "simple majority",
       "source": "S5",
       "related": [
-        "S15"
+        "S15",
+        "S16"
       ],
       "table": "README",
       "row": 31
@@ -1811,9 +1816,22 @@
       "text": "Proposed $300M infrastructure GO bond → Nov 2026 ballot (needs 2/3 vote). Funded by property tax.",
       "amount": 300000000,
       "election": "Nov 2026",
+      "threshold": "2/3",
+      "repaidBy": "property tax",
       "source": "S3",
+      "related": [
+        "S10"
+      ],
       "table": "Capital Program FY27-28",
       "row": 32
+    },
+    "backlog": {
+      "text": "Unfunded infrastructure / deferred maintenance estimated at $1.65–2 billion citywide (300+ mi sidewalks, 54 parks, 95 buildings).",
+      "low": 1650000000,
+      "high": 2000000000,
+      "source": "S6",
+      "table": "Capital Program FY27-28",
+      "row": 33
     }
   }
 }

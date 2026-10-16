@@ -21,7 +21,7 @@ const families = familiesFor(city, budget);
 const h = headlines(budget, families);
 const s1 = sourcesById(budget).get(h.gap.ref.source)!;
 const pageHref = (slug: string) => `${city.path}${slug}/`;
-// The ballot page arrives in epic 2; until then the sales-tax question opens The Gap, which compares both outcomes.
+// The sales-tax question opens the Ballot page; a city without one falls back to The Gap, which also compares both outcomes.
 const ballot = CITY_PAGES.some((p) => (p.slug as string) === 'ballot') ? { slug: 'ballot', label: 'Ballot' } : { slug: 'gap', label: 'The Gap' };
 
 const questions = [

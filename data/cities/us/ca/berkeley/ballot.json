@@ -1,0 +1,21 @@
+{
+  "note": "Ballot page data that isn't in the workbook. After the election, set each measure's status to \"passed\" or \"failed\" (and the result fields); the page's heading and result badges follow. Statements here quote their sources; news sources are labeled as reporting on the page.",
+  "election": "2026-11-03",
+  "measures": {
+    "salesTax": { "status": "pending", "yesShare": null },
+    "bond": { "status": "pending", "yesShare": null }
+  },
+  "fireStation": {
+    "label": "Fire station",
+    "passes": {
+      "text": "Stays open in FY27",
+      "sources": ["S16"],
+      "quote": "a 0.5% sales tax increase … would raise more than $9 million per year — enough to keep the station open"
+    },
+    "fails": {
+      "text": "Station 4 would close",
+      "sources": ["S15", "S16"],
+      "quote": "Fire Station 4, the Marin Avenue facility that serves North Berkeley, would be closed under that scenario"
+    }
+  }
+}

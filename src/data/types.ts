@@ -219,9 +219,21 @@ export interface CitedFacts {
   /** "Over 10 years: spending grew ~8%/yr vs revenue ~6.5%/yr". */
   growth: CitedFact & { years: number; spendingRate: number; revenueRate: number };
   /** The proposed local sales tax on the ballot: rate 0.005 = 0.5%. */
-  salesTax: CitedFact & { rate: number; election: string };
+  salesTax: CitedFact & {
+    rate: number;
+    election: string;
+    /** City estimate of yearly revenue, as a range. */
+    revenueLow: number;
+    revenueHigh: number;
+    /** Berkeley's total sales-tax rate if it passes: 0.1075 = 10.75%. */
+    newRate: number;
+    /** Votes needed to pass: "simple majority". */
+    threshold: string;
+  };
   /** The proposed infrastructure bond on the ballot. */
-  bond: CitedFact & { amount: number; election: string };
+  bond: CitedFact & { amount: number; election: string; threshold: string; repaidBy: string };
+  /** Unfunded infrastructure and deferred maintenance, as a range. */
+  backlog: CitedFact & { low: number; high: number };
 }
 
 export interface CityBudget {
