@@ -1,0 +1,80 @@
+---
+/**
+ * A glossary term: dotted underline, definition on hover or focus.
+ *   <Term name="One-time (one-time resources)">one-time money</Term>
+ * `name` must match a term on the city's Glossary tab exactly, or the build fails.
+ */
+import { budgetFor } from '../lib/budget';
+import type { City } from '../lib/cities';
+
+interface Props {
+  city: City;
+  name: string;
+}
+
+const { city, name } = Astro.props;
+const entry = budgetFor(city)?.glossary.find((g) => g.term === name);
+if (!entry) throw new Error(`<Term name="${name}">: not on ${city.path}'s Glossary tab`);
+const id = `term-${Math.random().toString(36).slice(2, 9)}`;
+const anchor = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+---
+
+<span class="term" tabindex="0" aria-describedby={id} data-term={anchor}><slot /><span class="tip" role="tooltip" id={id}>
+    <strong>{entry.term}.</strong>{' '}{entry.definition}
+  </span></span>
+
+<style>
+  .term {
+    position: relative;
+    text-decoration: underline dotted;
+    text-decoration-color: var(--faint);
+    text-underline-offset: 0.2em;
+    cursor: help;
+  }
+  .tip {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 20;
+    width: max-content;
+    max-width: min(20rem, calc(100vw - 2rem));
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--ink);
+    color: #fff;
+    font: 400 0.8125rem/1.45 var(--font-sans);
+    text-align: left;
+    white-space: normal;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 120ms;
+    transform: translateX(var(--shift, 0px));
+  }
+  .term:hover .tip,
+  .term:focus .tip {
+    visibility: visible;
+    opacity: 1;
+  }
+  .term[data-dismissed] .tip {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  // Keep the tooltip on screen, and let Escape dismiss it (WCAG 1.4.13).
+  for (const term of document.querySelectorAll<HTMLElement>('.term')) {
+    const tip = term.querySelector<HTMLElement>('.tip')!;
+    const place = () => {
+      term.removeAttribute('data-dismissed');
+      tip.style.setProperty('--shift', '0px');
+      const r = tip.getBoundingClientRect();
+      const over = r.right - (document.documentElement.clientWidth - 16);
+      if (over > 0) tip.style.setProperty('--shift', `${-Math.min(over, r.left - 16)}px`);
+    };
+    term.addEventListener('mouseenter', place);
+    term.addEventListener('focus', place);
+    term.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') term.setAttribute('data-dismissed', '');
+    });
+  }
+</script>

@@ -30,4 +30,18 @@ describe('Berkeley data downloads', () => {
     expect(existsSync(file)).toBe(true);
     expect(createHash('sha256').update(readFileSync(file)).digest('hex')).toBe(committed.workbook.sha256);
   });
+
+  it('publishes the "Used on" index with every source, and only city pages in it', () => {
+    const usage = JSON.parse(readFileSync(join(data, 'source-usage.json'), 'utf8'));
+    expect(Object.keys(usage)).toEqual(committed.sources.map((s) => s.id));
+    for (const pages of Object.values(usage) as { path: string }[][]) {
+      for (const p of pages) expect(p.path.startsWith('/us/ca/berkeley/')).toBe(true);
+    }
+  });
+});
+
+describe('receipt test page', () => {
+  it('stays out of search results', () => {
+    expect(readFileSync(join(root, 'dist/test/receipts/index.html'), 'utf8')).toContain('<meta name="robots" content="noindex">');
+  });
 });

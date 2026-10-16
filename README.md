@@ -42,6 +42,21 @@ CI (`.github/workflows/ci.yml`) runs lint, unit tests, build and dist tests on e
 
 Every page renders inside `src/layouts/Base.astro`: the dark top strip (path, independence line, "Report an error"), the header (full nav at 1024px and up, compact `WTMW` header with a menu below), and the footer. Nav links come from `CITY_PAGES` in `src/lib/city-pages.ts`; the "19 sources" pill counts the city's sources from its data. At 1024px the nav has about 50px to spare, so adding pages to the nav needs a layout change; the browser tests will fail if items overlap.
 
+## Showing a number: source chips, receipts and glossary terms
+
+Every figure on a page gets a chip that opens its receipt:
+
+```astro
+<SourceChip city={city} figure={{ value: gap.fy2027, label: 'FY2027 General Fund gap, after adjustments', ref: gap }} />
+<SourceChip city={city} source="S2" />   <!-- a whole document -->
+<Term city={city} name="One-time (one-time resources)">one-time money</Term>
+```
+
+- `ref` is the `budget.json` record the value came from; the receipt reads its source, table and row from it. Add `related: ['S15']` for news that also reported it, and `parts` for a derived figure ("How this number is built"); the build fails if the parts don't add up to the value, or if a source or glossary term doesn't exist.
+- The receipt is one modal `<dialog>` per page (`src/components/ReceiptDrawer.astro`). `?source=S1` opens that source's receipt.
+- "Used on" is computed after the build from where each chip actually appears (`src/integrations/source-usage.ts` → `/{city}/data/source-usage.json`).
+- `/test/receipts/` exercises all of it for the browser tests; it isn't linked and isn't indexed.
+
 ## Where city data lives
 
 ```

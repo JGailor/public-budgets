@@ -212,6 +212,15 @@ export interface GlossaryEntry {
 export interface CityBudget {
   schemaVersion: number;
   workbook: { file: string; sha256: string };
+  /** From the workbook's README note; shown on every receipt. */
+  notes: {
+    /** "Budgetary/cash basis" */
+    basis: string;
+    /** "Figures are from budget/planning documents … subject to revision. Not for investment-decision use." */
+    caveat: string;
+    table: string;
+    row: number;
+  };
   sources: Source[];
   revenue: Revenue;
   deficitBridge: DeficitBridge;

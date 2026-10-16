@@ -4,6 +4,12 @@
     "file": "source/Berkeley_Budget_FY25-FY28.xlsx",
     "sha256": "81c2fbcb5574f3b555228ef4bb32981adf59a0e1a10c46071afc30d6d1b5c858"
   },
+  "notes": {
+    "basis": "Budgetary/cash basis",
+    "caveat": "Figures are from budget/planning documents (budgetary/cash basis) and are subject to revision. Not for investment-decision use.",
+    "table": "README",
+    "row": 40
+  },
   "sources": [
     {
       "id": "S1",

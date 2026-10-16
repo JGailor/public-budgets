@@ -4,6 +4,7 @@ import '@fontsource/gelasio/700.css';
 import '@fontsource-variable/nunito-sans';
 import '../styles/base.css';
 import SiteFooter from '../components/SiteFooter.astro';
+import ReceiptDrawer from '../components/ReceiptDrawer.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import TopStrip from '../components/TopStrip.astro';
 import { budgetFor } from '../lib/budget';
@@ -13,9 +14,11 @@ import { SITE } from '../lib/site';
 interface Props {
   title: string;
   city?: City;
+  /** Keep the page out of search results (test pages). */
+  noindex?: boolean;
 }
 
-const { title, city } = Astro.props;
+const { title, city, noindex } = Astro.props;
 const fullTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
@@ -42,6 +45,7 @@ const figuresThrough = newest
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
   </head>
   <body>
     <a class="skip visually-hidden" href="#main">Skip to content</a>
@@ -51,6 +55,7 @@ const figuresThrough = newest
       <slot />
     </main>
     <SiteFooter city={city} />
+    {city && budgetFor(city) && <ReceiptDrawer city={city} />}
   </body>
 </html>
 
