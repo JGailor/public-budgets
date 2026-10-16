@@ -57,6 +57,10 @@ Every figure on a page gets a chip that opens its receipt:
 - "Used on" is computed after the build from where each chip actually appears (`src/integrations/source-usage.ts` → `/{city}/data/source-usage.json`).
 - `/test/receipts/` exercises all of it for the browser tests; it isn't linked and isn't indexed.
 
+## The landing page
+
+`src/pages/index.astro` quotes the first city's headline figures, computed by `headlines()` in `src/lib/headlines.ts`; `tests/dist/landing.test.ts` recomputes each one independently from `budget.json`, and a unit test fails if any of them is typed into the page. Department families (for the waffle colors) are in `data/cities/{city}/families.json`, an editorial grouping that the build checks covers every department exactly once. The link-preview image is `public/og/wherethemoneywent.png`, made by `node scripts/og-image.ts`.
+
 ## Where city data lives
 
 ```

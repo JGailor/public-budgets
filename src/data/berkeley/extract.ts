@@ -469,7 +469,10 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
     const basis = text.match(/\(([^)]*basis)\)/)?.[1];
     if (!basis) throw new Error(`README!B40: no "(… basis)" in "${text}"`);
     const caveat = text.replace(/^Note:\s*/, '');
+    const coverage = tab.text('B1').match(/FY\d{4}\s*[–-]\s*FY\d{4}$/)?.[0];
+    if (!coverage) throw new Error(`README!B1: no "FY…–FY…" range in "${tab.text('B1')}"`);
     return {
+      coverage,
       basis: basis[0].toUpperCase() + basis.slice(1),
       caveat: caveat[0].toUpperCase() + caveat.slice(1),
       table: 'README',

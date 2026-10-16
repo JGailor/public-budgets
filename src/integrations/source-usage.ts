@@ -21,6 +21,7 @@ function htmlFiles(dir: string): string[] {
 
 /** Page label for the receipt: "Overview" for the city root, else the nav label. */
 function label(cityPath: string, pagePath: string): string {
+  if (pagePath === '/') return 'Home';
   const slug = pagePath.slice(cityPath.length).replace(/\/$/, '');
   if (!slug) return 'Overview';
   return CITY_PAGES.find((p) => p.slug === slug)?.label ?? slug;
@@ -34,7 +35,9 @@ export function buildUsage(dist: string) {
     const usage: Record<string, { path: string; label: string }[]> = Object.fromEntries(
       budget.sources.map((s: { id: string }) => [s.id, []]),
     );
-    for (const file of htmlFiles(join(dist, cityPath))) {
+    // The city's own pages, plus the landing page, which shows the first city's figures.
+    const pages = [...htmlFiles(join(dist, cityPath)), ...(existsSync(join(dist, 'index.html')) ? [join(dist, 'index.html')] : [])];
+    for (const file of pages) {
       const pagePath = '/' + relative(dist, file).split(sep).join('/').replace(/index\.html$/, '');
       const ids = new Set([...readFileSync(file, 'utf8').matchAll(CHIP)].map((m) => m[1]));
       for (const id of ids) {

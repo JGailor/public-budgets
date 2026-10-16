@@ -33,7 +33,7 @@ describe('sources', () => {
 
   it('names a chip after its document', () => {
     expect(views.get('S1')).toMatchObject({
-      name: 'Source 1: FY27-FY28 Budget Balancing Plan',
+      name: 'S1 — Source 1: FY27-FY28 Budget Balancing Plan',
       badge: 'Primary source',
       committee: 'Budget & Finance Committee',
       date: 'April 16, 2026',

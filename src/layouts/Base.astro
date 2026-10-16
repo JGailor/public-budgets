@@ -14,11 +14,26 @@ import { SITE } from '../lib/site';
 interface Props {
   title: string;
   city?: City;
+  /** For pages outside a city (the landing page) that still show its figures and receipts. */
+  dataCity?: City;
+  /** In-page section links for the header on non-city pages. */
+  sections?: { href: string; label: string }[];
+  /** Shown in search results and link previews. */
+  description?: string;
   /** Keep the page out of search results (test pages). */
   noindex?: boolean;
 }
 
-const { title, city, noindex } = Astro.props;
+const {
+  title,
+  city,
+  dataCity,
+  sections,
+  description = 'City budgets, made readable. Every number links to the public document it came from.',
+  noindex,
+} = Astro.props;
+const receiptCity = city ?? dataCity;
+const ogImage = new URL('/og/wherethemoneywent.png', Astro.site);
 const fullTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
@@ -45,17 +60,29 @@ const figuresThrough = newest
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <link rel="canonical" href={canonical} />
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${SITE.name}: city budgets, made readable`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     {noindex && <meta name="robots" content="noindex" />}
   </head>
   <body>
     <a class="skip visually-hidden" href="#main">Skip to content</a>
     <TopStrip city={city} figuresThrough={figuresThrough} page={page || undefined} />
-    <SiteHeader city={city} />
+    <SiteHeader city={city} sections={sections} />
     <main id="main">
       <slot />
     </main>
     <SiteFooter city={city} />
-    {city && budgetFor(city) && <ReceiptDrawer city={city} />}
+    {receiptCity && budgetFor(receiptCity) && <ReceiptDrawer city={receiptCity} />}
   </body>
 </html>
 

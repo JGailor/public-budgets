@@ -1,0 +1,22 @@
+name: Request a city
+description: Ask for your city's budget on Where the Money Went.
+title: 'City request: '
+labels: [city-request]
+body:
+  - type: input
+    id: city
+    attributes:
+      label: City
+    validations:
+      required: true
+  - type: input
+    id: state
+    attributes:
+      label: State
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Anything we should know?
+      description: Where the city publishes its budget, what you'd most like to understand, or who else is asking.
