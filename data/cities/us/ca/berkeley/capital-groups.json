@@ -1,0 +1,13 @@
+{
+  "note": "Legend groups for the Capital page treemap, keyed by the workbook's fund category (Capital Program FY27-28, column B). Every category must be in exactly one group; the build fails otherwise. A group with merge: true is drawn as one block (the General Fund programs). Sources under otherBelowShare of the total roll into one gray 'Other sources (n)' block.",
+  "otherBelowShare": 0.01,
+  "groups": [
+    { "id": "utility", "name": "Utility & transport funds", "color": "#0e6b6f", "categories": ["Special (PW)"] },
+    { "id": "measure-ff", "name": "Measure FF (voter-approved)", "color": "#23395b", "categories": ["Bond/Parcel (PW)"] },
+    { "id": "general-fund", "name": "General Fund", "color": "#c8432b", "categories": ["GF/CIP"], "merge": true, "blockName": "General Fund" },
+    { "id": "parks", "name": "Parks funds", "color": "#3e9a8f", "categories": ["Special (PRW)"] },
+    { "id": "equipment", "name": "Equipment replacement", "color": "#8a6c45", "categories": ["Internal Service (PW)"] },
+    { "id": "grants", "name": "Grants", "color": "#7a4e7e", "categories": ["Grant"] },
+    { "id": "technology", "name": "Technology", "color": "#3f5e96", "categories": ["Special (IT)"] }
+  ]
+}

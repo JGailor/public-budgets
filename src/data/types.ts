@@ -233,7 +233,14 @@ export interface CitedFacts {
   /** The proposed infrastructure bond on the ballot. */
   bond: CitedFact & { amount: number; election: string; threshold: string; repaidBy: string };
   /** Unfunded infrastructure and deferred maintenance, as a range. */
-  backlog: CitedFact & { low: number; high: number };
+  backlog: CitedFact & {
+    low: number;
+    high: number;
+    /** The asset inventory behind the estimate. Miles is text: the workbook says "300+". */
+    sidewalkMiles: string;
+    parks: number;
+    buildings: number;
+  };
 }
 
 export interface CityBudget {

@@ -1829,6 +1829,9 @@
       "text": "Unfunded infrastructure / deferred maintenance estimated at $1.65–2 billion citywide (300+ mi sidewalks, 54 parks, 95 buildings).",
       "low": 1650000000,
       "high": 2000000000,
+      "sidewalkMiles": "300+",
+      "parks": 54,
+      "buildings": 95,
       "source": "S6",
       "table": "Capital Program FY27-28",
       "row": 33

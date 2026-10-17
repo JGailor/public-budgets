@@ -500,7 +500,7 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
     // The capital tab's source line is S3 (Proposed FY27-FY31 CIP presentation).
     const bd = fact('Capital Program FY27-28', 'A32', /^Proposed \$(\d+)M infrastructure GO bond → (Nov \d{4}) ballot \(needs ([\d/]+) vote\)\. Funded by ([a-z ]+)\./);
     // The Sources tab lists S6 for "$1.65–2B unfunded infrastructure".
-    const bl = fact('Capital Program FY27-28', 'A33', /estimated at \$([\d.]+)–([\d.]+) billion/);
+    const bl = fact('Capital Program FY27-28', 'A33', /estimated at \$([\d.]+)–([\d.]+) billion citywide \((\d+\+?) mi sidewalks, (\d+) parks, (\d+) buildings\)/);
     return {
       growth: {
         text: g.text,
@@ -535,7 +535,17 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
         table: 'Capital Program FY27-28',
         row: bd.row,
       },
-      backlog: { text: bl.text, low: Number(bl.m[1]) * 1e9, high: Number(bl.m[2]) * 1e9, source: 'S6', table: 'Capital Program FY27-28', row: bl.row },
+      backlog: {
+        text: bl.text,
+        low: Number(bl.m[1]) * 1e9,
+        high: Number(bl.m[2]) * 1e9,
+        sidewalkMiles: bl.m[3],
+        parks: Number(bl.m[4]),
+        buildings: Number(bl.m[5]),
+        source: 'S6',
+        table: 'Capital Program FY27-28',
+        row: bl.row,
+      },
     } satisfies CityBudget['citedFacts'];
   })();
 
