@@ -181,3 +181,30 @@ test.describe('receipts on a phone', () => {
     expect(tip.x + tip.width).toBeLessThanOrEqual(390);
   });
 });
+
+test.describe('ballot outcomes on the overview (#23)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('both outcome tiles, and their drawers, are colored the same way', async ({ page }) => {
+    await page.goto('/us/ca/berkeley/');
+    const tiles = page.locator('.tile--passes, .tile--fails');
+    await expect(tiles).toHaveCount(2);
+    const bg = await tiles.evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundColor));
+    expect(bg[0]).toBe(bg[1]);
+
+    const drawer = async (tile: string) => {
+      await page.locator(`${tile} [data-source-chip]`).first().click();
+      const d = dialog(page);
+      await expect(d).toBeVisible();
+      const f = d.locator('.figure');
+      const out = { cls: await f.getAttribute('class'), color: await f.evaluate((el) => getComputedStyle(el).color) };
+      await page.keyboard.press('Escape');
+      await expect(d).toBeHidden();
+      return out;
+    };
+    const passes = await drawer('.tile--passes');
+    const fails = await drawer('.tile--fails');
+    expect(passes.cls).toBe('figure figure--neutral');
+    expect(fails).toEqual(passes);
+  });
+});
