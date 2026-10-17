@@ -23,6 +23,18 @@ export interface Ref {
   row: number;
 }
 
+/**
+ * Where a fact read from a City PDF came from: the source, the PDF page (as the
+ * PDF viewer numbers it, "Page N of 260", not the printed folio) and the exact
+ * sentence, which the build checks against source/excerpts/{source}.json.
+ */
+export interface DocRef {
+  source: SourceId;
+  related?: SourceId[];
+  page: number;
+  quote: string;
+}
+
 export interface Source {
   id: SourceId;
   number: number;
@@ -39,8 +51,8 @@ export interface Source {
   /** city = a City of Berkeley document (primary); news = reporting (context). */
   type: 'city' | 'news';
   usedFor: string;
-  /** Row on the Sources & Links tab. */
-  row: number;
+  /** Row on the Sources & Links tab; absent for sources added from documents.json. */
+  row?: number;
 }
 
 export interface RevenueLine extends Ref {
@@ -222,9 +234,6 @@ export interface CitedFacts {
   salesTax: CitedFact & {
     rate: number;
     election: string;
-    /** City estimate of yearly revenue, as a range. */
-    revenueLow: number;
-    revenueHigh: number;
     /** Berkeley's total sales-tax rate if it passes: 0.1075 = 10.75%. */
     newRate: number;
     /** Votes needed to pass: "simple majority". */
@@ -240,6 +249,54 @@ export interface CitedFacts {
     sidewalkMiles: string;
     parks: number;
     buildings: number;
+  };
+}
+
+/** One row of a City PDF table: `quote` is the row exactly as printed, so it's checked on its page like any quote. */
+export interface DocCapitalPart extends DocRef {
+  name: string;
+  fy2027: number;
+  fy2028: number;
+  /** Derived: fy2027 + fy2028. */
+  total: number;
+}
+
+export interface DocCapitalLine extends DocCapitalPart {
+  /** "Enterprise Funds", "Special Revenue Funds", … as the table groups them. */
+  fundType: string;
+  /** For the General Fund's CIP fund: its program categories (Streets, Facilities, …), from the table that breaks it down. */
+  parts?: DocCapitalPart[];
+}
+
+/** Facts from City documents published after the workbook (documents.json), each parsed from its quote. */
+export interface DocumentFacts {
+  salesTaxMeasure: DocRef & { letter: string };
+  /** The City's estimate of yearly revenue. */
+  salesTaxRevenue: DocRef & { low: number; high: number };
+  salesTaxRevenueCouncil: DocRef & { low: number; high: number };
+  /** ISO start date; `until` as the City Attorney words it. */
+  salesTaxTerm: DocRef & { start: string; until: string };
+  salesTaxGeneral: DocRef;
+  bondMeasure: DocRef & { letter: string };
+  /** Average yearly cost per $100,000 of assessed value, over `years`, raising `perYear`. */
+  bondCost: DocRef & { perHundredK: number; years: number; perYear: number };
+  bondPeak: DocRef & { perHundredK: number; from: string };
+  bondAudit: DocRef & { everyYears: number };
+  /** Adopted "as amended by subsequent Council action": amendments made at the meeting aren't in the staff report. */
+  adoption: DocRef & { date: string };
+  /** The gap as restated in the adoption staff report, in dollars (rounded to $10k, as written). */
+  adoptionGap: DocRef & { fy2027: number; fy2028: number };
+  /** FY27–31 CIP "Capital & Maint. Need" total, and its stated yearly growth. */
+  capitalNeed: DocRef & { amount: number };
+  capitalNeedGrowth: DocRef & { rate: number };
+  /** The FY27–28 capital program by funding source, all funds: every fund with money in either year. */
+  /** `quote` is the table's title as printed. */
+  capitalProgram: DocRef & {
+    lines: DocCapitalLine[];
+    /** Derived: the sum of the lines (the table prints subtotals per fund type, which the build ties out, but no grand total). */
+    total: { fy2027: number; fy2028: number; total: number };
+    /** The fund that is the General Fund's capital money ("Capital Improvements", the CIP fund). */
+    generalFund: string;
   };
 }
 
@@ -267,7 +324,11 @@ export interface CityBudget {
   personnelAndPension: PersonnelAndPension;
   glossary: GlossaryEntry[];
   citedFacts: CitedFacts;
+  documentFacts: DocumentFacts;
 }
+
+/** budget.json as the workbook alone produces it, before documents.json is merged in. */
+export type WorkbookBudget = Omit<CityBudget, 'documentFacts'>;
 
 /** A formula cell the workbook computed, next to what we computed for it. */
 export interface CrossCheck {

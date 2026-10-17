@@ -3,7 +3,7 @@
  * return a message. Pinned figures come from #3's acceptance criteria and
  * the City's own documents; the rest tie each TOTAL row to its line items.
  */
-import type { CityBudget, CrossCheck, Ref, SourceId } from '../types.ts';
+import type { CrossCheck, Ref, SourceId, WorkbookBudget } from '../types.ts';
 
 export const PINNED = {
   fy2027DepartmentCount: 16,
@@ -18,7 +18,7 @@ export const PINNED = {
 
 const fmt = (n: number | null) => (n === null ? 'null' : n.toLocaleString('en-US', { maximumFractionDigits: 6 }));
 
-export function validateBerkeley(budget: CityBudget, checks: CrossCheck[] = []): string[] {
+export function validateBerkeley(budget: WorkbookBudget, checks: CrossCheck[] = []): string[] {
   const errors: string[] = [];
   const expectEqual = (what: string, actual: number, expected: number, tolerance = 0) => {
     if (!(Math.abs(actual - expected) <= tolerance)) {
@@ -106,7 +106,6 @@ export function validateBerkeley(budget: CityBudget, checks: CrossCheck[] = []):
   }
   if (!(salesTax.rate > 0 && salesTax.rate < 0.05)) errors.push(`cited sales-tax rate looks wrong: ${salesTax.rate}`);
   if (!(bond.amount >= 1e6)) errors.push(`cited bond amount looks wrong: ${bond.amount}`);
-  if (!(salesTax.revenueLow > 0 && salesTax.revenueLow <= salesTax.revenueHigh)) errors.push('cited sales-tax revenue range looks wrong');
   if (!(salesTax.newRate > salesTax.rate)) errors.push(`cited new sales-tax rate looks wrong: ${salesTax.newRate}`);
   const { backlog } = budget.citedFacts;
   if (!(backlog.low > 0 && backlog.low <= backlog.high)) errors.push('cited infrastructure backlog range looks wrong');
@@ -138,7 +137,7 @@ export function validateBerkeley(budget: CityBudget, checks: CrossCheck[] = []):
 }
 
 /** Every record that carries a source, for checks that must cover all of them. */
-export function allRefs(b: CityBudget): Ref[] {
+export function allRefs(b: WorkbookBudget): Ref[] {
   return [
     ...b.revenue.lines,
     b.revenue.total,

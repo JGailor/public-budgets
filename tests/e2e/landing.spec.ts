@@ -14,7 +14,7 @@ test.describe('landing page', () => {
 
   test('question cards open receipts and deep-link to their pages', async ({ page }) => {
     await page.goto('/');
-    const card = page.locator('.question').filter({ hasText: 'What if the sales tax passes?' });
+    const card = page.locator('.question').filter({ hasText: 'What if Measure V, the sales tax, passes?' });
     await card.locator('[data-source-chip]').click();
     const d = page.locator('dialog[data-receipt-dialog]');
     await expect(d.locator('.figure')).toHaveText('105');

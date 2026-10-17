@@ -3,7 +3,7 @@
  * repair backlog, and a squarified treemap of where the program's money comes
  * from. Legend groups are editorial, in data/cities/{city}/capital-groups.json.
  */
-import type { CapitalLine, CityBudget } from '../data/types.ts';
+import type { CityBudget, DocCapitalLine } from '../data/types.ts';
 import { shortMoney } from './format.ts';
 import type { Figure } from './receipts.ts';
 
@@ -11,13 +11,22 @@ export interface CapitalGroupDef {
   id: string;
   name: string;
   color: string;
-  categories: string[];
+  /** Fund names exactly as the City's table prints them. */
+  funds: string[];
   merge?: boolean;
   blockName?: string;
 }
 export interface CapitalGroupsFile {
   otherBelowShare: number;
   groups: CapitalGroupDef[];
+  /** Readable names for funds the table abbreviates. */
+  names?: Record<string, string>;
+}
+
+/** A line inside a block, as the receipt and screen readers list it. */
+export interface BlockLine {
+  name: string;
+  total: number;
 }
 
 const files = import.meta.glob<CapitalGroupsFile>('/data/cities/*/*/*/capital-groups.json', { eager: true, import: 'default' });
@@ -143,28 +152,31 @@ export interface Block {
   color: string;
   text: string;
   group: string | null;
-  lines: CapitalLine[];
+  lines: BlockLine[];
   figure: Figure;
   rect: Record<LayoutKey, Rect>;
   fit: Record<LayoutKey, Fit>;
 }
 
 export function capitalPage(b: CityBudget, file: CapitalGroupsFile) {
-  const c = b.capitalProgram;
+  const c = b.documentFacts.capitalProgram;
   const total = c.total.total;
   const sum = c.lines.reduce((a, l) => a + l.total, 0);
-  if (sum !== total) throw new Error(`capital lines sum to ${sum}, but the TOTAL row says ${total}`);
+  if (sum !== total) throw new Error(`capital lines sum to ${sum}, but the total says ${total}`);
 
   const groupOf = new Map<string, CapitalGroupDef>();
   for (const g of file.groups)
-    for (const cat of g.categories) {
-      if (groupOf.has(cat)) throw new Error(`capital-groups.json: "${cat}" is in both ${groupOf.get(cat)!.id} and ${g.id}`);
-      groupOf.set(cat, g);
+    for (const fund of g.funds) {
+      if (groupOf.has(fund)) throw new Error(`capital-groups.json: "${fund}" is in both ${groupOf.get(fund)!.id} and ${g.id}`);
+      groupOf.set(fund, g);
     }
-  const unmapped = [...new Set(c.lines.map((l) => l.category))].filter((cat) => !groupOf.has(cat));
+  const unmapped = c.lines.map((l) => l.name).filter((f) => !groupOf.has(f));
   if (unmapped.length) throw new Error(`capital-groups.json: no group for ${unmapped.join(', ')}`);
+  const stale = [...groupOf.keys(), ...Object.keys(file.names ?? {})].filter((f) => !c.lines.some((l) => l.name === f));
+  if (stale.length) throw new Error(`capital-groups.json: no fund named ${stale.join(', ')} in the City's table`);
+  const nameOf = (l: DocCapitalLine) => file.names?.[l.name] ?? l.name;
 
-  const fig = (value: number, label: string, lines: CapitalLine[], ref: CapitalLine = lines[0]): Figure => ({
+  const fig = (value: number, label: string, ref: DocCapitalLine, lines: BlockLine[]): Figure => ({
     value,
     label,
     ref,
@@ -173,29 +185,33 @@ export function capitalPage(b: CityBudget, file: CapitalGroupsFile) {
 
   type Raw = Omit<Block, 'rect' | 'fit'>;
   const raws: Raw[] = [];
-  const small: CapitalLine[] = [];
+  const small: DocCapitalLine[] = [];
   for (const g of file.groups.filter((x) => x.merge)) {
-    const lines = c.lines.filter((l) => g.categories.includes(l.category));
-    const value = lines.reduce((a, l) => a + l.total, 0);
+    const funds = c.lines.filter((l) => g.funds.includes(l.name));
+    // A merged block lists its programs when the City breaks the fund down, otherwise its funds.
+    const lines: BlockLine[] = funds.length === 1 && funds[0].parts ? funds[0].parts : funds.map((l) => ({ name: nameOf(l), total: l.total }));
+    const value = funds.reduce((a, l) => a + l.total, 0);
     const name = `${g.blockName ?? g.name} (${lines.length} programs)`;
-    raws.push({ id: g.id, name, value, color: g.color, text: labelColor(g.color), group: g.id, lines, figure: fig(value, `${name}, FY2027 + FY2028 capital funding`, lines) });
+    raws.push({ id: g.id, name, value, color: g.color, text: labelColor(g.color), group: g.id, lines, figure: fig(value, `${name}, FY2027 + FY2028 capital funding`, funds[0], lines) });
   }
   for (const l of c.lines) {
-    const g = groupOf.get(l.category)!;
+    const g = groupOf.get(l.name)!;
     if (g.merge) continue;
     if (l.total / total < file.otherBelowShare) {
       small.push(l);
       continue;
     }
-    raws.push({ id: l.name, name: l.name, value: l.total, color: g.color, text: labelColor(g.color), group: g.id, lines: [l], figure: fig(l.total, `${l.name}, FY2027 + FY2028 capital funding`, [l]) });
+    const name = nameOf(l);
+    raws.push({ id: name, name, value: l.total, color: g.color, text: labelColor(g.color), group: g.id, lines: [{ name, total: l.total }], figure: fig(l.total, `${name}, FY2027 + FY2028 capital funding`, l, []) });
   }
   raws.sort((x, y) => y.value - x.value);
   if (small.length) {
     const value = small.reduce((a, l) => a + l.total, 0);
     const name = `Other sources (${small.length})`;
     small.sort((x, y) => y.total - x.total);
+    const lines = small.map((l) => ({ name: nameOf(l), total: l.total }));
     // Other always goes last (bottom-right), whatever its size.
-    raws.push({ id: 'other', name, value, color: OTHER_COLOR, text: labelColor(OTHER_COLOR), group: null, lines: small, figure: fig(value, `${name}, FY2027 + FY2028 capital funding`, small) });
+    raws.push({ id: 'other', name, value, color: OTHER_COLOR, text: labelColor(OTHER_COLOR), group: null, lines, figure: fig(value, `${name}, FY2027 + FY2028 capital funding`, small[0], lines) });
   }
   const pctRect = (r: Rect, L: { w: number; h: number }): Rect => ({ x: (r.x / L.w) * 100, y: (r.y / L.h) * 100, w: (r.w / L.w) * 100, h: (r.h / L.h) * 100 });
   const laid = Object.fromEntries((Object.keys(LAYOUTS) as LayoutKey[]).map((k) => [k, squarify(raws.map((r) => r.value), LAYOUTS[k].w, LAYOUTS[k].h)])) as Record<LayoutKey, Rect[]>;
@@ -209,16 +225,40 @@ export function capitalPage(b: CityBudget, file: CapitalGroupsFile) {
   const legend = file.groups.filter((g) => visibleGroups.has(g.id)).map((g) => ({ id: g.id, name: g.name, color: g.color }));
   const gf = blocks.find((x) => file.groups.find((g) => g.id === x.id)?.merge)!;
 
+  const need = b.documentFacts.capitalNeed;
   const bl = b.citedFacts.backlog;
+  const max = Math.max(need.amount, bl.high);
   const gap = b.deficitBridge.steps.find((s) => s.key === 'final-gap')!;
   return {
-    total: { value: total, fy2027: c.total.fy2027, fy2028: c.total.fy2028, figure: { value: total, label: 'Capital program, FY2027 + FY2028, all funding sources', ref: c.total, tone: 'neutral' } satisfies Figure },
+    total: {
+      value: total,
+      fy2027: c.total.fy2027,
+      fy2028: c.total.fy2028,
+      figure: {
+        value: total,
+        label: 'Capital program, FY2027 + FY2028, all funding sources',
+        ref: c,
+        tone: 'neutral',
+        parts: [
+          { label: 'FY2027', value: c.total.fy2027 },
+          { label: 'FY2028', value: c.total.fy2028 },
+        ],
+      } satisfies Figure,
+    },
+    /** The FY27–31 CIP's unfunded capital and maintenance need: the City's newest figure. */
+    need: {
+      value: need.amount,
+      growth: b.documentFacts.capitalNeedGrowth.rate,
+      figure: { value: need.amount, label: 'Unfunded capital and maintenance need, FY2027–31 CIP', ref: need, tone: 'neutral' } satisfies Figure,
+      growthCite: b.documentFacts.capitalNeedGrowth,
+    },
+    /** The bond-planning page's earlier range, and what it counted. */
     backlog: {
       fact: bl,
-      figure: { value: bl.low, label: 'Unfunded infrastructure and deferred maintenance, low end of the city estimate', ref: bl, tone: 'neutral' } satisfies Figure,
+      figure: { value: bl.low, label: 'Unfunded infrastructure and deferred maintenance, earlier City estimate (low end)', ref: bl, tone: 'neutral' } satisfies Figure,
     },
-    /** Scale: one axis from 0 to the backlog's high estimate. */
-    scale: { program: total / bl.high, low: bl.low / bl.high },
+    /** Scale: one axis from 0 to the larger of the two need estimates. */
+    scale: { program: total / max, need: need.amount / max },
     blocks,
     legend,
     generalFund: gf,

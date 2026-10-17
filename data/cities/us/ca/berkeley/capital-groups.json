@@ -1,13 +1,48 @@
 {
-  "note": "Legend groups for the Capital page treemap, keyed by the workbook's fund category (Capital Program FY27-28, column B). Every category must be in exactly one group; the build fails otherwise. A group with merge: true is drawn as one block (the General Fund programs). Sources under otherBelowShare of the total roll into one gray 'Other sources (n)' block.",
+  "note": "Legend groups for the Capital page treemap, keyed by fund name exactly as the adoption report's 'Capital program by funding source' table prints it (budget.json documentFacts.capitalProgram). Every fund must be in exactly one group; the build fails otherwise. `names` gives a fund a readable name on the page. A group with merge: true is drawn as one block (the General Fund's CIP fund, split into its programs in the receipt). Funds under otherBelowShare of the total roll into one gray 'Other sources (n)' block.",
   "otherBelowShare": 0.01,
   "groups": [
-    { "id": "utility", "name": "Utility & transport funds", "color": "#0e6b6f", "categories": ["Special (PW)"] },
-    { "id": "measure-ff", "name": "Measure FF (voter-approved)", "color": "#23395b", "categories": ["Bond/Parcel (PW)"] },
-    { "id": "general-fund", "name": "General Fund", "color": "#c8432b", "categories": ["GF/CIP"], "merge": true, "blockName": "General Fund" },
-    { "id": "parks", "name": "Parks funds", "color": "#3e9a8f", "categories": ["Special (PRW)"] },
-    { "id": "equipment", "name": "Equipment replacement", "color": "#8a6c45", "categories": ["Internal Service (PW)"] },
-    { "id": "grants", "name": "Grants", "color": "#7a4e7e", "categories": ["Grant"] },
-    { "id": "technology", "name": "Technology", "color": "#3f5e96", "categories": ["Special (IT)"] }
-  ]
+    {
+      "id": "utility",
+      "name": "Utility & transport funds",
+      "color": "#0e6b6f",
+      "funds": [
+        "Sanitary Sewer Operation",
+        "Clean Storm Water",
+        "Zero Waste",
+        "Meas BB-Local Streets and RD",
+        "Meas BB-Bike and Pedestrian",
+        "State Transportation Tax",
+        "Meas F-ALA CT VRF ST and RD",
+        "Street Lighting",
+        "Private Party Sidewalks",
+        "Street And Open Space Impr"
+      ]
+    },
+    { "id": "measure-ff", "name": "Measure FF (voter-approved)", "color": "#23395b", "funds": ["Measure FF-Street Repair"] },
+    { "id": "general-fund", "name": "General Fund", "color": "#c8432b", "funds": ["Capital Improvements"], "merge": true, "blockName": "General Fund" },
+    { "id": "parks", "name": "Parks funds", "color": "#3e9a8f", "funds": ["Park Tax", "Playground Camp", "Marina Operations/Maint"] },
+    { "id": "equipment", "name": "Equipment replacement", "color": "#8a6c45", "funds": ["Equipment Replacement"] },
+    { "id": "grants", "name": "Grants", "color": "#7a4e7e", "funds": ["Capital Grants-State", "Capital Grants-Local", "Capital Grants-Federal", "MTC", "One-Time Grant:No Cap Exp"] },
+    { "id": "technology", "name": "Technology", "color": "#3f5e96", "funds": ["It Cost Allocation"] },
+    { "id": "settlements", "name": "Settlements & other", "color": "#6b7280", "funds": ["UC Settlement", "Miles Lab"] }
+  ],
+  "names": {
+    "Sanitary Sewer Operation": "Sanitary Sewer",
+    "Marina Operations/Maint": "Marina Fund",
+    "Meas BB-Local Streets and RD": "Measure BB: local streets & roads",
+    "Meas BB-Bike and Pedestrian": "Measure BB: bike & pedestrian",
+    "State Transportation Tax": "State Transportation (Gas) Tax",
+    "Meas F-ALA CT VRF ST and RD": "Vehicle Registration Fee (Measure F)",
+    "Street And Open Space Impr": "Street & Open Space Improvement",
+    "Measure FF-Street Repair": "Measure FF (Safe Streets)",
+    "Park Tax": "Parks Tax",
+    "Playground Camp": "Camps Fund",
+    "Capital Grants-State": "Capital Grant — State",
+    "Capital Grants-Local": "Capital Grant — Local",
+    "Capital Grants-Federal": "Capital Grant — Federal",
+    "MTC": "MTC (regional transportation) grant",
+    "One-Time Grant:No Cap Exp": "One-time grant",
+    "It Cost Allocation": "IT Cost Allocation Fund"
+  }
 }

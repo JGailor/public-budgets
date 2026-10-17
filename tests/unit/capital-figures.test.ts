@@ -11,10 +11,12 @@ const groups = capitalGroupsFor(city.path);
 const c = capitalPage(budget, groups);
 
 describe('capital page figures', () => {
-  it('the total is $178,597,581; the General Fund block is $24.2M', () => {
-    expect(c.total.value).toBe(178_597_581);
-    expect(c.generalFund.name).toBe('General Fund (6 programs)');
-    expect((c.generalFund.value / 1e6).toFixed(1)).toBe('24.2');
+  it('the total is $183,623,376 (adoption report p.170); the General Fund block is $24.0M in 5 programs', () => {
+    expect(c.total.value).toBe(183_623_376);
+    expect([c.total.fy2027, c.total.fy2028]).toEqual([100_066_068, 83_557_308]);
+    expect(c.generalFund.name).toBe('General Fund (5 programs)');
+    expect(c.generalFund.value).toBe(24_025_016);
+    expect(c.generalFund.figure.parts!.map((p) => p.label)).toEqual(['Streets', 'Facilities', 'Camps', 'Sidewalks', 'Parks']);
     expect(c.generalFund.figure.parts!.reduce((a, p) => a + p.value, 0)).toBe(c.generalFund.value);
   });
 
@@ -24,17 +26,19 @@ describe('capital page figures', () => {
   });
 
   it('"Other sources (n)" counts what it rolled up: every source under 1% of the total', () => {
-    const small = budget.capitalProgram.lines.filter((l) => !l.category.startsWith('GF') && l.total / c.total.value < 0.01);
+    const program = budget.documentFacts.capitalProgram;
+    const small = program.lines.filter((l) => l.name !== program.generalFund && l.total / c.total.value < 0.01);
     const other = c.blocks.at(-1)!;
     expect(other.name).toBe(`Other sources (${small.length})`);
-    expect(small.length).toBe(7);
+    expect(small.length).toBe(14);
     expect(other.value).toBe(small.reduce((a, l) => a + l.total, 0));
   });
 
   it('every dollar is in exactly one block', () => {
     expect(c.blocks.reduce((a, b) => a + b.value, 0)).toBe(c.total.value);
-    const names = c.blocks.flatMap((b) => b.lines.map((l) => l.name));
-    expect(new Set(names).size).toBe(budget.capitalProgram.lines.length);
+    // The General Fund block lists its programs instead of its one fund.
+    const names = c.blocks.flatMap((b) => (b.id === 'general-fund' ? ['general-fund'] : b.lines.map((l) => l.name)));
+    expect(new Set(names).size).toBe(budget.documentFacts.capitalProgram.lines.length);
   });
 
   for (const k of ['wide', 'tall'] as const) {
@@ -65,19 +69,23 @@ describe('capital page figures', () => {
     for (const b of c.blocks) expect(contrast(b.text, b.color), b.id).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('a fund category with no legend group fails the build', () => {
+  it('a fund with no legend group, or a group naming a fund the table lacks, fails the build', () => {
     const missing = { ...groups, groups: groups.groups.filter((g) => g.id !== 'grants') };
-    expect(() => capitalPage(budget, missing)).toThrow(/no group for Grant/);
+    expect(() => capitalPage(budget, missing)).toThrow(/no group for .*Capital Grants-State/);
+    const stale = { ...groups, groups: groups.groups.map((g) => (g.id === 'grants' ? { ...g, funds: [...g.funds, 'FEMA'] } : g)) };
+    expect(() => capitalPage(budget, stale)).toThrow(/no fund named FEMA/);
   });
 
-  it('the scale and the inventory come from the cited backlog', () => {
-    expect(c.scale.program).toBeCloseTo(178_597_581 / 2e9, 9);
-    expect(c.scale.low).toBeCloseTo(0.825, 9);
-    expect(c.backlog.fact).toMatchObject({ sidewalkMiles: '300+', parks: 54, buildings: 95 });
+  it('the scale: the FY27-31 CIP need is the axis; the earlier estimate and inventory are kept', () => {
+    expect(c.need.value).toBe(2_115_819_772);
+    expect(c.need.growth).toBe(0.04);
+    expect(c.scale.need).toBe(1);
+    expect(c.scale.program).toBeCloseTo(183_623_376 / 2_115_819_772, 9);
+    expect(c.backlog.fact).toMatchObject({ low: 1_650_000_000, high: 2_000_000_000, sidewalkMiles: '300+', parks: 54, buildings: 95 });
   });
 
   it('has no figure typed into the page', () => {
     const src = readFileSync(join(import.meta.dirname, '../../src/pages/[country]/[state]/[city]/capital.astro'), 'utf8');
-    for (const lit of ['178', '24.2', '1.65', '300+', ' 54 ', ' 95 ', '$29M', '48.1', 'Sanitary']) expect(src, lit).not.toContain(lit);
+    for (const lit of ['183', '24.0', '2.12', '1.65', '300+', ' 54 ', ' 95 ', '4%', '$29M', '48.1', 'Sanitary']) expect(src, lit).not.toContain(lit);
   });
 });

@@ -1,0 +1,137 @@
+{
+  "note": "City documents published after the workbook, and the sources that ballot.json cites beyond it. Sources here continue the workbook's numbering (S20 onwards). Every quote, here and in ballot.json, must appear on its page of source/excerpts/{source}.json (whitespace-normalized; page 1 for a web page). The build parses every number from its quote, so a number can't drift from its source. News excerpts keep only the paragraphs quoted.",
+  "sources": [
+    {
+      "id": "S20",
+      "publisher": "City of Berkeley",
+      "title": "Adoption of FY 2027 & FY 2028 Biennial Budget and FY 2027–2031 Capital Improvement Program",
+      "committee": "City Council",
+      "date": "2026-06-23",
+      "dateLabel": "Jun 23 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/2026-06/2026-06-23%20Special%20Item%2001%20Adoption%20of%20Fiscal%20Years%202027%20and%202028.pdf",
+      "type": "city",
+      "usedFor": "Budget adoption; Fire Station 4 and police positions under each sales-tax outcome; unfunded capital need"
+    },
+    {
+      "id": "S21",
+      "publisher": "City of Berkeley",
+      "title": "City Attorney's Impartial Analyses, November 2026 ballot (Measures U and V)",
+      "committee": "City Attorney",
+      "url": "https://berkeleyca.gov/sites/default/files/Nov%202026%20Impartial%20Analyses.pdf",
+      "type": "city",
+      "usedFor": "Measure letters; sales-tax estimate, start date and type; bond cost to property owners"
+    },
+    {
+      "id": "S22",
+      "publisher": "City of Berkeley",
+      "title": "Placing a Transactions and Use (Sales) General Tax Measure on the November 3, 2026 ballot",
+      "committee": "City Council",
+      "date": "2026-06-16",
+      "dateLabel": "Jun 16 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/2026-06/2026-06-16%20Item%2039%20Placing%20a%20Transactions%20and%20Use.pdf",
+      "type": "city",
+      "usedFor": "Sales-tax revenue estimate"
+    },
+    {
+      "id": "S23",
+      "publisher": "City of Berkeley",
+      "title": "Supplemental: restore 9.00 FTE positions in the Fire Department (budget adoption, Item 1)",
+      "committee": "Councilmembers Kesarwani, Blackaby and Taplin",
+      "date": "2026-06-23",
+      "dateLabel": "Jun 23 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/2026-06/Budget%20Supplemental%20Cover%20-%20Kesarwani.pdf",
+      "type": "city",
+      "usedFor": "Proposed restoration of nine fire positions at adoption"
+    },
+    {
+      "id": "S24",
+      "publisher": "Berkeleyside",
+      "title": "Berkeley approves budget with cuts and layoffs; jobs in fire department spared for now",
+      "date": "2026-06-24",
+      "dateLabel": "Jun 24 2026",
+      "url": "https://www.berkeleyside.org/2026/06/24/berkeley-budget-sales-tax-firefighters",
+      "type": "news",
+      "usedFor": "Council vote at adoption; nine fire positions funded"
+    }
+  ],
+  "quotes": {
+    "salesTaxMeasure": {
+      "source": "S21",
+      "page": 3,
+      "quote": "CITY ATTORNEY’S IMPARTIAL ANALYSIS OF MEASURE V"
+    },
+    "salesTaxRevenue": {
+      "source": "S21",
+      "page": 3,
+      "quote": "The City estimates the tax will generate $9 to $10 million annually.",
+      "related": [
+        "S22"
+      ]
+    },
+    "salesTaxRevenueCouncil": {
+      "source": "S22",
+      "page": 1,
+      "quote": "the tax is estimated to generate approximately $9 million - $10 million annually"
+    },
+    "salesTaxTerm": {
+      "source": "S21",
+      "page": 3,
+      "quote": "the tax would go into effect beginning April 1, 2027, and last until ended by the voters"
+    },
+    "salesTaxGeneral": {
+      "source": "S21",
+      "page": 3,
+      "quote": "This would be a general tax, meaning the revenue from the tax would be placed into the General Fund and could be spent on any valid municipal purpose."
+    },
+    "bondMeasure": {
+      "source": "S21",
+      "page": 1,
+      "quote": "CITY ATTORNEY’S IMPARTIAL ANALYSIS OF MEASURE U"
+    },
+    "bondCost": {
+      "source": "S21",
+      "page": 2,
+      "quote": "the average annual taxpayer costs over the projected 40 years that the bonds would be outstanding are approximately $22.14 per $100,000 of assessed property value; generating approximately $15,200,000 per year"
+    },
+    "bondPeak": {
+      "source": "S21",
+      "page": 2,
+      "quote": "$35 per $100,000 of assessed value, which the City projects would begin to apply in 2040-41"
+    },
+    "bondAudit": {
+      "source": "S21",
+      "page": 1,
+      "quote": "All expenditures would be subject to an audit by the City Auditor at least once every three years"
+    },
+    "adoption": {
+      "source": "S20",
+      "page": 1,
+      "quote": "as contained in the City Manager’s FY27 & FY28 Proposed Biennial Budget, and as amended by subsequent Council action"
+    },
+    "adoptionGap": {
+      "source": "S20",
+      "page": 2,
+      "quote": "The City projects General Fund structural deficits of $29.25 million in FY27 (after the allocation of one-time resources) and $29.53 million in FY28."
+    },
+    "capitalNeed": {
+      "source": "S20",
+      "page": 248,
+      "quote": "Capital & Maint. Need $ 2,115,819,772"
+    },
+    "capitalNeedGrowth": {
+      "source": "S20",
+      "page": 248,
+      "quote": "(1) Capital & Maint. Needs are current estimates of unfunded needs. Needs are estimated to increase at a rate of 4% per year."
+    }
+  },
+  "capitalProgram": {
+    "source": "S20",
+    "byFund": 170,
+    "generalFund": "Capital Improvements",
+    "generalFundBreakdown": [
+      172,
+      173
+    ],
+    "note": "FY27 and FY28 columns of 'Capital program by funding source - all funds' (p.170): every fund row, tied out to its fund type's Total row. The General Fund's CIP fund is broken down by program category on pp.172-173 ('… Total' rows), tied out to the p.170 row and to that table's Grand Total."
+  }
+}

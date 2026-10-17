@@ -29,6 +29,7 @@ import type {
   Source,
   SourceId,
   UnfundedLiability,
+  WorkbookBudget,
 } from '../types.ts';
 import { SCHEMA_VERSION } from '../types.ts';
 import type { Tab, Workbook } from '../workbook.ts';
@@ -515,8 +516,6 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
         text: t.text,
         rate: Number(t.m[1]) / 100,
         election: t.m[2],
-        revenueLow: Number(t.m[3]) * 1e6,
-        revenueHigh: Number(t.m[4]) * 1e6,
         newRate: Number(t.m[5]) / 100,
         threshold: majority.m[1],
         source: 'S5',
@@ -549,7 +548,7 @@ export async function extractBerkeley(wb: Workbook, meta: CityBudget['workbook']
     } satisfies CityBudget['citedFacts'];
   })();
 
-  const budget: CityBudget = {
+  const budget: WorkbookBudget = {
     schemaVersion: SCHEMA_VERSION,
     workbook: meta,
     notes,

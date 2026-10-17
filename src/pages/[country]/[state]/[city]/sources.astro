@@ -13,7 +13,8 @@ import { csvTables } from '../../../../data/csv';
 import { budgetFor } from '../../../../lib/budget';
 import { cityStaticPaths, type City } from '../../../../lib/cities';
 import { shortMoney } from '../../../../lib/format';
-import { sourcesById } from '../../../../lib/receipts';
+import { ballotFileFor } from '../../../../lib/ballot';
+import { pagesBySource, sourcesById } from '../../../../lib/receipts';
 
 export const getStaticPaths = cityStaticPaths;
 
@@ -22,6 +23,14 @@ const budget = budgetFor(city)!;
 const sources = [...sourcesById(budget).values()];
 const counts = { all: sources.length, city: sources.filter((s) => s.type === 'city').length, news: sources.filter((s) => s.type === 'news').length };
 const raw = new Map(budget.sources.map((s) => [s.id, s]));
+const pages = pagesBySource(budget.documentFacts, ballotFileFor(city.path));
+const pageList = (ps: number[]) => `${ps.length > 1 ? 'pp.' : 'p.'} ${ps.join(', ')}`;
+const meta = (id: (typeof sources)[number]['id'], date?: string) =>
+  [raw.get(id)!.publisher, date, raw.get(id)!.usedFor, pages.has(id) ? pageList(pages.get(id)!) : undefined].filter(Boolean).join(' · ');
+const adoption = budget.documentFacts.adoption;
+const adoptedOn = new Date(`${adoption.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+const program = budget.documentFacts.capitalProgram;
+const workbookProgram = budget.capitalProgram.total;
 const data = `${city.path}data/`;
 const workbook = basename(budget.workbook.file);
 const tables = csvTables(budget).map((t) => t.name);
@@ -72,9 +81,7 @@ const humanize = (name: string) =>
                 <span class={`badge badge--${s.type}`}>{s.id}</span>
                 <span class="doc">
                   <span class="title">{s.title}</span>
-                  <span class="meta">
-                    {[s.publisher, s.date, raw.get(s.id)!.usedFor].filter(Boolean).join(' · ')}
-                  </span>
+                  <span class="meta">{meta(s.id, s.date)}</span>
                 </span>
                 <span class="used">
                   <span class="visually-hidden">Used on: </span>
@@ -136,6 +143,22 @@ const humanize = (name: string) =>
             </p>
             <p class="chips-row"><SourceChip city={city} source="S8" /><SourceChip city={city} source="S12" /><SourceChip city={city} source="S17" /></p>
           </li>
+          <li class="gap card" data-gap="adoption">
+            <h3>Adopted with amendments not yet in City records</h3>
+            <p>
+              The Council adopted the budget on {adoptedOn} "as amended by subsequent Council action". A Council supplemental proposed restoring nine fire positions, and reporting says the Council funded
+              them. Until the minutes are posted, position and workforce counts are from the April 16 plan.
+            </p>
+            <p class="chips-row"><SourceChip city={city} source={adoption.source} at={adoption} /><SourceChip city={city} source="S23" /><SourceChip city={city} source="S24" /></p>
+          </li>
+          <li class="gap card" data-gap="capital-total">
+            <h3>Two capital program totals</h3>
+            <p>
+              The May proposal's presentation lists {shortMoney(workbookProgram.total)} for FY27-28; the adoption report's table by funding source
+              totals {shortMoney(program.total.total)}, with a few more funds and revised amounts. The Capital page uses the adoption report.
+            </p>
+            <p class="chips-row"><SourceChip city={city} source={workbookProgram.source} /><SourceChip city={city} source={program.source} at={program} /></p>
+          </li>
           <li class="gap card" data-gap="it-allocation">
             <h3>Department totals differ by {shortMoney(itAllocation.baseline)}</h3>
             <p>The comparison table leaves out the {itAllocation.name}. Totals reconcile once it's added back.</p>
@@ -146,7 +169,8 @@ const humanize = (name: string) =>
         <section class="methods" aria-labelledby="methods-title">
           <h2 id="methods-title">How we build this site</h2>
           <p>
-            Numbers are copied from the city's workbook, never retyped. Groupings (like 'property tax') are sums of the city's own line items, and each
+            Numbers are copied from the city's workbook, or read from the sentence or table row of a City document that states them, never retyped. The
+            build checks every quoted sentence against the document's text. Groupings (like 'property tax') are sums of the city's own line items, and each
             group lists its parts.
           </p>
           <p class="basis">{budget.notes.caveat}</p>

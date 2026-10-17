@@ -7,18 +7,34 @@ const root = join(import.meta.dirname, '../..');
 const dist = join(root, 'dist');
 const b: CityBudget = JSON.parse(readFileSync(join(root, 'data/cities/us/ca/berkeley/budget.json'), 'utf8'));
 const html = readFileSync(join(dist, 'us/ca/berkeley/sources/index.html'), 'utf8');
-const text = html.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/\s+/g, ' ');
+const strip = (h: string) => h.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+const text = strip(html);
 const pages = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? pages(join(dir, e.name)) : e.name.endsWith('.html') ? [join(dir, e.name)] : []));
 
 describe('sources page', () => {
   const rows = [...html.matchAll(/<li class="src-row" id="(S\d+)" data-type="(city|news)"/g)].map((m) => ({ id: m[1], type: m[2] }));
 
-  it('lists all 19 sources: 10 city documents, 9 news reports', () => {
+  it('lists all 24 sources: 14 city documents, 10 news reports', () => {
     expect(rows.map((r) => r.id)).toEqual(b.sources.map((s) => s.id));
-    expect(rows.filter((r) => r.type === 'city')).toHaveLength(10);
-    expect(text).toContain('City documents (10)');
-    expect(text).toContain('News reports (9)');
+    expect(rows.filter((r) => r.type === 'city')).toHaveLength(14);
+    expect(text).toContain('City documents (14)');
+    expect(text).toContain('News reports (10)');
+  });
+
+  it('the documents added after the workbook list the pages the site cites', () => {
+    const meta = (id: string) => strip(html.match(new RegExp(`id="${id}"[\\s\\S]*?<span class="meta"[^>]*>([^<]*)<`))![1]);
+    expect(meta('S20')).toMatch(/· pp\. 1, 2, 55, 96, 170, 172, 173, 248$/);
+    expect(meta('S21')).toMatch(/· pp\. 1, 2, 3$/);
+    expect(meta('S22')).toMatch(/· p\. 1$/);
+    expect(meta('S1')).not.toMatch(/ p\. /);
+  });
+
+  it('explains the adoption amendments and the two capital totals in the known gaps', () => {
+    expect(text).toContain('Adopted with amendments not yet in City records');
+    expect(text).toContain('Until the minutes are posted, position and workforce counts are from the April 16 plan.');
+    const m = (v: number) => `$${(v / 1e6).toFixed(1)}M`;
+    expect(text).toContain(`lists ${m(b.capitalProgram.total.total)} for FY27-28; the adoption report's table by funding source totals ${m(b.documentFacts.capitalProgram.total.total)}`);
   });
 
   it('every chip used anywhere on the site points at a source listed here', () => {

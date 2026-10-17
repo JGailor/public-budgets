@@ -42,7 +42,7 @@ describe('revenue groups', () => {
 describe('cited facts', () => {
   it('parse the sentences the workbook states them in', () => {
     expect(budget.citedFacts.growth).toMatchObject({ years: 10, spendingRate: 0.08, revenueRate: 0.065, source: 'S12' });
-    expect(budget.citedFacts.salesTax).toMatchObject({ rate: 0.005, election: 'Nov 2026', source: 'S5', related: ['S15', 'S16'], newRate: 0.1075, revenueLow: 9_000_000, revenueHigh: 9_400_000, threshold: 'simple majority' });
+    expect(budget.citedFacts.salesTax).toMatchObject({ rate: 0.005, election: 'Nov 2026', source: 'S5', related: ['S15', 'S16'], newRate: 0.1075, threshold: 'simple majority' });
     expect(budget.citedFacts.bond).toMatchObject({ amount: 300_000_000, election: 'Nov 2026', source: 'S3', threshold: '2/3', repaidBy: 'property tax' });
     expect(budget.citedFacts.backlog).toMatchObject({ low: 1_650_000_000, high: 2_000_000_000, sidewalkMiles: '300+', parks: 54, buildings: 95, source: 'S6' });
   });

@@ -30,10 +30,33 @@ describe('ballot page figures', () => {
     expect((fails.cuts.pct * 100).toFixed(1)).toBe('10.3');
   });
 
-  it('the measures: 0.5%, ~$9.0-9.4M/yr, to 10.75%, simple majority; $300M bond, 2/3, $1.65-2B backlog', () => {
-    expect(p.salesTax.fact).toMatchObject({ rate: 0.005, revenueLow: 9_000_000, revenueHigh: 9_400_000, newRate: 0.1075, threshold: 'simple majority' });
+  it('Measure V: 0.5%, $9-10M/yr (City Attorney and Council agree), to 10.75%, simple majority, from April 1, 2027 until ended by voters', () => {
+    expect(p.salesTax.fact).toMatchObject({ rate: 0.005, newRate: 0.1075, threshold: 'simple majority' });
+    expect(p.salesTax.letter).toBe('V');
+    expect(p.salesTax.revenue).toMatchObject({ low: 9_000_000, high: 10_000_000 });
+    expect(p.salesTax.revenue.cites.map((c) => `${c.source} p.${c.page}`)).toEqual(['S21 p.3', 'S22 p.1']);
+    expect(p.salesTax.term).toMatchObject({ start: '2027-04-01', until: 'until ended by the voters' });
+    expect(p.salesTax.general.quote).toMatch(/general tax/);
+  });
+
+  it('Measure U: $300M, 2/3, ~$22.14 per $100k over 40 years (~$15.2M/yr), peak ~$35 from 2040-41, audited every 3 years; need $2.12B', () => {
     expect(p.bond.fact).toMatchObject({ amount: 300_000_000, threshold: '2/3', repaidBy: 'property tax' });
+    expect(p.bond.letter).toBe('U');
+    expect(p.bond.cost).toMatchObject({ perHundredK: 22.14, years: 40, perYear: 15_200_000 });
+    expect(p.bond.peak).toMatchObject({ perHundredK: 35, from: '2040-41' });
+    expect(p.bond.audit.everyYears).toBe(3);
+    expect(p.bond.need.value).toBe(2_115_819_772);
     expect(p.bond.backlog.ref).toMatchObject({ low: 1_650_000_000, high: 2_000_000_000 });
+  });
+
+  it('scenario rows quote the adoption report: Fire Station 4 (p.55) and 21 police positions (p.96)', () => {
+    const row = (s: typeof passes, k: string) => s.rows.find((r) => r.key === k)!;
+    expect(row(passes, 'fire-station')).toMatchObject({ label: 'Fire Station 4', text: 'Tax revenue proposed to keep it open', cite: { source: 'S20', page: 55 } });
+    expect(row(fails, 'fire-station')).toMatchObject({ label: 'Fire Station 4', text: 'Closure reconsidered for FY2028', cite: { source: 'S20', page: 55 } });
+    expect(row(passes, 'police')).toMatchObject({ label: '21 police positions', cite: { source: 'S20', page: 96 } });
+    expect(row(fails, 'police')).toMatchObject({ label: '21 police positions', cite: { source: 'S20', page: 96 } });
+    expect(passes.caveat).toBe(fails.caveat);
+    expect(p.adoption).toMatchObject({ date: '2026-06-23', cite: { source: 'S20', page: 1 } });
   });
 
   it('both outcomes are built the same way: same fields, same pictogram scale', () => {
@@ -49,20 +72,30 @@ describe('ballot page figures', () => {
 
   it('results are a data change: pending, passed and failed', () => {
     expect(ballotState(withStatus('pending'))).toMatchObject({ decided: false, result: null, eyebrow: 'November 3, 2026', heading: 'On your ballot, and what it changes' });
-    expect(ballotState(withStatus('passed'))).toMatchObject({ decided: true, result: 'passes', heading: expect.stringMatching(/^The sales tax passed\./) });
-    expect(ballotState(withStatus('failed'))).toMatchObject({ decided: true, result: 'fails', heading: expect.stringMatching(/^The sales tax failed\./) });
+    expect(ballotState(withStatus('passed'), 'Measure V')).toMatchObject({ decided: true, result: 'passes', heading: expect.stringMatching(/^Measure V passed\./) });
+    expect(ballotState(withStatus('failed'), 'Measure V')).toMatchObject({ decided: true, result: 'fails', heading: expect.stringMatching(/^Measure V failed\./) });
+    expect(ballotPage(budget, withStatus('passed')).state.heading).toMatch(/^Measure V passed\./);
   });
 
   it('rejects a ballot.json it cannot render honestly', () => {
     expect(() => checkBallotFile({ ...file, measures: { ...file.measures, salesTax: { status: 'won' as never, yesShare: null } } }, budget)).toThrow(/status/);
-    expect(() => checkBallotFile({ ...file, fireStation: { ...file.fireStation, fails: { ...file.fireStation.fails, sources: ['S99'] } } }, budget)).toThrow(/S99/);
+    const withRow = (fails: Partial<BallotFile['rows'][number]['fails']>): BallotFile => ({ ...file, rows: [{ ...file.rows[0], fails: { ...file.rows[0].fails, ...fails } }, ...file.rows.slice(1)] });
+    expect(() => checkBallotFile(withRow({ cite: { ...file.rows[0].fails.cite, source: 'S99' as never } }), budget)).toThrow(/S99/);
+    expect(() => checkBallotFile(withRow({ also: ['S99' as never] }), budget)).toThrow(/S99/);
+    // Neutral by construction: one outcome can't cite more (or other) documents than the other.
+    expect(() => checkBallotFile(withRow({ also: ['S15', 'S16'] }), budget)).toThrow(/cites S20,S16 if it passes but S20,S15,S16 if it fails/);
+    expect(() => checkBallotFile(withRow({ text: '' }), budget)).toThrow(/needs text/);
+    expect(() => checkBallotFile({ ...file, countsCaveat: { ...file.countsCaveat, cites: [] } }, budget)).toThrow(/countsCaveat/);
   });
 
   it('has no figure typed into the page, and no advocacy', () => {
     const src = readFileSync(join(import.meta.dirname, '../../src/pages/[country]/[state]/[city]/ballot.astro'), 'utf8');
-    for (const lit of ['105', '138', '1,455', '1,422', '19.8', '29.3', '10.75', '300M', '9.4', '1.65', 'Police']) expect(src, lit).not.toContain(lit);
+    for (const lit of ['105', '138', '1,455', '1,422', '19.8', '29.3', '10.75', '300M', '9.4', '1.65', '2.12', '22.14', '15.2', '2040', 'April 1', 'Measure V', 'Measure U', 'Police', 'Station 4', '21 ']) expect(src, lit).not.toContain(lit);
     const words = /vote (yes|no)|\bsupport\b|\boppose\b|devastat|catastroph|disastr|crucial|vital|must pass|reckless|\bsave\b/i;
     expect(src.replace(/<style>[\s\S]*<\/style>/, '')).not.toMatch(words);
-    expect(JSON.stringify(file.fireStation.passes.text + file.fireStation.fails.text)).not.toMatch(words);
+    const said = [...file.rows.flatMap((r) => [r.label, r.passes.text, r.fails.text]), file.countsCaveat.text].join(' ');
+    expect(said).not.toMatch(words);
+    // The fails line says only what the document says: no "would close", no "eliminated" the report doesn't state.
+    expect(said).not.toMatch(/would close|will close|eliminated/i);
   });
 });

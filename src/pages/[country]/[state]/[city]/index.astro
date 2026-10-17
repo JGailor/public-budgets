@@ -182,8 +182,9 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
         <p class="n n--gold">3</p>
         <h2>You get a say in November.</h2>
         <p class="body">
-          A {formatValue(o.ballot.salesTax.value, 'percent')} sales tax <SourceChip city={city} figure={o.ballot.salesTax} /> and a {shortMoney(o.ballot.bond.value, 0)} bond
-          <SourceChip city={city} figure={o.ballot.bond} /> are on the {o.ballot.election} ballot. The plan depends on the tax.
+          Measure {o.ballot.salesTaxLetter}, a {formatValue(o.ballot.salesTax.value, 'percent')} sales tax <SourceChip city={city} figure={o.ballot.salesTax} />, and
+          Measure {o.ballot.bondLetter}, a {shortMoney(o.ballot.bond.value, 0)} bond <SourceChip city={city} figure={o.ballot.bond} />, are on the {o.ballot.election} ballot. The plan
+          depends on the tax.
         </p>
         <div class="tiles">
           <div class="tile tile--passes">

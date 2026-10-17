@@ -230,6 +230,63 @@
       "type": "news",
       "usedFor": "Measure FF $270M / allocation split",
       "row": 23
+    },
+    {
+      "id": "S20",
+      "publisher": "City of Berkeley",
+      "title": "Adoption of FY 2027 & FY 2028 Biennial Budget and FY 2027–2031 Capital Improvement Program",
+      "committee": "City Council",
+      "date": "2026-06-23",
+      "dateLabel": "Jun 23 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/2026-06/2026-06-23%20Special%20Item%2001%20Adoption%20of%20Fiscal%20Years%202027%20and%202028.pdf",
+      "type": "city",
+      "usedFor": "Budget adoption; Fire Station 4 and police positions under each sales-tax outcome; unfunded capital need",
+      "number": 20
+    },
+    {
+      "id": "S21",
+      "publisher": "City of Berkeley",
+      "title": "City Attorney's Impartial Analyses, November 2026 ballot (Measures U and V)",
+      "committee": "City Attorney",
+      "url": "https://berkeleyca.gov/sites/default/files/Nov%202026%20Impartial%20Analyses.pdf",
+      "type": "city",
+      "usedFor": "Measure letters; sales-tax estimate, start date and type; bond cost to property owners",
+      "number": 21
+    },
+    {
+      "id": "S22",
+      "publisher": "City of Berkeley",
+      "title": "Placing a Transactions and Use (Sales) General Tax Measure on the November 3, 2026 ballot",
+      "committee": "City Council",
+      "date": "2026-06-16",
+      "dateLabel": "Jun 16 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/2026-06/2026-06-16%20Item%2039%20Placing%20a%20Transactions%20and%20Use.pdf",
+      "type": "city",
+      "usedFor": "Sales-tax revenue estimate",
+      "number": 22
+    },
+    {
+      "id": "S23",
+      "publisher": "City of Berkeley",
+      "title": "Supplemental: restore 9.00 FTE positions in the Fire Department (budget adoption, Item 1)",
+      "committee": "Councilmembers Kesarwani, Blackaby and Taplin",
+      "date": "2026-06-23",
+      "dateLabel": "Jun 23 2026",
+      "url": "https://berkeleyca.gov/sites/default/files/2026-06/Budget%20Supplemental%20Cover%20-%20Kesarwani.pdf",
+      "type": "city",
+      "usedFor": "Proposed restoration of nine fire positions at adoption",
+      "number": 23
+    },
+    {
+      "id": "S24",
+      "publisher": "Berkeleyside",
+      "title": "Berkeley approves budget with cuts and layoffs; jobs in fire department spared for now",
+      "date": "2026-06-24",
+      "dateLabel": "Jun 24 2026",
+      "url": "https://www.berkeleyside.org/2026/06/24/berkeley-budget-sales-tax-firefighters",
+      "type": "news",
+      "usedFor": "Council vote at adoption; nine fire positions funded",
+      "number": 24
     }
   ],
   "revenue": {
@@ -1800,8 +1857,6 @@
       "text": "Proposed 0.5% sales tax (Nov 2026 ballot) would raise ~$9.0–9.4M/yr; would bring Berkeley rate to 10.75%.",
       "rate": 0.005,
       "election": "Nov 2026",
-      "revenueLow": 9000000,
-      "revenueHigh": 9400000,
       "newRate": 0.1075,
       "threshold": "simple majority",
       "source": "S5",
@@ -1835,6 +1890,395 @@
       "source": "S6",
       "table": "Capital Program FY27-28",
       "row": 33
+    }
+  },
+  "documentFacts": {
+    "salesTaxMeasure": {
+      "source": "S21",
+      "page": 3,
+      "quote": "CITY ATTORNEY’S IMPARTIAL ANALYSIS OF MEASURE V",
+      "letter": "V"
+    },
+    "salesTaxRevenue": {
+      "source": "S21",
+      "page": 3,
+      "quote": "The City estimates the tax will generate $9 to $10 million annually.",
+      "related": [
+        "S22"
+      ],
+      "low": 9000000,
+      "high": 10000000
+    },
+    "salesTaxRevenueCouncil": {
+      "source": "S22",
+      "page": 1,
+      "quote": "the tax is estimated to generate approximately $9 million - $10 million annually",
+      "low": 9000000,
+      "high": 10000000
+    },
+    "salesTaxTerm": {
+      "source": "S21",
+      "page": 3,
+      "quote": "the tax would go into effect beginning April 1, 2027, and last until ended by the voters",
+      "start": "2027-04-01",
+      "until": "until ended by the voters"
+    },
+    "salesTaxGeneral": {
+      "source": "S21",
+      "page": 3,
+      "quote": "This would be a general tax, meaning the revenue from the tax would be placed into the General Fund and could be spent on any valid municipal purpose."
+    },
+    "bondMeasure": {
+      "source": "S21",
+      "page": 1,
+      "quote": "CITY ATTORNEY’S IMPARTIAL ANALYSIS OF MEASURE U",
+      "letter": "U"
+    },
+    "bondCost": {
+      "source": "S21",
+      "page": 2,
+      "quote": "the average annual taxpayer costs over the projected 40 years that the bonds would be outstanding are approximately $22.14 per $100,000 of assessed property value; generating approximately $15,200,000 per year",
+      "years": 40,
+      "perHundredK": 22.14,
+      "perYear": 15200000
+    },
+    "bondPeak": {
+      "source": "S21",
+      "page": 2,
+      "quote": "$35 per $100,000 of assessed value, which the City projects would begin to apply in 2040-41",
+      "perHundredK": 35,
+      "from": "2040-41"
+    },
+    "bondAudit": {
+      "source": "S21",
+      "page": 1,
+      "quote": "All expenditures would be subject to an audit by the City Auditor at least once every three years",
+      "everyYears": 3
+    },
+    "adoption": {
+      "source": "S20",
+      "page": 1,
+      "quote": "as contained in the City Manager’s FY27 & FY28 Proposed Biennial Budget, and as amended by subsequent Council action",
+      "date": "2026-06-23"
+    },
+    "adoptionGap": {
+      "source": "S20",
+      "page": 2,
+      "quote": "The City projects General Fund structural deficits of $29.25 million in FY27 (after the allocation of one-time resources) and $29.53 million in FY28.",
+      "fy2027": 29250000,
+      "fy2028": 29530000
+    },
+    "capitalNeed": {
+      "source": "S20",
+      "page": 248,
+      "quote": "Capital & Maint. Need $ 2,115,819,772",
+      "amount": 2115819772
+    },
+    "capitalNeedGrowth": {
+      "source": "S20",
+      "page": 248,
+      "quote": "(1) Capital & Maint. Needs are current estimates of unfunded needs. Needs are estimated to increase at a rate of 4% per year.",
+      "rate": 0.04
+    },
+    "capitalProgram": {
+      "source": "S20",
+      "page": 170,
+      "quote": "FY 2027-FY 2031 CAPITAL PROGRAM BY FUNDING SOURCE-ALL FUNDS",
+      "lines": [
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Capital Improvements $ 11,885,200 $ 12,139,816 $ 12,412,070 $ 12,681,193 $ 12,945,418 $ 62,063,697",
+          "name": "Capital Improvements",
+          "fundType": "Capital Projects Funds",
+          "fy2027": 11885200,
+          "fy2028": 12139816,
+          "total": 24025016,
+          "parts": [
+            {
+              "source": "S20",
+              "page": 173,
+              "quote": "Streets Total $ 10,412,200 $ 10,666,816 $ 10,929,070 $ 11,199,193 $ 11,477,418 $ 54,684,697",
+              "name": "Streets",
+              "fy2027": 10412200,
+              "fy2028": 10666816,
+              "total": 21079016
+            },
+            {
+              "source": "S20",
+              "page": 172,
+              "quote": "Facilities Total $ 1,273,000 $ 888,000 $ 898,000 $ 897,000 $ 883,000 $ 4,839,000",
+              "name": "Facilities",
+              "fy2027": 1273000,
+              "fy2028": 888000,
+              "total": 2161000
+            },
+            {
+              "source": "S20",
+              "page": 172,
+              "quote": "Camps Total $ - $ 385,000 $ - $ - $ - $ 385,000",
+              "name": "Camps",
+              "fy2027": 0,
+              "fy2028": 385000,
+              "total": 385000
+            },
+            {
+              "source": "S20",
+              "page": 173,
+              "quote": "Sidewalks Total $ 185,000 $ 185,000 $ 185,000 $ 185,000 $ 185,000 $ 925,000",
+              "name": "Sidewalks",
+              "fy2027": 185000,
+              "fy2028": 185000,
+              "total": 370000
+            },
+            {
+              "source": "S20",
+              "page": 173,
+              "quote": "Parks Total $ 15,000 $ 15,000 $ 400,000 $ 400,000 $ 400,000 $ 1,230,000",
+              "name": "Parks",
+              "fy2027": 15000,
+              "fy2028": 15000,
+              "total": 30000
+            }
+          ]
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Clean Storm Water $ 4,465,000 $ 6,390,000 $ 3,470,000 $ 3,300,000 $ 3,015,000 $ 20,640,000",
+          "name": "Clean Storm Water",
+          "fundType": "Enterprise Funds",
+          "fy2027": 4465000,
+          "fy2028": 6390000,
+          "total": 10855000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Marina Operations/Maint $ 350,000 $ 350,000 $ 350,000 $ 350,000 $ 350,000 $ 1,750,000",
+          "name": "Marina Operations/Maint",
+          "fundType": "Enterprise Funds",
+          "fy2027": 350000,
+          "fy2028": 350000,
+          "total": 700000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Sanitary Sewer Operation $ 25,150,000 $ 22,920,000 $ 24,050,000 $ 25,250,000 $ 22,550,000 $ 119,920,000",
+          "name": "Sanitary Sewer Operation",
+          "fundType": "Enterprise Funds",
+          "fy2027": 25150000,
+          "fy2028": 22920000,
+          "total": 48070000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Zero Waste $ 3,750,000 $ 2,900,000 $ 2,400,000 $ 2,000,000 $ 2,000,000 $ 13,050,000",
+          "name": "Zero Waste",
+          "fundType": "Enterprise Funds",
+          "fy2027": 3750000,
+          "fy2028": 2900000,
+          "total": 6650000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Capital Grants-Federal $ 500,000 $ - $ - $ - $ - $ 500,000",
+          "name": "Capital Grants-Federal",
+          "fundType": "Grants Funds",
+          "fy2027": 500000,
+          "fy2028": 0,
+          "total": 500000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Capital Grants-Local $ 758,250 $ 1,026,250 $ 773,500 $ - $ - $ 2,558,000",
+          "name": "Capital Grants-Local",
+          "fundType": "Grants Funds",
+          "fy2027": 758250,
+          "fy2028": 1026250,
+          "total": 1784500
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Capital Grants-State $ 1,447,000 $ 4,681,900 $ 4,693,200 $ 3,710,900 $ - $ 14,533,000",
+          "name": "Capital Grants-State",
+          "fundType": "Grants Funds",
+          "fy2027": 1447000,
+          "fy2028": 4681900,
+          "total": 6128900
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "MTC $ 1,122,000 $ 150,000 $ - $ - $ - $ 1,272,000",
+          "name": "MTC",
+          "fundType": "Grants Funds",
+          "fy2027": 1122000,
+          "fy2028": 150000,
+          "total": 1272000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "One-Time Grant:No Cap Exp $ 1,200,000 $ - $ - $ - $ - $ 1,200,000",
+          "name": "One-Time Grant:No Cap Exp",
+          "fundType": "Grants Funds",
+          "fy2027": 1200000,
+          "fy2028": 0,
+          "total": 1200000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Equipment Replacement $ 9,995,432 $ 5,464,714 $ 9,798,645 $ 9,119,322 $ 4,974,003 $ 39,352,116",
+          "name": "Equipment Replacement",
+          "fundType": "Internal Service Funds",
+          "fy2027": 9995432,
+          "fy2028": 5464714,
+          "total": 15460146
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "It Cost Allocation $ 485,000 $ 535,000 $ - $ - $ - $ 1,020,000",
+          "name": "It Cost Allocation",
+          "fundType": "Internal Service Funds",
+          "fy2027": 485000,
+          "fy2028": 535000,
+          "total": 1020000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Meas BB-Bike and Pedestrian $ - $ 258,000 $ 258,000 $ - $ - $ 516,000",
+          "name": "Meas BB-Bike and Pedestrian",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 0,
+          "fy2028": 258000,
+          "total": 258000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Meas BB-Local Streets and RD $ 3,380,000 $ 3,280,000 $ 3,280,000 $ 3,280,000 $ 3,280,000 $ 16,500,000",
+          "name": "Meas BB-Local Streets and RD",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 3380000,
+          "fy2028": 3280000,
+          "total": 6660000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Meas F-ALA CT VRF ST and RD $ 255,000 $ 255,000 $ 255,000 $ 255,000 $ 255,000 $ 1,275,000",
+          "name": "Meas F-ALA CT VRF ST and RD",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 255000,
+          "fy2028": 255000,
+          "total": 510000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Measure FF-Street Repair $ 24,328,066 $ 14,676,515 $ 14,342,835 $ 11,199,906 $ 13,067,933 $ 77,615,255",
+          "name": "Measure FF-Street Repair",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 24328066,
+          "fy2028": 14676515,
+          "total": 39004581
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Miles Lab $ 100,000 $ - $ - $ - $ - $ 100,000",
+          "name": "Miles Lab",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 100000,
+          "fy2028": 0,
+          "total": 100000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Park Tax $ 5,975,000 $ 2,750,000 $ 2,775,000 $ 2,775,000 $ 2,775,000 $ 17,050,000",
+          "name": "Park Tax",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 5975000,
+          "fy2028": 2750000,
+          "total": 8725000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Playground Camp $ 585,000 $ 415,000 $ 100,000 $ 100,000 $ 100,000 $ 1,300,000",
+          "name": "Playground Camp",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 585000,
+          "fy2028": 415000,
+          "total": 1000000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Private Party Sidewalks $ 100,000 $ 100,000 $ 100,000 $ 100,000 $ 100,000 $ 500,000",
+          "name": "Private Party Sidewalks",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 100000,
+          "fy2028": 100000,
+          "total": 200000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "State Transportation Tax $ 3,435,120 $ 3,835,113 $ 3,094,641 $ 2,513,345 $ 2,445,303 $ 15,323,522",
+          "name": "State Transportation Tax",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 3435120,
+          "fy2028": 3835113,
+          "total": 7270233
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Street And Open Space Impr $ 150,000 $ - $ - $ - $ - $ 150,000",
+          "name": "Street And Open Space Impr",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 150000,
+          "fy2028": 0,
+          "total": 150000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "Street Lighting $ 200,000 $ 680,000 $ 200,000 $ - $ - $ 1,080,000",
+          "name": "Street Lighting",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 200000,
+          "fy2028": 680000,
+          "total": 880000
+        },
+        {
+          "source": "S20",
+          "page": 170,
+          "quote": "UC Settlement $ 450,000 $ 750,000 $ - $ - $ - $ 1,200,000",
+          "name": "UC Settlement",
+          "fundType": "Special Revenue Funds",
+          "fy2027": 450000,
+          "fy2028": 750000,
+          "total": 1200000
+        }
+      ],
+      "total": {
+        "fy2027": 100066068,
+        "fy2028": 83557308,
+        "total": 183623376
+      },
+      "generalFund": "Capital Improvements"
     }
   }
 }

@@ -42,7 +42,7 @@ const questions = [
     tone: 'red',
   },
   {
-    q: 'What if the sales tax passes?',
+    q: `What if Measure ${budget.documentFacts.salesTaxMeasure.letter}, the sales tax, passes?`,
     a: `${h.positionsWithTax.value} positions cut instead of ${h.positionsWithoutTax}.`,
     figure: h.positionsWithTax,
     href: pageHref(ballot.slug),
