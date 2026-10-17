@@ -289,6 +289,9 @@ export interface DocumentFacts {
   adoptionGap: DocRef & { fy2027: number; fy2028: number };
   /** FY27–31 CIP "Capital & Maint. Need" total, and its stated yearly growth. */
   capitalNeed: DocRef & { amount: number };
+  /** FY27 spending, all funds and General Fund (adoption report p.1): the sentence's rounded figure, the table's exact one. */
+  allFunds: DocRef & { amount: number };
+  generalFund: DocRef & { amount: number };
   capitalNeedGrowth: DocRef & { rate: number };
   /** The City's official ballot titles ("Measure V - Transactions and Use (Sales) General Tax Measure (majority)"), split up. */
   salesTaxTitle: DocRef & { letter: string; title: string; vote: string };

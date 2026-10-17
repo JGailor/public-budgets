@@ -65,12 +65,17 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
       <p class="eyebrow">{city.government} · General Fund · Fiscal Year 2027</p>
       <h1>Where every $100 of {city.name}'s budget goes.</h1>
       <p class="lede">
-        Before this year's cuts, {city.name}'s departments started from a {shortMoney(o.baseline.value)} General Fund baseline: the city's flexible,
-        everyday money. Each square is one dollar out of every hundred. <span class="hover-hint">Hover a square to see the department.</span><span
-          class="tap-hint">Tap a square.</span>
-        <SourceChip city={city} figure={o.baseline} />
+        {city.name}'s whole budget this year is {shortMoney(o.size.allFunds.value)} <SourceChip city={city} figure={o.size.allFunds} />. Most of it is set aside
+        for specific uses, like sewers, parking or grants. The {shortMoney(o.size.generalFund.value)} <Term city={city} name="General Fund (GF)">General Fund</Term>
+        <SourceChip city={city} figure={o.size.generalFund} /> is the part the Council can spend on anything. This chart
+        shows the {shortMoney(o.baseline.value)} of it planned for departments, before cuts <SourceChip city={city} figure={o.baseline} />. Each square is one dollar out
+        of every hundred. <span class="hover-hint">Hover a square to see the department.</span><span class="tap-hint">Tap a square.</span>
       </p>
-
+      <!-- Phones: the tour sits above the waffle, which fills a screen (#24). Wide screens show the copy in .hero-more. -->
+      <p class="ctas ctas--narrow">
+        <a class="btn btn--ink" href="#three-things">Start the 3-minute tour <span aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href={`${city.path}gap/`}>Jump to the {shortMoney(Math.abs(o.gap.value), 0)} gap</a>
+      </p>
     </div>
 
     <div class="hero-waffle">
@@ -111,7 +116,7 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
         </div>
       </dl>
 
-      <p class="ctas">
+      <p class="ctas ctas--wide">
         <a class="btn btn--ink" href="#three-things">Start the 3-minute tour <span aria-hidden="true">→</span></a>
         <a class="btn btn--ghost" href={`${city.path}gap/`}>Jump to the {shortMoney(Math.abs(o.gap.value), 0)} gap</a>
       </p>
@@ -123,9 +128,10 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     <ol class="things">
       <li class="card">
         <p class="n n--bay">1</p>
-        <h2>It mostly comes from property.</h2>
+        <h2>Property tax is the City's biggest source of money.</h2>
         <p class="body">
-          About 1 in {o.revenue.oneIn} dollars is property tax. Taxes on home sales add {pct(o.revenue.transfer.share)}.
+          About $1 of every ${o.revenue.oneIn} the City collects is property tax. Another {pct(o.revenue.transfer.share)} comes from a tax paid when a home is
+          sold.
         </p>
         <div class="mix" role="img" aria-label={`FY2026 General Fund revenue by source: ${o.revenue.mix.map((g) => `${g.name} ${pct(g.share)}`).join(', ')}.`}>
           {o.revenue.mix.map((g) => <span style={`flex:${g.adopted};background:${g.color}`} title={`${g.name}: ${pct(g.share)}`} />)}
@@ -140,9 +146,10 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
 
       <li class="card">
         <p class="n n--red">2</p>
-        <h2>Spending outgrew revenue.</h2>
+        <h2>Costs are growing faster than income.</h2>
         <p class="body">
-          Costs grew about {rate(o.growth.cited.spendingRate)} a year, revenue about {rate(o.growth.cited.revenueRate)}. The gap comes back every year.
+          For {numberWords[g.years] ?? g.years} years, the City's costs grew about {rate(g.spendingRate)} a year and its
+          income about {rate(g.revenueRate)}. So it starts each year short.
         </p>
         <svg class="mini-wf" viewBox={`0 0 ${o.waterfall.length * 62} 110`} role="img" aria-label={`FY2027 deficit bridge: ${o.waterfall.map((w) => `${w.label} ${formatValue(w.value)}`).join(', ')}.`}>
           <defs>
@@ -179,22 +186,22 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
       </li>
 
       <li class="card">
-        <p class="n n--gold">3</p>
+        <p class="n n--ink">3</p>
         <h2>You get a say in November.</h2>
         <p class="body">
-          Measure {o.ballot.salesTaxLetter}, a {formatValue(o.ballot.salesTax.value, 'percent')} sales tax <SourceChip city={city} figure={o.ballot.salesTax} />, and
-          Measure {o.ballot.bondLetter}, a {shortMoney(o.ballot.bond.value, 0)} bond <SourceChip city={city} figure={o.ballot.bond} />, are on the {o.ballot.election} ballot. The plan
-          depends on the tax.
+          Measure {o.ballot.salesTaxLetter} would add a {formatValue(o.ballot.salesTax.value, 'percent')} sales tax <SourceChip city={city} figure={o.ballot.salesTax} />.
+          Measure {o.ballot.bondLetter} would let the City borrow {shortMoney(o.ballot.bond.value, 0)} for repairs (a bond) <SourceChip city={city} figure={o.ballot.bond} />. The City's
+          budget plan counts on the sales tax.
         </p>
         <div class="tiles">
           <div class="tile tile--passes">
             <p class="tile-n num">{o.ballot.withTax.value}</p>
-            <p>positions cut if it passes</p>
+            <p>positions cut if Measure {o.ballot.salesTaxLetter} passes</p>
             <SourceChip city={city} figure={o.ballot.withTax} />
           </div>
           <div class="tile tile--fails">
             <p class="tile-n num">{o.ballot.withoutTax.value}</p>
-            <p>positions cut if it fails</p>
+            <p>positions cut if Measure {o.ballot.salesTaxLetter} fails</p>
             <SourceChip city={city} figure={o.ballot.withoutTax} />
           </div>
         </div>
@@ -383,6 +390,9 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     gap: 0.75rem;
     margin: 1.75rem 0 0;
   }
+  .ctas--wide {
+    display: none;
+  }
   .hero-waffle {
     width: 100%;
     max-width: 30rem;
@@ -430,6 +440,12 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     .hero-more {
       margin-top: 2rem;
     }
+    .ctas--narrow {
+      display: none;
+    }
+    .ctas--wide {
+      display: flex;
+    }
   }
 
   /* Three things */
@@ -462,8 +478,9 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
   .n--red {
     color: var(--red);
   }
-  .n--gold {
-    color: var(--gold);
+  /* The ballot card: gold means one-time money and red money short; a ballot is neither (#23). */
+  .n--ink {
+    color: var(--ink);
   }
   .things h2 {
     margin: 0;
