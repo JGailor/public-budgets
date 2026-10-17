@@ -2008,6 +2008,18 @@
       "quote": "(1) Capital & Maint. Needs are current estimates of unfunded needs. Needs are estimated to increase at a rate of 4% per year.",
       "rate": 0.04
     },
+    "allFunds": {
+      "source": "S20",
+      "page": 1,
+      "quote": "The total proposed citywide expenditure for all funds in FY27 is $916.8 million (gross appropriations)",
+      "amount": 916819369
+    },
+    "generalFund": {
+      "source": "S20",
+      "page": 1,
+      "quote": "In FY27, the General Fund (Fund 011) expenditures are estimated at $313.8 million",
+      "amount": 313849211
+    },
     "capitalProgram": {
       "source": "S20",
       "page": 170,

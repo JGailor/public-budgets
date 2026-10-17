@@ -175,6 +175,16 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
     const [ag, agM] = m('adoptionGap', /\$([\d.]+) million in FY27 .* \$([\d.]+) million in FY28/);
     const [cn, cnM] = m('capitalNeed', /Need \$ ([\d,]+)$/);
     const [cg, cgM] = m('capitalNeedGrowth', /increase at a rate of (\d+)% per year/);
+    // The p.1 sentence says it in millions; its table, on the same page, has the dollars. They must agree.
+    const spending = (key: string, sentence: RegExp, row: RegExp) => {
+      const [ref, sM] = m(key, sentence);
+      const [, tM] = m(`${key}Exact`, row);
+      const amount = money(tM[1]);
+      if (Math.round(amount / 1e5) / 10 !== Number(sM[1])) throw new Error(`documents.json ${key}: the table's ${tM[1]} isn't the sentence's $${sM[1]} million`);
+      return { ...ref, amount };
+    };
+    const allFunds = spending('allFunds', /all funds in FY27 is \$([\d.]+) million/, /^Total All Funds \$[\d,]+ \$([\d,]+)$/);
+    const generalFund = spending('generalFund', /General Fund \(Fund 011\) expenditures are estimated at \$([\d.]+) million/, /^General Fund \$[\d,]+ \$([\d,]+)$/);
     const TITLE = /^Measure ([A-Z]+)-(.+) \((.+)\)$/;
     const [stTitle, stTitleM] = m('salesTaxTitle', TITLE);
     const [bTitle, bTitleM] = m('bondTitle', TITLE);
@@ -195,6 +205,8 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
       adoptionGap: { ...ag, fy2027: Math.round(Number(agM[1]) * 1e6), fy2028: Math.round(Number(agM[2]) * 1e6) },
       capitalNeed: { ...cn, amount: money(cnM[1]) },
       capitalNeedGrowth: { ...cg, rate: Number(cgM[1]) / 100 },
+      allFunds,
+      generalFund,
       capitalProgram: capitalFromDocument(file.capitalProgram, excerpts),
       oneTimeDelay: q('oneTimeDelay'),
       stepNotes: Object.fromEntries(

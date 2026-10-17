@@ -295,6 +295,9 @@ export interface DocumentFacts {
   adoptionGap: DocRef & { fy2027: number; fy2028: number };
   /** FY27–31 CIP "Capital & Maint. Need" total, and its stated yearly growth. */
   capitalNeed: DocRef & { amount: number };
+  /** FY27 spending, all funds and General Fund (adoption report p.1): the sentence's rounded figure, the table's exact one. */
+  allFunds: DocRef & { amount: number };
+  generalFund: DocRef & { amount: number };
   capitalNeedGrowth: DocRef & { rate: number };
   /** "What is this step?": a plain sentence per deficit-bridge step (and the overview's grouped adjustments), with the S1 wording it rests on. */
   stepNotes: Record<string, StepNote>;

@@ -50,6 +50,12 @@ export function overview(b: CityBudget, families: Families, revenueGroups: Reven
     shares,
     familyTotals,
     departments: fy27.departments,
+    /** The whole budget, and its General Fund (adoption report). A different document and basis from the
+     *  baseline below (S1's planning figure), so the page never shows a difference between them. */
+    size: {
+      allFunds: { value: b.documentFacts.allFunds.amount, label: 'Citywide spending, all funds, FY2027 (gross appropriations)', ref: b.documentFacts.allFunds, tone: 'neutral' } satisfies Figure,
+      generalFund: { value: b.documentFacts.generalFund.amount, label: 'General Fund spending, FY2027', ref: b.documentFacts.generalFund, tone: 'neutral' } satisfies Figure,
+    },
     baseline: {
       value: fy27.total.baseline,
       label: 'General Fund department baseline before proposed cuts, FY2027 (planning figure)',
@@ -68,7 +74,7 @@ export function overview(b: CityBudget, families: Families, revenueGroups: Reven
       total: { value: b.revenue.total.fy2026Adopted, label: 'General Fund revenue and transfers, FY2026 adopted', ref: b.revenue.total } satisfies Figure,
       property,
       transfer,
-      /** "About 1 in 3 dollars is property tax." */
+      /** "About $1 of every $3 the City collects is property tax." */
       oneIn: Math.round(1 / property.share),
     },
     waterfall: waterfall.map((w) => ({

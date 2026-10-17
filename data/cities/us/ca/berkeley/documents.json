@@ -160,6 +160,26 @@
     "bondTitle": {
       "source": "S25",
       "quote": "Measure U - General Obligation Bond Measure for Public Infrastructure and Facilities (2/3 vote)"
+    },
+    "allFunds": {
+      "source": "S20",
+      "page": 1,
+      "quote": "The total proposed citywide expenditure for all funds in FY27 is $916.8 million (gross appropriations)"
+    },
+    "allFundsExact": {
+      "source": "S20",
+      "page": 1,
+      "quote": "Total All Funds $785,833,221 $916,819,369"
+    },
+    "generalFund": {
+      "source": "S20",
+      "page": 1,
+      "quote": "In FY27, the General Fund (Fund 011) expenditures are estimated at $313.8 million"
+    },
+    "generalFundExact": {
+      "source": "S20",
+      "page": 1,
+      "quote": "General Fund $314,898,507 $313,849,211"
     }
   },
   "capitalProgram": {
