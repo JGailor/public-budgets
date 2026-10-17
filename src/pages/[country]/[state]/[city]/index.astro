@@ -308,6 +308,11 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     gap: 2rem;
     padding-block: clamp(2rem, 5vw, 4rem);
   }
+  /* A grid item's default min-width is its min-content width, so the waffle's open table (#22)
+     would stretch the track, and the page, instead of scrolling inside .table-scroll. */
+  .hero > * {
+    min-width: 0;
+  }
   .hero-copy {
     grid-area: copy;
   }

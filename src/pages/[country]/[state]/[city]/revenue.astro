@@ -310,6 +310,12 @@ const t = r.insights;
     cursor: pointer;
     white-space: nowrap;
   }
+  /* At 320px the three sort pills don't fit with full padding. */
+  @media (max-width: 22rem) {
+    .seg label {
+      padding-inline: 0.5rem;
+    }
+  }
   .seg input:checked + label {
     background: var(--card);
     color: var(--ink);
