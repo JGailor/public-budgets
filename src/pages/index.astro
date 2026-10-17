@@ -601,7 +601,8 @@ const requestTemplate = `${SITE.repo}/issues/new`;
   /* Promise */
   .promise {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    /* min(): an 18rem track is wider than the card's content box on a 320px phone. */
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
     gap: 1.5rem 3rem;
     padding: clamp(1.75rem, 4vw, 3rem);
     border-radius: 1.125rem;

@@ -26,7 +26,12 @@ async function overflow(page: Page) {
       .filter((el) => {
         const r = el.getBoundingClientRect();
         // A closed <details> keeps its content laid out but unrendered; only count what can be seen.
-        return r.width > 0 && r.height > 0 && r.right > vw + 0.5 && el.checkVisibility({ visibilityProperty: true });
+        if (!(r.width > 0 && r.height > 0 && r.right > vw + 0.5 && el.checkVisibility({ visibilityProperty: true }))) return false;
+        // Content scrolling inside its own box (a wide table in .table-scroll) is fine, as long as the box fits.
+        for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+          if (getComputedStyle(a).overflowX !== 'visible') return a.getBoundingClientRect().right > vw + 0.5;
+        }
+        return true;
       })
       .map((el) => `${el.tagName.toLowerCase()}.${el.className} right=${Math.round(el.getBoundingClientRect().right)}`);
     return { vw, scrollWidth: document.documentElement.scrollWidth, offenders: offenders.slice(0, 5) };
@@ -54,6 +59,55 @@ async function overlaps(page: Page, scope: string, selectors: string) {
     return { count: boxes.length, hits };
   }, selectors);
 }
+
+// Disclosures (a waffle's "Show as a table", a methods note) can hold wide content: opening one must
+// widen its own box, never the page. iOS zooms the whole page out when it does (#22).
+for (const width of [320, 375]) {
+  test.describe(`at ${width}px, every <details> open`, () => {
+    test.use({ viewport: { width, height: 800 } });
+
+    for (const route of ROUTES) {
+      test(`${route} has no horizontal scroll`, async ({ page }) => {
+        await page.goto(route);
+        await page.evaluate(() => document.fonts.ready);
+        // Open nested ones too; the site menu has its own test above and covers the page by design.
+        const opened = await page.evaluate(() => {
+          let n = 0;
+          for (let more = true; more; ) {
+            more = false;
+            for (const d of document.querySelectorAll<HTMLDetailsElement>('details:not([open])')) {
+              if (d.querySelector(':scope > summary[aria-label="Menu"]')) continue;
+              d.open = true;
+              n++;
+              more = true;
+            }
+          }
+          return n;
+        });
+        const o = await overflow(page);
+        expect(o.vw).toBe(width);
+        expect(o.scrollWidth, `${opened} opened\n${o.offenders.join('\n')}`).toBeLessThanOrEqual(o.vw);
+        expect(o.offenders).toEqual([]);
+      });
+    }
+  });
+}
+
+test.describe('at 320px', () => {
+  test.use({ viewport: { width: 320, height: 800 } });
+
+  test("the overview's waffle table scrolls inside its own box", async ({ page }) => {
+    await page.goto(berkeley.path);
+    await page.getByText('Show as a table').click();
+    const box = page.locator('.hero .table-scroll');
+    await expect(box).toBeVisible();
+    const m = await box.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, overflowX: getComputedStyle(el).overflowX }));
+    expect(m.overflowX).toBe('auto');
+    expect(m.scroll).toBeGreaterThan(m.client);
+    await box.evaluate((el) => (el.scrollLeft = 1000));
+    expect(await box.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  });
+});
 
 for (const width of [390, 768, 1024, 1199]) {
   test.describe(`at ${width}px`, () => {
