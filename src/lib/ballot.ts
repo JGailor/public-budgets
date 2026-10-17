@@ -16,6 +16,18 @@ export interface Cite {
   quote: string;
 }
 
+/** A City document a voter can open to read more about a measure. */
+export interface ReadLink {
+  label: string;
+  source: SourceId;
+}
+
+export interface Measure {
+  status: Status;
+  yesShare: number | null;
+  read: ReadLink[];
+}
+
 /** One line of a scenario card. Both outcomes cite the same documents. */
 export interface Row {
   key: string;
@@ -26,7 +38,7 @@ export interface Row {
 
 export interface BallotFile {
   election: string;
-  measures: { salesTax: { status: Status; yesShare: number | null }; bond: { status: Status; yesShare: number | null } };
+  measures: Record<'salesTax' | 'bond', Measure>;
   rows: Row[];
   /** "as amended by subsequent Council action": the budget was adopted with changes the figures shown don't include. */
   adoption: { cite: Cite };
@@ -81,6 +93,16 @@ export function checkBallotFile(file: BallotFile, b: CityBudget, where = 'ballot
     const docs = (o: 'passes' | 'fails') => [r[o].cite.source, ...r[o].also].join();
     if (docs('passes') !== docs('fails')) throw new Error(`${where}: rows.${r.key} cites ${docs('passes')} if it passes but ${docs('fails')} if it fails`);
   }
+  // Both measures offer the same kinds of document, in the same order: neither looks better documented.
+  const reads = (k: 'salesTax' | 'bond') => file.measures[k].read.map((r) => r.label).join(', ');
+  if (!file.measures.salesTax.read.length) throw new Error(`${where}: measures.salesTax.read is empty`);
+  if (reads('salesTax') !== reads('bond')) throw new Error(`${where}: the sales tax links ${reads('salesTax')} but the bond links ${reads('bond')}`);
+  for (const k of ['salesTax', 'bond'] as const)
+    for (const r of file.measures[k].read) {
+      const s = b.sources.find((x) => x.id === r.source);
+      if (!s) throw new Error(`${where}: measures.${k}.read cites unknown source ${r.source}`);
+      if (s.type !== 'city') throw new Error(`${where}: measures.${k}.read links ${r.source}, which isn't a City document`);
+    }
   cites(file.adoption.cite, 'adoption');
   if (!file.countsCaveat.text || !file.countsCaveat.cites.length) throw new Error(`${where}: countsCaveat needs text and cites`);
   file.countsCaveat.cites.forEach((c, i) => cites(c, `countsCaveat.cites[${i}]`));
@@ -92,7 +114,7 @@ export function ballotPage(b: CityBudget, file: BallotFile, short: Record<string
   const t = b.citedFacts.salesTax;
   const bond = b.citedFacts.bond;
   const d = b.documentFacts;
-  const cite = (r: { source: SourceId; page: number; quote: string }): Cite => ({ source: r.source, page: r.page, quote: r.quote });
+  const cite = (r: { source: SourceId; page?: number; quote: string }): Cite => ({ source: r.source, ...(r.page ? { page: r.page } : {}), quote: r.quote });
   const pos = (k: 'with-sales-tax' | 'without-sales-tax') => b.fte.positions.find((p) => p.key === k)!;
   const fte = (k: 'with-sales-tax' | 'without-sales-tax') => b.fte.scenarios.find((s) => s.key === k)!;
   const bridge = b.oneTimeResources.uses.find((u) => /sales & use tax/i.test(u.label))!;
@@ -131,6 +153,8 @@ export function ballotPage(b: CityBudget, file: BallotFile, short: Record<string
       revenue: { low: d.salesTaxRevenue.low, high: d.salesTaxRevenue.high, cites: [cite(d.salesTaxRevenue), cite(d.salesTaxRevenueCouncil)] },
       term: { start: d.salesTaxTerm.start, until: d.salesTaxTerm.until, cite: cite(d.salesTaxTerm) },
       general: cite(d.salesTaxGeneral),
+      official: { title: d.salesTaxTitle.title, cite: cite(d.salesTaxTitle) },
+      read: file.measures.salesTax.read,
       figure: { value: t.rate, label: `Measure ${d.salesTaxMeasure.letter}: proposed local sales tax, ${t.election} ballot`, ref: t, format: 'percent', tone: 'neutral' } satisfies Figure,
       bridge: { value: bridge.amount, label: 'One-time money used as a bridge until the sales-tax vote, FY2027-28', ref: bridge, tone: 'one-time' } satisfies Figure,
     },
@@ -138,6 +162,8 @@ export function ballotPage(b: CityBudget, file: BallotFile, short: Record<string
       fact: bond,
       letter: d.bondMeasure.letter,
       letterCite: cite(d.bondMeasure),
+      official: { title: d.bondTitle.title, cite: cite(d.bondTitle) },
+      read: file.measures.bond.read,
       cost: { perHundredK: d.bondCost.perHundredK, years: d.bondCost.years, perYear: d.bondCost.perYear, cite: cite(d.bondCost) },
       peak: { perHundredK: d.bondPeak.perHundredK, from: d.bondPeak.from, cite: cite(d.bondPeak) },
       audit: { everyYears: d.bondAudit.everyYears, cite: cite(d.bondAudit) },

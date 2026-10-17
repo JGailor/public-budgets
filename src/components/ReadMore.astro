@@ -1,0 +1,74 @@
+---
+/**
+ * "Read Measure V": links to the City documents behind a ballot measure (full
+ * text, impartial analysis, the Clerk's measures page). Both measure cards use
+ * this one component, so they offer the same kinds of link in the same form.
+ */
+import { budgetFor } from '../lib/budget';
+import type { ReadLink } from '../lib/ballot';
+import type { City } from '../lib/cities';
+import { sourcesById } from '../lib/receipts';
+
+type Props = { city: City; letter: string; links: ReadLink[] };
+
+const { city, letter, links } = Astro.props;
+const views = sourcesById(budgetFor(city)!);
+const items = links.map((l) => {
+  const s = views.get(l.source);
+  if (!s) throw new Error(`ReadMore: unknown source ${l.source}`);
+  return { ...l, url: s.url, format: s.format, title: s.title };
+});
+const headingId = `read-${letter.toLowerCase()}`;
+---
+
+<nav class="read" aria-labelledby={headingId}>
+  <p class="read-h" id={headingId}>Read Measure {letter}</p>
+  <ul role="list">
+    {
+      items.map((l) => (
+        <li>
+          <a href={l.url} target="_blank" rel="noopener" data-source-link={l.source} title={l.title} aria-label={`${l.label} (${l.format}, opens in a new tab)`}>
+            {l.label} <span class="fmt">({l.format} ↗)</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .read {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+  }
+  .read-h {
+    margin: 0 0 0.5rem;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  a {
+    display: inline-block;
+    padding-block: 0.25rem;
+    color: var(--bay);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    text-underline-offset: 0.2em;
+  }
+  .fmt {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.8125rem;
+  }
+</style>

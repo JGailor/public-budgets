@@ -118,7 +118,7 @@ export function sourcesById(budget: CityBudget): Map<SourceId, SourceView> {
 
 /** "/us/ca/berkeley/data/deficit-bridge.csv" for the table a record came from. */
 export function csvHref(budget: CityBudget, city: City, ref: Ref | DocRef): string | undefined {
-  if ('page' in ref) return undefined;
+  if ('quote' in ref) return undefined;
   for (const t of csvTables(budget)) {
     if ((t.rows as Ref[]).some((r) => r.table === ref.table && r.row === ref.row)) return `${city.path}data/${t.name}.csv`;
   }
@@ -137,7 +137,7 @@ export function figureReceipt(budget: CityBudget, city: City, figure: Figure, pa
   }
   const value = formatValue(figure.value, figure.format);
   const ref = figure.ref;
-  const where = 'page' in ref ? `p. ${ref.page}` : `${ref.table}, row ${ref.row}`;
+  const where = 'quote' in ref ? (ref.page ? `p. ${ref.page}` : 'web page') : `${ref.table}, row ${ref.row}`;
   const citation = [
     `${figure.label}: ${value}.`,
     ...ids.map((id, i) => `${i === 0 ? 'Source' : 'Also'}: ${views.get(id)!.citation}${i === 0 ? ` (${where})` : ''}.`),
@@ -149,7 +149,7 @@ export function figureReceipt(budget: CityBudget, city: City, figure: Figure, pa
     tone: figure.tone ?? (figure.value < 0 ? 'short' : 'neutral'),
     label: figure.label,
     sources: ids,
-    ...('page' in ref ? { page: ref.page, quote: ref.quote } : { table: ref.table, row: ref.row }),
+    ...('quote' in ref ? { page: ref.page, quote: ref.quote } : { table: ref.table, row: ref.row }),
     csv: csvHref(budget, city, figure.ref),
     parts: figure.parts?.map((p, i) => ({
       label: `${i === 0 ? '' : '+ '}${p.label}`,

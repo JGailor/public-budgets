@@ -5,6 +5,7 @@
  * src/lib/ballot.ts and render through the same markup below, with the same
  * colors and weight. Results are a data change in ballot.json (status).
  */
+import ReadMore from '../../../../components/ReadMore.astro';
 import SourceChip from '../../../../components/SourceChip.astro';
 import Base from '../../../../layouts/Base.astro';
 import { ballotFileFor, ballotPage, type Outcome } from '../../../../lib/ballot';
@@ -51,6 +52,7 @@ const planDate = longDate(p.plan.date!);
       <li class="card measure">
         <p class="kicker">Measure {v.letter} · {thresholdLabel(t.threshold)}</p>
         <h2>{pct(t.rate)} local sales tax <SourceChip city={city} figure={v.figure} /></h2>
+        <p class="official">Official title: “{v.official.title}” <SourceChip city={city} source={v.official.cite.source} at={v.official.cite} /></p>
         <p>
           A general tax: the money would go to the General Fund and could be spent on any city purpose. <SourceChip city={city} source={v.general.source} at={v.general} />{' '}
           The City estimates it would raise {range(v.revenue.low, v.revenue.high)} a year
@@ -59,10 +61,12 @@ const planDate = longDate(p.plan.date!);
           <SourceChip city={city} source={v.term.cite.source} at={v.term.cite} />
         </p>
         <p>The city's FY27-28 plan was built in two versions, one for each outcome.</p>
+        <ReadMore city={city} letter={v.letter} links={v.read} />
       </li>
       <li class="card measure">
         <p class="kicker">Measure {u.letter} · {thresholdLabel(bond.threshold)}</p>
         <h2>{millions(bond.amount)} infrastructure bond <SourceChip city={city} figure={u.figure} /></h2>
+        <p class="official">Official title: “{u.official.title}” <SourceChip city={city} source={u.official.cite.source} at={u.official.cite} /></p>
         <p>
           Borrowing for streets, buildings and parks, repaid by a {bond.repaidBy}. The City estimates about ${u.cost.perHundredK.toFixed(2)} a year per $100,000 of
           assessed value on average over {u.cost.years} years, raising about {millions(u.cost.perYear)} a year.
@@ -75,6 +79,7 @@ const planDate = longDate(p.plan.date!);
           <SourceChip city={city} figure={u.need} />; an earlier City estimate was {billions(u.backlog.ref.low, u.backlog.ref.high)}.
           <SourceChip city={city} figure={u.backlog} />
         </p>
+        <ReadMore city={city} letter={u.letter} links={u.read} />
       </li>
     </ul>
 
@@ -218,6 +223,11 @@ const planDate = longDate(p.plan.date!);
     margin: 0 0 1rem;
     color: var(--muted);
     line-height: 1.6;
+  }
+  .measure .official {
+    margin-top: -0.25rem;
+    color: var(--ink);
+    font-size: 0.9375rem;
   }
   .chip-row {
     display: inline-flex;
