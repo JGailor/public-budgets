@@ -18,7 +18,7 @@ describe('departments page (built)', () => {
   it('FY27 Police, tax passes: baseline, cut, softened, net', () => {
     expect(text).toContain(`FY27 baseline ${m(police.baseline)}`);
     expect(text).toContain(`Proposed cut ${m(police.reduction)} (${pct(police.reductionPct)})`);
-    expect(text).toContain(`Softened by sales tax +${m(police.salesTaxAllocation)}`);
+    expect(text).toContain(`Softened by bridge money +${m(police.salesTaxAllocation)}`);
     expect(text).toContain(`Net cut if tax passes ${m(police.netReduction)} (${pct(police.netReductionPct)})`);
   });
 

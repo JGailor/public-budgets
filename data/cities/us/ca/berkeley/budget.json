@@ -2279,6 +2279,11 @@
         "total": 183623376
       },
       "generalFund": "Capital Improvements"
+    },
+    "oneTimeDelay": {
+      "source": "S20",
+      "page": 55,
+      "quote": "The City Manager has recommended utilizing one-time funds during Fiscal Year 2027 to delay the closure of Fire Station 4 until after the results of the Sales and Use Tax measure are disclosed in November 2026."
     }
   }
 }

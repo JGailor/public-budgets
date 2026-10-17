@@ -101,7 +101,7 @@ export interface DepartmentReduction extends Ref {
   charter: boolean;
   baseline: number;
   reduction: number;
-  /** One-time sales & use tax money softening this department's cut. */
+  /** One-time money (reserves, Successor Agency transfer) softening this department's cut until the sales-tax vote; not tax revenue. */
   salesTaxAllocation: number;
   /** Derived: baseline - reduction. */
   budgetAfterReduction: number;
@@ -289,6 +289,8 @@ export interface DocumentFacts {
   /** FY27–31 CIP "Capital & Maint. Need" total, and its stated yearly growth. */
   capitalNeed: DocRef & { amount: number };
   capitalNeedGrowth: DocRef & { rate: number };
+  /** The adoption report: one-time funds delay cuts until the vote (the FY27 "bridge" is that money, not tax revenue). */
+  oneTimeDelay: DocRef;
   /** The FY27–28 capital program by funding source, all funds: every fund with money in either year. */
   /** `quote` is the table's title as printed. */
   capitalProgram: DocRef & {

@@ -97,9 +97,9 @@ export function gapPage(b: CityBudget) {
       passes: {
         cuts: { value: fy27.netReduction, label: 'FY2027 department cuts if the sales tax passes', ref: fy27, tone: 'short' } satisfies Figure,
         pct: fy27.netReductionPct,
-        softened: { value: fy27.salesTaxAllocation, label: 'FY2027 cuts softened by one-time sales-tax money', ref: fy27, tone: 'one-time' } satisfies Figure,
+        softened: { value: fy27.salesTaxAllocation, label: 'FY2027 cuts softened by one-time bridge money', ref: fy27, tone: 'one-time' } satisfies Figure,
       },
-      bridge: item(bridge, 'One-time money used as the sales-tax bridge, FY2027-28'),
+      bridge: item(bridge, 'One-time money used as a bridge until the sales-tax vote, FY2027-28'),
       total: fy27.reduction,
     },
     oneTime: {

@@ -9,7 +9,7 @@
  * can confirm our arithmetic matches Excel's.
  *
  * Skipped on purpose: Scenario Model (its "gap remaining" counts the
- * sales-tax money twice), Dept Comparison and Charts (views of the tabs
+ * $9.4M twice, as FY27 tax revenue and as the one-time bridge), Dept Comparison and Charts (views of the tabs
  * read here), GF Expenditure History and Enterprise & Special Funds (no
  * page uses them yet).
  */

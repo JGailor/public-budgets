@@ -208,8 +208,8 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
       <p class="eyebrow">Why the gap keeps coming back</p>
       <h2>Small differences, compounded.</h2>
       <p class="body">
-        City staff say spending grew about {rate(g.spendingRate)} a year over {numberWords[g.years] ?? g.years} years while revenue grew about
-        {rate(g.revenueRate)}. {pointsText} points doesn't sound like much. Compounded over a decade, it adds up to a <Term city={city} name="Structural deficit">structural deficit</Term>.
+        City staff say spending grew about {rate(g.spendingRate)} a year over {numberWords[g.years] ?? g.years} years while revenue
+        grew about {rate(g.revenueRate)}. {pointsText} points doesn't sound like much. Compounded over a decade, it adds up to a <Term city={city} name="Structural deficit">structural deficit</Term>.
         <SourceChip city={city} figure={o.growth.figure} />
       </p>
       <p class="illustration-note">
@@ -539,7 +539,7 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
   .tile :global(.chips) {
     margin: 0.5rem 0 0;
   }
-  /* Passes = the one-time sales-tax bridge (gold); fails = deeper cuts (red). */
+  /* Passes = the one-time bridge money (gold); fails = deeper cuts (red). */
   .tile--passes {
     background: var(--gold-light);
   }

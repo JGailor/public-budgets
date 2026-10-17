@@ -192,6 +192,7 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
       capitalNeed: { ...cn, amount: money(cnM[1]) },
       capitalNeedGrowth: { ...cg, rate: Number(cgM[1]) / 100 },
       capitalProgram: capitalFromDocument(file.capitalProgram, excerpts),
+      oneTimeDelay: q('oneTimeDelay'),
     };
   } catch (e) {
     errors.push((e as Error).message);

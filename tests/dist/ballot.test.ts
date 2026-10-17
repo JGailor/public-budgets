@@ -92,6 +92,12 @@ describe('ballot page (built)', () => {
     expect(t).not.toMatch(/may have changed/);
   });
 
+  it('the footnote calls the $9.4M one-time money until the vote, not tax money, and says when the tax would start', () => {
+    const t = strip(html);
+    expect(t).toContain('Note: in FY27 the plan uses $9.4M of one-time money (reserves and a Successor Agency transfer) to soften Police, Fire and Parks, Rec & Waterfront cuts until the vote.');
+    expect(t).toContain('The tax itself would start April 1, 2027.');
+  });
+
   it('uses no advocacy language', () => {
     expect(strip(html)).not.toMatch(/vote (yes|no)\b|devastat|catastroph|disastr|must pass/i);
   });

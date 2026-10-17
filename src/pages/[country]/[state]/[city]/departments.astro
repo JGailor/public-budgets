@@ -74,7 +74,7 @@ const selectRules = p.rows
     <ul class="key" aria-label="Key">
       <li><span class="sw sw--kept"></span>Budget after cuts</li>
       <li><span class="sw sw--cut"></span>Cut</li>
-      <li class="tax tax--passes"><span class="sw sw--soft"></span>Softened by one-time sales-tax money</li>
+      <li class="tax tax--passes"><span class="sw sw--soft"></span>Softened by one-time bridge money</li>
     </ul>
 
     <div class="layout">
@@ -179,7 +179,7 @@ const selectRules = p.rows
                         <dd><SourceChip city={city} figure={v.figures.cut} /></dd>
                       </div>
                       <div class="tax tax--passes">
-                        <dt>Softened by sales tax</dt>
+                        <dt>Softened by bridge money</dt>
                         <dd class="num once">{v.d.salesTaxAllocation === 0 ? 'none' : `+${money(v.d.salesTaxAllocation)}`}</dd>
                         <dd><SourceChip city={city} figure={v.figures.softened} /></dd>
                       </div>

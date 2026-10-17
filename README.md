@@ -104,7 +104,7 @@ data/cities/us/ca/berkeley/
 - **Derived numbers are computed, not read.** The workbook doesn't store results for all of its formulas, so the extractor reads typed-in inputs and TOTAL rows, computes everything else, and checks its arithmetic against every result Excel did store.
 - **Validation** ties every TOTAL row to its lines and pins the City's headline figures (FY27 department baselines $283,764,035, the FY27 gap −$29,249,339, …). A moved column, a changed source line, or a formula typed over an input cell stops the build with the cell address.
 - **City documents published after the workbook** are in `documents.json`. It adds sources S20 onwards, after the workbook's, and the facts they state. Each fact has a `quote` and a PDF `page`. `source/excerpts/S{n}.json` holds the text of just those pages (news excerpts keep only the paragraphs quoted). The build checks every quote against its page and parses every number from the quote itself. Tables are read row by row: a row's five years must sum to its 5-year column, and each section must sum to its Total row. Receipts for these facts show "p. N of the PDF" and the sentence. To add one, extract the page text into the excerpt file, add the quote, and run `npm run data`.
-- **Skipped on purpose:** the *Scenario Model* tab (its "gap remaining" counts the sales-tax money twice).
+- **Skipped on purpose:** the *Scenario Model* tab (its "gap remaining" counts the $9.4M twice: as FY27 tax revenue, though the tax would start April 1, 2027, and as the one-time bridge).
 - **Downloads:** the build publishes `/us/ca/berkeley/data/budget.json`, one CSV per table, and the original workbook.
 
 Pages read the data with `budgetFor(city)` from `src/lib/budget.ts`.

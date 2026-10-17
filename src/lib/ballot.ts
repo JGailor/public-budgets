@@ -132,7 +132,7 @@ export function ballotPage(b: CityBudget, file: BallotFile, short: Record<string
       term: { start: d.salesTaxTerm.start, until: d.salesTaxTerm.until, cite: cite(d.salesTaxTerm) },
       general: cite(d.salesTaxGeneral),
       figure: { value: t.rate, label: `Measure ${d.salesTaxMeasure.letter}: proposed local sales tax, ${t.election} ballot`, ref: t, format: 'percent', tone: 'neutral' } satisfies Figure,
-      bridge: { value: bridge.amount, label: 'One-time money set aside as the sales-tax bridge, FY2027-28', ref: bridge, tone: 'one-time' } satisfies Figure,
+      bridge: { value: bridge.amount, label: 'One-time money used as a bridge until the sales-tax vote, FY2027-28', ref: bridge, tone: 'one-time' } satisfies Figure,
     },
     bond: {
       fact: bond,
@@ -153,5 +153,7 @@ export function ballotPage(b: CityBudget, file: BallotFile, short: Record<string
     softened: softened.map((d) => short[d.id] ?? d.name),
     plan: b.sources.find((s) => s.id === 'S1')!,
     adoption: { date: d.adoption.date, cite: file.adoption.cite },
+    /** The City's own words: one-time funds hold off the cuts until the vote. */
+    oneTimeDelay: cite(d.oneTimeDelay),
   };
 }
