@@ -47,7 +47,8 @@ const questions = [
     figure: h.positionsWithTax,
     href: pageHref(ballot.slug),
     page: ballot.label,
-    tone: 'gold',
+    // Neutral ink: gold means one-time money and red means money short; neither is a ballot outcome (#23).
+    tone: 'ink',
   },
   {
     q: "Who's cutting what?",
@@ -475,9 +476,9 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     --accent: var(--red);
     --answer: var(--red);
   }
-  .question--gold {
-    --accent: var(--gold);
-    --answer: #8a5f0b;
+  .question--ink {
+    --accent: var(--ink);
+    --answer: var(--ink);
   }
   .question--blue {
     --accent: var(--family-safety-2);

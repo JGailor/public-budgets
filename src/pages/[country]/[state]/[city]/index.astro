@@ -539,12 +539,11 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
   .tile :global(.chips) {
     margin: 0.5rem 0 0;
   }
-  /* Passes = the one-time bridge money (gold); fails = deeper cuts (red). */
-  .tile--passes {
-    background: var(--gold-light);
-  }
+  /* Both outcomes look the same (#23): gold means one-time money and red means money short,
+     and neither is a ballot outcome. The Ballot page's scenario headers use the same pale teal. */
+  .tile--passes,
   .tile--fails {
-    background: var(--red-light);
+    background: var(--bay-light);
   }
   .more {
     margin-top: auto;
