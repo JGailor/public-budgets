@@ -182,9 +182,11 @@ test.describe('desktop shell', () => {
     }
   });
 
-  test('the footer names the copyright holder, with the build year', async ({ page }) => {
+  test('the footer names the copyright holder, with the build year, linking to its site', async ({ page }) => {
     await page.goto(berkeley.path);
-    await expect(page.locator('footer.site-footer .legal')).toContainText(`© ${new Date().getFullYear()} Playframe Studios, LLC`);
+    const legal = page.locator('footer.site-footer .legal');
+    await expect(legal.locator('p').first()).toHaveText(`© ${new Date().getFullYear()} PlayFrame Studios`);
+    await expect(legal.getByRole('link', { name: 'PlayFrame Studios' })).toHaveAttribute('href', 'https://playframestudios.com/');
   });
 
   test('the footer says Made with Foundry, linking to foundryworks.dev, and fits at 390px', async ({ page }) => {
