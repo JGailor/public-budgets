@@ -182,6 +182,11 @@ test.describe('desktop shell', () => {
     }
   });
 
+  test('the footer names the copyright holder, with the build year', async ({ page }) => {
+    await page.goto(berkeley.path);
+    await expect(page.locator('footer.site-footer .legal')).toContainText(`© ${new Date().getFullYear()} Playframe Studios, LLC`);
+  });
+
   test('loads the chosen fonts, and numbers are tabular', async ({ page }) => {
     await page.goto(berkeley.path);
     const result = await page.evaluate(async () => {

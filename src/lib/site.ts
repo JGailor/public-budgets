@@ -6,6 +6,8 @@ export const SITE = {
   short: 'WTMW',
   domain: 'wherethemoneywent.com',
   repo: 'https://github.com/JGailor/public-budgets',
+  /** The copyright holder, named in the footer. */
+  publisher: 'Playframe Studios, LLC',
 } as const;
 
 /**
