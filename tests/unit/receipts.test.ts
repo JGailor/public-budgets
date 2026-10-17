@@ -74,12 +74,15 @@ describe('figure receipts', () => {
   });
 
   it('shows how a derived number is built', () => {
+    // One sign per line, the amount without one, and the figure as the total (#25).
     expect(r.parts).toEqual([
-      { label: 'Initial estimate', value: '−$32,256,300' },
-      { label: '+ Revenue projections', value: '$5,111,718' },
-      { label: '+ Three adjustments', value: '−$4,204,757' },
-      { label: '+ One-time money', value: '$2,100,000' },
+      { sign: '−', label: 'Initial estimate', value: '$32,256,300' },
+      { sign: '+', label: 'Revenue projections', value: '$5,111,718' },
+      { sign: '−', label: 'Three adjustments', value: '$4,204,757' },
+      { sign: '+', label: 'One-time money', value: '$2,100,000' },
     ]);
+    expect(r.total).toBe('−$29,249,339');
+    for (const p of r.parts!) expect(`${p.label}${p.value}`).not.toMatch(/[−+]|\bless\b/);
   });
 
   it('refuses parts that do not add up to the figure', () => {

@@ -30,6 +30,8 @@ export interface Figure {
   related?: SourceId[];
   /** For a derived figure: how it's built ("How this number is built"). */
   parts?: FigurePart[];
+  /** Words after the total line's number: "= $12,113 left over". */
+  partsTotal?: string;
 }
 
 export interface SourceView {
@@ -67,7 +69,10 @@ export interface Receipt {
   quote?: string;
   /** Download for the table this figure came from. */
   csv?: string;
-  parts?: { label: string; value: string }[];
+  /** One sign per line, then the amount without one: "+ Operating Reserve $4,177,541", "− Proposed Sales & Use Tax $9,443,000". */
+  parts?: { sign: '+' | '−'; label: string; value: string }[];
+  /** "= $12,113 left over": the figure itself, closing the sum. */
+  total?: string;
   citation: string;
 }
 
@@ -151,10 +156,12 @@ export function figureReceipt(budget: CityBudget, city: City, figure: Figure, pa
     sources: ids,
     ...('quote' in ref ? { page: ref.page, quote: ref.quote } : { table: ref.table, row: ref.row }),
     csv: csvHref(budget, city, figure.ref),
-    parts: figure.parts?.map((p, i) => ({
-      label: `${i === 0 ? '' : '+ '}${p.label}`,
-      value: formatValue(p.value, figure.format),
+    parts: figure.parts?.map((p) => ({
+      sign: p.value < 0 ? MINUS : '+',
+      label: p.label,
+      value: formatValue(Math.abs(p.value), figure.format),
     })),
+    ...(figure.parts ? { total: [value, figure.partsTotal].filter(Boolean).join(' ') } : {}),
     citation,
   };
 }

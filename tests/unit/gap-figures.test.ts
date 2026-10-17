@@ -49,12 +49,14 @@ describe('the waterfall', () => {
     // figureReceipt throws if the parts don't add up to the figure.
     expect(figureReceipt(budget, city, before.figure, page).parts?.map((p) => p.label)).toEqual([
       'Initial estimate',
-      '+ Revenue came in higher',
-      '+ 1947 Center St. debt service',
-      '+ Propping up parking funds',
-      '+ Non-departmental costs',
+      'Revenue came in higher',
+      '1947 Center St. debt service',
+      'Propping up parking funds',
+      'Non-departmental costs',
     ]);
-    expect(figureReceipt(budget, city, final.figure, page).parts?.map((p) => p.value)).toEqual(['−$31,349,339', '$2,100,000']);
+    const finalReceipt = figureReceipt(budget, city, final.figure, page);
+    expect(finalReceipt.parts?.map((p) => `${p.sign} ${p.value}`)).toEqual(['− $31,349,339', '+ $2,100,000']);
+    expect(finalReceipt.total).toBe('−$29,249,339');
   });
 
   it('refuses a bridge whose totals do not follow from its steps', () => {

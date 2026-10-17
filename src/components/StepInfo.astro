@@ -1,0 +1,110 @@
+---
+/**
+ * "What is this step?" (#25): an ⓘ button and its panel. A real button, so it opens on tap, click,
+ * Enter or Space, never on hover alone. The panel is a separate element (part="panel") so a page
+ * can put it where it fits: inside the step on the Gap page, under the chart on the overview.
+ * One panel is open at a time; Esc or a click elsewhere closes it.
+ */
+import type { StepNote } from '../data/types';
+import type { City } from '../lib/cities';
+import SourceChip from './SourceChip.astro';
+
+type Props = { city: City; id: string; label: string; note: StepNote; part: 'button' | 'panel' };
+
+const { city, id, label, note, part } = Astro.props;
+---
+
+{
+  part === 'button' ? (
+    <button type="button" class="info" aria-expanded="false" aria-controls={id} data-info>
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <circle cx="8" cy="4.75" r="1.05" fill="currentColor" />
+        <path d="M8 7.25v4.75" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </svg>
+      <span class="visually-hidden">What is “{label}”?</span>
+    </button>
+  ) : (
+    <div class="info-panel" id={id} hidden data-info-panel>
+      <p>
+        {note.text}{' '}
+        {note.cites.map((c) => (
+          <SourceChip city={city} source={c.source} at={c} />
+        ))}
+      </p>
+    </div>
+  )
+}
+
+<script>
+  const buttons = () => [...document.querySelectorAll<HTMLButtonElement>('button[data-info]')];
+  const panelOf = (b: HTMLButtonElement) => document.getElementById(b.getAttribute('aria-controls')!);
+  const close = (b: HTMLButtonElement) => {
+    b.setAttribute('aria-expanded', 'false');
+    panelOf(b)?.setAttribute('hidden', '');
+  };
+  const openButton = () => buttons().find((b) => b.getAttribute('aria-expanded') === 'true');
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as Element;
+    const b = target.closest<HTMLButtonElement>('button[data-info]');
+    if (b) {
+      const wasOpen = b.getAttribute('aria-expanded') === 'true';
+      buttons().forEach(close);
+      if (!wasOpen) {
+        b.setAttribute('aria-expanded', 'true');
+        panelOf(b)?.removeAttribute('hidden');
+      }
+      return;
+    }
+    // A click inside the open panel (its source chip, say) keeps it open.
+    if (!target.closest('[data-info-panel]') && !target.closest('dialog')) buttons().forEach(close);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+    const b = openButton();
+    if (!b) return;
+    close(b);
+    b.focus();
+  });
+</script>
+
+<style>
+  .info {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--bay);
+    vertical-align: middle;
+    cursor: pointer;
+  }
+  .info:hover,
+  .info[aria-expanded='true'] {
+    background: var(--bay-light);
+  }
+  .info:focus-visible {
+    outline: 2px solid var(--bay);
+    outline-offset: 1px;
+  }
+  .info-panel {
+    padding: 0.75rem 0.875rem;
+    border-radius: 0.625rem;
+    background: var(--card);
+    box-shadow: 0 1px 2px rgb(22 25 29 / 0.08), 0 6px 20px rgb(22 25 29 / 0.12);
+    color: var(--ink);
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+  .info-panel p {
+    margin: 0;
+  }
+</style>

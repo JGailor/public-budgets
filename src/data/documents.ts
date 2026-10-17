@@ -4,12 +4,13 @@
  * number is parsed from the quote, never typed in: the same rule the workbook's
  * sentence-stated facts follow (citedFacts).
  */
-import type { CityBudget, DocCapitalLine, DocCapitalPart, DocRef, DocumentFacts, Source, SourceId, WorkbookBudget } from './types.ts';
+import type { CityBudget, DocCapitalLine, DocCapitalPart, DocRef, DocumentFacts, Source, SourceId, StepNote, WorkbookBudget } from './types.ts';
 
 export interface DocumentsFile {
   sources: Omit<Source, 'number' | 'row'>[];
   quotes: Record<string, DocRef>;
   capitalProgram: { source: SourceId; byFund: number; generalFund: string; generalFundBreakdown: number[] };
+  stepNotes: Record<string, StepNote>;
 }
 /** Page number → page text, as extracted from the PDF. */
 export type Excerpts = Record<SourceId, Record<string, string>>;
@@ -196,6 +197,16 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
       capitalNeedGrowth: { ...cg, rate: Number(cgM[1]) / 100 },
       capitalProgram: capitalFromDocument(file.capitalProgram, excerpts),
       oneTimeDelay: q('oneTimeDelay'),
+      stepNotes: Object.fromEntries(
+        Object.entries(file.stepNotes).map(([key, n]) => {
+          if (!n.text.trim() || !n.cites.length) throw new Error(`documents.json stepNotes.${key}: needs text and at least one cite`);
+          for (const ref of n.cites) {
+            if (!known.has(ref.source)) throw new Error(`documents.json stepNotes.${key}: unknown source ${ref.source}`);
+            checkQuote(ref, excerpts, `documents.json stepNotes.${key}`);
+          }
+          return [key, n];
+        }),
+      ),
       salesTaxTitle: { ...stTitle, letter: stTitleM[1], title: stTitleM[2].trim(), vote: stTitleM[3] },
       bondTitle: { ...bTitle, letter: bTitleM[1], title: bTitleM[2].trim(), vote: bTitleM[3] },
     };
@@ -209,6 +220,10 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
   if (f.salesTaxRevenue.low !== f.salesTaxRevenueCouncil.low || f.salesTaxRevenue.high !== f.salesTaxRevenueCouncil.high)
     errors.push('documents.json: the City Attorney and Council revenue estimates disagree');
   if (f.salesTaxMeasure.letter === f.bondMeasure.letter) errors.push('documents.json: both measures have the same letter');
+  // Every step the Gap page and the overview draw has its "what is this?" note, and no note names a step that isn't there.
+  const stepKeys = [...budget.deficitBridge.steps.map((s) => s.key).filter((k) => k !== 'after-revenue-projections'), 'adjustments'];
+  for (const k of stepKeys) if (!f.stepNotes[k]) errors.push(`documents.json stepNotes: no note for step "${k}"`);
+  for (const k of Object.keys(f.stepNotes)) if (!stepKeys.includes(k)) errors.push(`documents.json stepNotes: "${k}" isn't a deficit-bridge step`);
   // Two City documents name the measures: the City Attorney's analyses and the Clerk's ballot measures page.
   if (f.salesTaxTitle.letter !== f.salesTaxMeasure.letter) errors.push(`documents.json: the ballot measures page calls the sales tax Measure ${f.salesTaxTitle.letter}, the impartial analysis Measure ${f.salesTaxMeasure.letter}`);
   if (f.bondTitle.letter !== f.bondMeasure.letter) errors.push(`documents.json: the ballot measures page calls the bond Measure ${f.bondTitle.letter}, the impartial analysis Measure ${f.bondMeasure.letter}`);

@@ -25,12 +25,14 @@ export function overview(b: CityBudget, families: Families, revenueGroups: Reven
   const transfer = revenueGroups.find((g) => g.id === 'transfer-tax')!;
 
   const adjustments = ['center-street-debt-service', 'parking-funds-stabilization', 'non-departmental'].map(step);
+  // `short` labels the mini chart's bars (#25); `note` is the step's "what is this?" (src/data/documents.ts checks its quotes).
+  const notes = b.documentFacts.stepNotes;
   const waterfall = [
-    { key: 'initial', label: 'Initial estimate', value: step('initial-estimate').fy2027, kind: 'total' as const },
-    { key: 'revenue', label: 'Revenue came in higher', value: step('revenue-projections').fy2027, kind: 'up' as const },
-    { key: 'adjustments', label: 'Three adjustments', value: adjustments.reduce((a, s) => a + s.fy2027, 0), kind: 'cost' as const },
-    { key: 'one-time', label: 'One-time money', value: step('one-time-resources').fy2027, kind: 'one-time' as const },
-    { key: 'final', label: 'The gap', value: step('final-gap').fy2027, kind: 'total' as const },
+    { key: 'initial', label: 'Initial estimate', short: 'First estimate', note: notes['initial-estimate'], value: step('initial-estimate').fy2027, kind: 'total' as const },
+    { key: 'revenue', label: 'Revenue came in higher', short: 'Higher revenue', note: notes['revenue-projections'], value: step('revenue-projections').fy2027, kind: 'up' as const },
+    { key: 'adjustments', label: 'Three adjustments', short: `${adjustments.length} adjustments`, note: notes.adjustments, value: adjustments.reduce((a, s) => a + s.fy2027, 0), kind: 'cost' as const },
+    { key: 'one-time', label: 'One-time money', short: 'One-time money', note: notes['one-time-resources'], value: step('one-time-resources').fy2027, kind: 'one-time' as const },
+    { key: 'final', label: 'The gap', short: 'Gap left', note: notes['final-gap'], value: step('final-gap').fy2027, kind: 'total' as const },
   ];
 
   const g = b.citedFacts.growth;

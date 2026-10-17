@@ -2313,6 +2313,103 @@
       "page": 55,
       "quote": "The City Manager has recommended utilizing one-time funds during Fiscal Year 2027 to delay the closure of Fire Station 4 until after the results of the Sales and Use Tax measure are disclosed in November 2026."
     },
+    "stepNotes": {
+      "initial-estimate": {
+        "text": "The City's first estimate of the General Fund shortfall, after rebuilding its baseline from actual spending and service needs.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 5,
+            "quote": "Baseline rebuilt using actual spending and service needs."
+          }
+        ]
+      },
+      "revenue-projections": {
+        "text": "Updated revenue projections: the City now expects to collect more than the first estimate assumed, so the gap shrinks.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 6,
+            "quote": "Additional Income From Revenue Projections"
+          }
+        ]
+      },
+      "center-street-debt-service": {
+        "text": "Debt payments for 1947 Center Street that the General Fund has to cover. The City calls it required debt-service support.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 5,
+            "quote": "required debt-service support"
+          }
+        ]
+      },
+      "parking-funds-stabilization": {
+        "text": "General Fund money to stabilize the City's parking funds.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 5,
+            "quote": "parking-fund stabilization"
+          }
+        ]
+      },
+      "non-departmental": {
+        "text": "Changes to General Fund costs that don't belong to any one department. The City calls them non-departmental refinements.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 5,
+            "quote": "non-departmental refinements"
+          }
+        ]
+      },
+      "adjustments": {
+        "text": "Three changes that add to the gap: debt payments for 1947 Center Street, money to stabilize the parking funds, and costs that don't belong to any one department.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 5,
+            "quote": "Includes strategic cost shifts, non-departmental refinements, required debt-service support, and parking-fund stabilization."
+          }
+        ]
+      },
+      "before-one-time-resources": {
+        "text": "The gap after every revenue and spending adjustment, before any one-time money is used.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 5,
+            "quote": "After revenue and expenditure adjustments, GF deficit ranged from $31.3M (FY 27) to $29.5M (FY 28)"
+          }
+        ]
+      },
+      "one-time-resources": {
+        "text": "Money the City can spend only once, used here to even out the FY27 and FY28 gaps. The City says it eases the gap in the short term, and the lasting fix comes from ongoing cuts and new revenue.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 7,
+            "quote": "Smooth Out Difference in FY 2027 and FY 2028 Deficit"
+          },
+          {
+            "source": "S1",
+            "page": 9,
+            "quote": "While one-time resources provide short-term easing, the underlying balance is achieved through durable, sustainable fiscal measures and new revenue."
+          }
+        ]
+      },
+      "final-gap": {
+        "text": "The gap left after every step: the number the City planned around. The City says it closed it with ongoing cuts of more than 10% of department budgets.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 9,
+            "quote": "The City closed the FY 27 and FY 28 structural deficits with more than 10 percent in ongoing reductions."
+          }
+        ]
+      }
+    },
     "salesTaxTitle": {
       "source": "S25",
       "quote": "Measure V - Transactions and Use (Sales) General Tax Measure (majority)",
