@@ -86,6 +86,23 @@ describe('ballot page (built)', () => {
     expect(t).toContain(`If Measure ${d.salesTaxMeasure.letter}, the sales tax…`);
   });
 
+  it('each measure card shows its official title and links its City documents, in the same form', () => {
+    const t = strip(html);
+    const d = b.documentFacts;
+    expect(t).toContain(`Official title: “${d.salesTaxTitle.title}”`);
+    expect(t).toContain(`Official title: “${d.bondTitle.title}”`);
+    const navs = [...html.matchAll(/<nav class="read"[^>]*>([\s\S]*?)<\/nav>/g)].map((m) => m[1]);
+    expect(navs).toHaveLength(2);
+    const links = navs.map((n) => [...n.matchAll(/<a href="([^"]+)"[^>]*data-source-link="(S\d+)"[^>]*>\s*([^<]+?)\s*</g)].map((m) => ({ href: m[1].replace(/&amp;/g, '&'), source: m[2], label: m[3] })));
+    // Same labels in the same order on both cards.
+    expect(links[0].map((l) => l.label)).toEqual(links[1].map((l) => l.label));
+    expect(links[0].map((l) => l.label)).toEqual(['Full text', 'Impartial analysis', 'All City measures']);
+    for (const l of links.flat()) expect(l.href).toBe(b.sources.find((s) => s.id === l.source)!.url);
+    expect(strip(navs[0])).toContain(`Read Measure ${d.salesTaxMeasure.letter}`);
+    expect(strip(navs[1])).toContain(`Read Measure ${d.bondMeasure.letter}`);
+    expect(links[0][0].source).not.toBe(links[1][0].source); // each card's own full text
+  });
+
   it('the footnote says the budget was adopted with amendments, not that figures "may have changed"', () => {
     const t = strip(html);
     expect(t).toContain('The Council adopted the budget on June 23, 2026 with amendments made at that meeting');

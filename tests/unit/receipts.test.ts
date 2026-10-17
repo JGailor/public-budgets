@@ -137,7 +137,7 @@ describe('"Used on" index', () => {
     ]);
     expect(usage.S15).toEqual([{ path: '/us/ca/berkeley/gap/', label: 'The Gap' }]);
     expect(usage.S2).toEqual([]);
-    expect(Object.keys(usage)).toHaveLength(24);
+    expect(Object.keys(usage)).toHaveLength(27);
   });
 
   it('labels chips on the Sources page as Methods, and fills "used on" placeholders', () => {

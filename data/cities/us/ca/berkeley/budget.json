@@ -287,6 +287,34 @@
       "type": "news",
       "usedFor": "Council vote at adoption; nine fire positions funded",
       "number": 24
+    },
+    {
+      "id": "S25",
+      "publisher": "City of Berkeley",
+      "title": "Ballot Measures: City measures on the November 3, 2026 ballot",
+      "committee": "City Clerk",
+      "url": "https://berkeleyca.gov/your-government/elections/ballot-measures",
+      "type": "city",
+      "usedFor": "Official measure titles; links to each measure's full text, analyses and arguments",
+      "number": 25
+    },
+    {
+      "id": "S26",
+      "publisher": "City of Berkeley",
+      "title": "Full text of Measure U: General Obligation Bonds for Public Infrastructure and Facilities",
+      "url": "https://berkeleyca.gov/sites/default/files/Berkeley_Bond%20Measure%20-%20Full%20Text.pdf",
+      "type": "city",
+      "usedFor": "The bond measure as voters will see it",
+      "number": 26
+    },
+    {
+      "id": "S27",
+      "publisher": "City of Berkeley",
+      "title": "Full text of Measure V: 2026 Transactions and Use Tax Ordinance",
+      "url": "https://berkeleyca.gov/sites/default/files/Berkeley_Sales%20Tax%20-%20Full%20Text.pdf",
+      "type": "city",
+      "usedFor": "The sales-tax measure as voters will see it",
+      "number": 27
     }
   ],
   "revenue": {
@@ -2284,6 +2312,20 @@
       "source": "S20",
       "page": 55,
       "quote": "The City Manager has recommended utilizing one-time funds during Fiscal Year 2027 to delay the closure of Fire Station 4 until after the results of the Sales and Use Tax measure are disclosed in November 2026."
+    },
+    "salesTaxTitle": {
+      "source": "S25",
+      "quote": "Measure V - Transactions and Use (Sales) General Tax Measure (majority)",
+      "letter": "V",
+      "title": "Transactions and Use (Sales) General Tax Measure",
+      "vote": "majority"
+    },
+    "bondTitle": {
+      "source": "S25",
+      "quote": "Measure U - General Obligation Bond Measure for Public Infrastructure and Facilities (2/3 vote)",
+      "letter": "U",
+      "title": "General Obligation Bond Measure for Public Infrastructure and Facilities",
+      "vote": "2/3 vote"
     }
   }
 }

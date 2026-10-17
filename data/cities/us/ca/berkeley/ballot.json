@@ -1,14 +1,42 @@
 {
-  "note": "Ballot page data that isn't in the workbook. After the election, set each measure's status to \"passed\" or \"failed\" (and the result fields); the page's heading and result badges follow. Every row is one builder's output for both outcomes, so keep passes and fails parallel: same label, same kind of statement, same sources. Each cite's quote is checked against its page of source/excerpts/{source}.json at build time.",
+  "note": "Ballot page data that isn't in the workbook. After the election, set each measure's status to \"passed\" or \"failed\" (and the result fields); the page's heading and result badges follow. Every row is one builder's output for both outcomes, so keep passes and fails parallel: same label, same kind of statement, same sources. Each cite's quote is checked against its page of source/excerpts/{source}.json at build time. Each measure's `read` lists the City documents a voter can open to dig deeper; both measures list the same kinds of document in the same order (no campaign sites).",
   "election": "2026-11-03",
   "measures": {
     "salesTax": {
       "status": "pending",
-      "yesShare": null
+      "yesShare": null,
+      "read": [
+        {
+          "label": "Full text",
+          "source": "S27"
+        },
+        {
+          "label": "Impartial analysis",
+          "source": "S21"
+        },
+        {
+          "label": "All City measures",
+          "source": "S25"
+        }
+      ]
     },
     "bond": {
       "status": "pending",
-      "yesShare": null
+      "yesShare": null,
+      "read": [
+        {
+          "label": "Full text",
+          "source": "S26"
+        },
+        {
+          "label": "Impartial analysis",
+          "source": "S21"
+        },
+        {
+          "label": "All City measures",
+          "source": "S25"
+        }
+      ]
     }
   },
   "rows": [

@@ -11,7 +11,7 @@ const budget = budgetFor(city)!;
 const file = ballotFileFor(city.path);
 const p = ballotPage(budget, file, shortNames(city.path, budget));
 const [passes, fails] = p.scenarios;
-const withStatus = (status: 'pending' | 'passed' | 'failed'): BallotFile => ({ ...file, measures: { ...file.measures, salesTax: { status, yesShare: null } } });
+const withStatus = (status: 'pending' | 'passed' | 'failed'): BallotFile => ({ ...file, measures: { ...file.measures, salesTax: { ...file.measures.salesTax, status, yesShare: null } } });
 
 describe('ballot page figures', () => {
   it('passes 105 positions (85 vacant, 20 filled), FTE 1,455; fails 138 (100 / 38), FTE 1,422', () => {
@@ -49,6 +49,15 @@ describe('ballot page figures', () => {
     expect(p.bond.backlog.ref).toMatchObject({ low: 1_650_000_000, high: 2_000_000_000 });
   });
 
+  it("official titles come from the City's ballot measures page, and each card links the measure's own full text", () => {
+    expect(p.salesTax.official).toMatchObject({ title: 'Transactions and Use (Sales) General Tax Measure', cite: { source: 'S25' } });
+    expect(p.bond.official).toMatchObject({ title: 'General Obligation Bond Measure for Public Infrastructure and Facilities', cite: { source: 'S25' } });
+    expect(p.salesTax.read.map((r) => r.source)).toEqual(['S27', 'S21', 'S25']);
+    expect(p.bond.read.map((r) => r.source)).toEqual(['S26', 'S21', 'S25']);
+    expect(budget.sources.find((s) => s.id === 'S27')!.title).toMatch(/Measure V/);
+    expect(budget.sources.find((s) => s.id === 'S26')!.title).toMatch(/Measure U/);
+  });
+
   it('scenario rows quote the adoption report: Fire Station 4 (p.55) and 21 police positions (p.96)', () => {
     const row = (s: typeof passes, k: string) => s.rows.find((r) => r.key === k)!;
     expect(row(passes, 'fire-station')).toMatchObject({ label: 'Fire Station 4', text: 'Tax revenue proposed to keep it open', cite: { source: 'S20', page: 55 } });
@@ -78,7 +87,12 @@ describe('ballot page figures', () => {
   });
 
   it('rejects a ballot.json it cannot render honestly', () => {
-    expect(() => checkBallotFile({ ...file, measures: { ...file.measures, salesTax: { status: 'won' as never, yesShare: null } } }, budget)).toThrow(/status/);
+    expect(() => checkBallotFile({ ...file, measures: { ...file.measures, salesTax: { ...file.measures.salesTax, status: 'won' as never } } }, budget)).toThrow(/status/);
+    // Both measures link the same kinds of City document, in the same order.
+    const withRead = (read: BallotFile['measures']['bond']['read']): BallotFile => ({ ...file, measures: { ...file.measures, bond: { ...file.measures.bond, read } } });
+    expect(() => checkBallotFile(withRead(file.measures.bond.read.slice(0, 2)), budget)).toThrow(/the sales tax links Full text, Impartial analysis, All City measures but the bond links Full text, Impartial analysis$/);
+    expect(() => checkBallotFile(withRead([...file.measures.bond.read.slice(0, 2), { label: 'All City measures', source: 'S16' }]), budget)).toThrow(/S16, which isn't a City document/);
+    expect(() => checkBallotFile(withRead([...file.measures.bond.read.slice(0, 2), { label: 'All City measures', source: 'S99' as never }]), budget)).toThrow(/unknown source S99/);
     const withRow = (fails: Partial<BallotFile['rows'][number]['fails']>): BallotFile => ({ ...file, rows: [{ ...file.rows[0], fails: { ...file.rows[0].fails, ...fails } }, ...file.rows.slice(1)] });
     expect(() => checkBallotFile(withRow({ cite: { ...file.rows[0].fails.cite, source: 'S99' as never } }), budget)).toThrow(/S99/);
     expect(() => checkBallotFile(withRow({ also: ['S99' as never] }), budget)).toThrow(/S99/);

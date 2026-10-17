@@ -31,7 +31,8 @@ export interface Ref {
 export interface DocRef {
   source: SourceId;
   related?: SourceId[];
-  page: number;
+  /** Absent for a web page. */
+  page?: number;
   quote: string;
 }
 
@@ -289,6 +290,9 @@ export interface DocumentFacts {
   /** FY27–31 CIP "Capital & Maint. Need" total, and its stated yearly growth. */
   capitalNeed: DocRef & { amount: number };
   capitalNeedGrowth: DocRef & { rate: number };
+  /** The City's official ballot titles ("Measure V - Transactions and Use (Sales) General Tax Measure (majority)"), split up. */
+  salesTaxTitle: DocRef & { letter: string; title: string; vote: string };
+  bondTitle: DocRef & { letter: string; title: string; vote: string };
   /** The adoption report: one-time funds delay cuts until the vote (the FY27 "bridge" is that money, not tax revenue). */
   oneTimeDelay: DocRef;
   /** The FY27–28 capital program by funding source, all funds: every fund with money in either year. */

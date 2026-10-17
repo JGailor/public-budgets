@@ -51,3 +51,14 @@ test('a scenario row opens a receipt with the PDF page and the sentence it quote
   await expect(dialog).toContainText('the proposed station closure will be reconsidered for Fiscal Year 2028');
   await expect(dialog).not.toContainText('Basis');
 });
+
+test("each measure card links its own City documents, opening in a new tab", async ({ page }) => {
+  await page.goto(PAGE);
+  for (const letter of ['V', 'U']) {
+    const nav = page.getByRole('navigation', { name: `Read Measure ${letter}` });
+    await expect(nav.getByRole('link')).toHaveCount(3);
+    const full = nav.getByRole('link', { name: 'Full text (PDF, opens in a new tab)' });
+    await expect(full).toHaveAttribute('target', '_blank');
+    await expect(full).toHaveAttribute('href', /Full%20Text\.pdf$/);
+  }
+});

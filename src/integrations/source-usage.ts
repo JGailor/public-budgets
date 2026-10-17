@@ -12,7 +12,8 @@ import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
 import { CITY_PAGES } from '../lib/city-pages.ts';
 
-const CHIP = /data-source-chip="(S\d+)"/g;
+// A source chip, or a plain link to a source document (the Ballot page's "Read Measure V" links).
+const CHIP = /data-source-(?:chip|link)="(S\d+)"/g;
 
 function htmlFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {

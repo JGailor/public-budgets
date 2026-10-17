@@ -15,10 +15,10 @@ const pages = (dir: string): string[] =>
 describe('sources page', () => {
   const rows = [...html.matchAll(/<li class="src-row" id="(S\d+)" data-type="(city|news)"/g)].map((m) => ({ id: m[1], type: m[2] }));
 
-  it('lists all 24 sources: 14 city documents, 10 news reports', () => {
+  it('lists all 27 sources: 17 city documents, 10 news reports', () => {
     expect(rows.map((r) => r.id)).toEqual(b.sources.map((s) => s.id));
-    expect(rows.filter((r) => r.type === 'city')).toHaveLength(14);
-    expect(text).toContain('City documents (14)');
+    expect(rows.filter((r) => r.type === 'city')).toHaveLength(17);
+    expect(text).toContain('City documents (17)');
     expect(text).toContain('News reports (10)');
   });
 

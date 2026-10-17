@@ -174,6 +174,9 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
     const [ag, agM] = m('adoptionGap', /\$([\d.]+) million in FY27 .* \$([\d.]+) million in FY28/);
     const [cn, cnM] = m('capitalNeed', /Need \$ ([\d,]+)$/);
     const [cg, cgM] = m('capitalNeedGrowth', /increase at a rate of (\d+)% per year/);
+    const TITLE = /^Measure ([A-Z]+)-(.+) \((.+)\)$/;
+    const [stTitle, stTitleM] = m('salesTaxTitle', TITLE);
+    const [bTitle, bTitleM] = m('bondTitle', TITLE);
     const words: Record<string, number> = { two: 2, three: 3, four: 4, five: 5 };
     const s20 = added.find((s) => s.id === ad.source);
     if (!s20?.date) throw new Error(`documents.json adoption: ${ad.source} has no date`);
@@ -193,6 +196,8 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
       capitalNeedGrowth: { ...cg, rate: Number(cgM[1]) / 100 },
       capitalProgram: capitalFromDocument(file.capitalProgram, excerpts),
       oneTimeDelay: q('oneTimeDelay'),
+      salesTaxTitle: { ...stTitle, letter: stTitleM[1], title: stTitleM[2].trim(), vote: stTitleM[3] },
+      bondTitle: { ...bTitle, letter: bTitleM[1], title: bTitleM[2].trim(), vote: bTitleM[3] },
     };
   } catch (e) {
     errors.push((e as Error).message);
@@ -204,6 +209,9 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
   if (f.salesTaxRevenue.low !== f.salesTaxRevenueCouncil.low || f.salesTaxRevenue.high !== f.salesTaxRevenueCouncil.high)
     errors.push('documents.json: the City Attorney and Council revenue estimates disagree');
   if (f.salesTaxMeasure.letter === f.bondMeasure.letter) errors.push('documents.json: both measures have the same letter');
+  // Two City documents name the measures: the City Attorney's analyses and the Clerk's ballot measures page.
+  if (f.salesTaxTitle.letter !== f.salesTaxMeasure.letter) errors.push(`documents.json: the ballot measures page calls the sales tax Measure ${f.salesTaxTitle.letter}, the impartial analysis Measure ${f.salesTaxMeasure.letter}`);
+  if (f.bondTitle.letter !== f.bondMeasure.letter) errors.push(`documents.json: the ballot measures page calls the bond Measure ${f.bondTitle.letter}, the impartial analysis Measure ${f.bondMeasure.letter}`);
   const gap = budget.deficitBridge.steps.find((s) => s.key === 'final-gap');
   for (const [k, y] of [['fy2027', 'fy2027'], ['fy2028', 'fy2028']] as const) {
     const wb = gap ? Math.abs(gap[y]) : NaN;
