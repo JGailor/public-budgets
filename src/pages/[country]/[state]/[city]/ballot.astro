@@ -52,9 +52,9 @@ const planDate = longDate(p.plan.date!);
         <p class="kicker">Measure {v.letter} · {thresholdLabel(t.threshold)}</p>
         <h2>{pct(t.rate)} local sales tax <SourceChip city={city} figure={v.figure} /></h2>
         <p>
-          A general tax: the money would go to the General Fund and could be spent on any city purpose. <SourceChip city={city} source={v.general.source} at={v.general} />
+          A general tax: the money would go to the General Fund and could be spent on any city purpose. <SourceChip city={city} source={v.general.source} at={v.general} />{' '}
           The City estimates it would raise {range(v.revenue.low, v.revenue.high)} a year
-          {v.revenue.cites.map((c) => <SourceChip city={city} source={c.source} at={c} />)}
+          {v.revenue.cites.map((c) => <SourceChip city={city} source={c.source} at={c} />)}{' '}
           and bring {city.name}'s sales-tax rate to {pct(t.newRate)}. It would start {longDate(v.term.start)} and last {v.term.until}.
           <SourceChip city={city} source={v.term.cite.source} at={v.term.cite} />
         </p>
@@ -67,7 +67,7 @@ const planDate = longDate(p.plan.date!);
           Borrowing for streets, buildings and parks, repaid by a {bond.repaidBy}. The City estimates about ${u.cost.perHundredK.toFixed(2)} a year per $100,000 of
           assessed value on average over {u.cost.years} years, raising about {millions(u.cost.perYear)} a year.
           <SourceChip city={city} source={u.cost.cite.source} at={u.cost.cite} /> Its highest rate would be about ${u.peak.perHundredK}, from {u.peak.from}.
-          <SourceChip city={city} source={u.peak.cite.source} at={u.peak.cite} />
+          <SourceChip city={city} source={u.peak.cite.source} at={u.peak.cite} />{' '}
           The City Auditor would audit its spending at least every {words(u.audit.everyYears)} years. <SourceChip city={city} source={u.audit.cite.source} at={u.audit.cite} />
         </p>
         <p>

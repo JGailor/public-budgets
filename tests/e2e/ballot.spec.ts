@@ -41,3 +41,13 @@ test('the nav, the overview and the landing page link here', async ({ page }) =>
   await page.goto('/');
   await expect(page.locator(`a[href="${PAGE}"]`).first()).toBeVisible();
 });
+
+test('a scenario row opens a receipt with the PDF page and the sentence it quotes', async ({ page }) => {
+  await page.goto(PAGE);
+  await page.locator('.scenario[data-outcome="fails"] [data-row="fire-station"] .chips button').first().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('p. 55 of the PDF');
+  await expect(dialog).toContainText('the proposed station closure will be reconsidered for Fiscal Year 2028');
+  await expect(dialog).not.toContainText('Basis');
+});
