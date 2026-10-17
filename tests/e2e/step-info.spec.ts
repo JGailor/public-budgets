@@ -52,6 +52,8 @@ test.describe('desktop', () => {
     await second.click();
     await expect(await panelFor(page, first)).toBeHidden();
     await expect(await panelFor(page, second)).toContainText('can spend only once');
+    // S1 p.9's whole sentence: the lasting fix includes new revenue, i.e. the sales tax (PM review on #25).
+    await expect(await panelFor(page, second)).toContainText('the lasting fix comes from ongoing cuts and new revenue.');
     // A click elsewhere closes it; a click on its own chip doesn't.
     await (await panelFor(page, second)).locator('[data-source-chip]').first().click();
     await expect(page.locator('dialog[data-receipt-dialog]')).toBeVisible();

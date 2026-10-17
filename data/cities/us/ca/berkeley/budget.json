@@ -2385,7 +2385,7 @@
         ]
       },
       "one-time-resources": {
-        "text": "Money the City can spend only once, used here to even out the FY27 and FY28 gaps. The City says it eases the gap in the short term, and the lasting fix comes from ongoing measures.",
+        "text": "Money the City can spend only once, used here to even out the FY27 and FY28 gaps. The City says it eases the gap in the short term, and the lasting fix comes from ongoing cuts and new revenue.",
         "cites": [
           {
             "source": "S1",
@@ -2400,7 +2400,7 @@
         ]
       },
       "final-gap": {
-        "text": "The gap left after every step: the number the City planned around. The City says it closed it with more than 10% in ongoing cuts.",
+        "text": "The gap left after every step: the number the City planned around. The City says it closed it with ongoing cuts of more than 10% of department budgets.",
         "cites": [
           {
             "source": "S1",
