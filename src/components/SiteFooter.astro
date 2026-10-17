@@ -10,6 +10,8 @@ interface Props {
 // Off a city's pages (e.g. the landing page) the data links go to the first city.
 const city = Astro.props.city ?? cities[0];
 const pageUrl = new URL(Astro.url.pathname, Astro.site);
+// The build year: the first deploy each January moves it on.
+const year = new Date().getFullYear();
 const links = [
   { href: `${city.path}sources/`, label: 'Sources & methods' },
   { href: `${city.path}glossary/`, label: 'Glossary' },
@@ -42,6 +44,12 @@ const links = [
         }
       </ul>
     </nav>
+  </div>
+  <div class="wrap">
+    <div class="legal">
+      <p>© {year} {SITE.publisher}</p>
+      <p>Made with <a href={SITE.madeWith.url} rel="noopener">{SITE.madeWith.name}</a></p>
+    </div>
   </div>
 </footer>
 
@@ -96,6 +104,21 @@ const links = [
   }
   nav a:hover {
     text-decoration: underline;
+  }
+  .legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.25rem;
+    border-top: 1px solid rgb(255 255 255 / 0.15);
+    font-size: 0.8125rem;
+  }
+  .legal p {
+    margin: 0;
+  }
+  .legal a {
+    color: #fff;
   }
   @media (max-width: 47.99rem) {
     .about p {
