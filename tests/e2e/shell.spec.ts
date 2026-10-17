@@ -187,6 +187,16 @@ test.describe('desktop shell', () => {
     await expect(page.locator('footer.site-footer .legal')).toContainText(`© ${new Date().getFullYear()} Playframe Studios, LLC`);
   });
 
+  test('the footer says Made with Foundry, linking to foundryworks.dev, and fits at 390px', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto(berkeley.path);
+    const legal = page.locator('footer.site-footer .legal');
+    await expect(legal).toContainText('Made with Foundry');
+    await expect(legal.getByRole('link', { name: 'Foundry' })).toHaveAttribute('href', 'https://foundryworks.dev');
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBe(0);
+  });
+
   test('loads the chosen fonts, and numbers are tabular', async ({ page }) => {
     await page.goto(berkeley.path);
     const result = await page.evaluate(async () => {

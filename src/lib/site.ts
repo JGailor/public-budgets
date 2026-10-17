@@ -8,6 +8,8 @@ export const SITE = {
   repo: 'https://github.com/JGailor/public-budgets',
   /** The copyright holder, named in the footer. */
   publisher: 'Playframe Studios, LLC',
+  /** The tool the site is built with, credited in the footer. */
+  madeWith: { name: 'Foundry', url: 'https://foundryworks.dev' },
 } as const;
 
 /**

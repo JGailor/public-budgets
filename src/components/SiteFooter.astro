@@ -45,8 +45,11 @@ const links = [
       </ul>
     </nav>
   </div>
-  <div class="wrap legal">
-    <p>© {year} {SITE.publisher}</p>
+  <div class="wrap">
+    <div class="legal">
+      <p>© {year} {SITE.publisher}</p>
+      <p>Made with <a href={SITE.madeWith.url} rel="noopener">{SITE.madeWith.name}</a></p>
+    </div>
   </div>
 </footer>
 
@@ -113,6 +116,9 @@ const links = [
   }
   .legal p {
     margin: 0;
+  }
+  .legal a {
+    color: #fff;
   }
   @media (max-width: 47.99rem) {
     .about p {
