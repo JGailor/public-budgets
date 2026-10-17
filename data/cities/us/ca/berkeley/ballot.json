@@ -1,21 +1,85 @@
 {
-  "note": "Ballot page data that isn't in the workbook. After the election, set each measure's status to \"passed\" or \"failed\" (and the result fields); the page's heading and result badges follow. Statements here quote their sources; news sources are labeled as reporting on the page.",
+  "note": "Ballot page data that isn't in the workbook. After the election, set each measure's status to \"passed\" or \"failed\" (and the result fields); the page's heading and result badges follow. Every row is one builder's output for both outcomes, so keep passes and fails parallel: same label, same kind of statement, same sources. Each cite's quote is checked against its page of source/excerpts/{source}.json at build time.",
   "election": "2026-11-03",
   "measures": {
-    "salesTax": { "status": "pending", "yesShare": null },
-    "bond": { "status": "pending", "yesShare": null }
-  },
-  "fireStation": {
-    "label": "Fire station",
-    "passes": {
-      "text": "Stays open in FY27",
-      "sources": ["S16"],
-      "quote": "a 0.5% sales tax increase … would raise more than $9 million per year — enough to keep the station open"
+    "salesTax": {
+      "status": "pending",
+      "yesShare": null
     },
-    "fails": {
-      "text": "Station 4 would close",
-      "sources": ["S15", "S16"],
-      "quote": "Fire Station 4, the Marin Avenue facility that serves North Berkeley, would be closed under that scenario"
+    "bond": {
+      "status": "pending",
+      "yesShare": null
     }
+  },
+  "rows": [
+    {
+      "key": "fire-station",
+      "label": "Fire Station 4",
+      "passes": {
+        "text": "Tax revenue proposed to keep it open",
+        "cite": {
+          "source": "S20",
+          "page": 55,
+          "quote": "Should voters approve the Sales and Use Tax measure, the resulting revenue is proposed to be allocated to maintain operations at the fire station."
+        },
+        "also": [
+          "S16"
+        ]
+      },
+      "fails": {
+        "text": "Closure reconsidered for FY2028",
+        "cite": {
+          "source": "S20",
+          "page": 55,
+          "quote": "Conversely, if the measure does not pass, the proposed station closure will be reconsidered for Fiscal Year 2028."
+        },
+        "also": [
+          "S16"
+        ]
+      }
+    },
+    {
+      "key": "police",
+      "label": "21 police positions",
+      "passes": {
+        "text": "Tax revenue proposed to keep them",
+        "cite": {
+          "source": "S20",
+          "page": 96,
+          "quote": "Should voters approve the Sales and Use Tax measure, the resulting revenue is proposed to be allocated to maintain the 21 identified sworn and non-sworn positions."
+        },
+        "also": []
+      },
+      "fails": {
+        "text": "Funded only until the vote result",
+        "cite": {
+          "source": "S20",
+          "page": 96,
+          "quote": "For FY27, the strategy is to utilize one-time funds to delay the elimination of 21 positions until the outcome of the November 2026 Sales and Use Tax measure is known."
+        },
+        "also": []
+      }
+    }
+  ],
+  "adoption": {
+    "cite": {
+      "source": "S20",
+      "page": 1,
+      "quote": "as contained in the City Manager’s FY27 & FY28 Proposed Biennial Budget, and as amended by subsequent Council action"
+    }
+  },
+  "countsCaveat": {
+    "text": "At adoption, the Council was reported to have restored nine fire positions; the counts shown are from the April 16 plan.",
+    "cites": [
+      {
+        "source": "S23",
+        "page": 1,
+        "quote": "This supplemental item proposes to fund 9.00 full-time equivalent positions in the Fire Department"
+      },
+      {
+        "source": "S24",
+        "quote": "officials preserved funding for nine positions in the fire department that had been on the chopping block"
+      }
+    ]
   }
 }

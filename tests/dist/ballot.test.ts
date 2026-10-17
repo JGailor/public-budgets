@@ -46,9 +46,56 @@ describe('ballot page (built)', () => {
         .replace(/aria-label="[^"]*"/g, '')
         .replace(/>[^<]*</g, '><')
         .replace(/class="person on/g, 'class="person')
-        // The fire-station line cites one source if it passes and two if it fails.
-        .replace(/(<span class="chips"[\s\S]*?<\/span><\/span>)+/g, 'CHIPS');
+        // Chips keep their source ids: both outcomes cite the same documents, in the same places.
+        .replace(/data-source-chip="(S\d+)"/g, 'chip-$1');
     expect(skeleton(cards[0].html)).toBe(skeleton(cards[1].html));
+  });
+
+  it('each card quotes the adoption report on Fire Station 4 and the 21 police positions', () => {
+    const [passes, fails] = cards;
+    expect(passes.text).toContain('Fire Station 4 Tax revenue proposed to keep it open');
+    expect(fails.text).toContain('Fire Station 4 Closure reconsidered for FY2028');
+    expect(passes.text).toContain('21 police positions Tax revenue proposed to keep them');
+    expect(fails.text).toContain('21 police positions Funded only until the vote result');
+    for (const c of cards) {
+      const receipts = [...c.html.matchAll(/data-receipt="([^"]*)"/g)].map((m) => JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')));
+      expect(receipts.filter((r) => r.sources[0] === 'S20').map((r) => r.page)).toEqual([55, 96]);
+    }
+  });
+
+  it('the nine-fire-positions caveat is on both cards, in the same words and place', () => {
+    const caveat = 'At adoption, the Council was reported to have restored nine fire positions; the counts shown are from the April 16 plan.';
+    for (const c of cards) {
+      expect(c.text).toContain(caveat);
+      expect(c.text.indexOf(caveat)).toBeGreaterThan(c.text.indexOf('positions eliminated'));
+      expect(c.text.indexOf(caveat)).toBeLessThan(c.text.indexOf('People laid off'));
+    }
+  });
+
+  it('names the measures by letter, with the City Attorney and adoption figures', () => {
+    const t = strip(html);
+    const d = b.documentFacts;
+    expect(t).toContain(`Measure ${d.salesTaxMeasure.letter} · Simple majority`);
+    expect(t).toContain(`Measure ${d.bondMeasure.letter} · Two-thirds vote`);
+    expect(t).toContain('The City estimates it would raise $9–10M a year');
+    expect(t).toContain('It would start April 1, 2027 and last until ended by the voters.');
+    expect(t).toContain(`about $${d.bondCost.perHundredK.toFixed(2)} a year per $100,000 of assessed value on average over ${d.bondCost.years} years`);
+    expect(t).toContain(`Its highest rate would be about $${d.bondPeak.perHundredK}, from ${d.bondPeak.from}.`);
+    expect(t).toContain('at least every three years');
+    expect(t).toContain(`unfunded capital and maintenance need at $${+(d.capitalNeed.amount / 1e9).toFixed(2)}B`);
+    expect(t).toContain(`If Measure ${d.salesTaxMeasure.letter}, the sales tax…`);
+  });
+
+  it('the footnote says the budget was adopted with amendments, not that figures "may have changed"', () => {
+    const t = strip(html);
+    expect(t).toContain('The Council adopted the budget on June 23, 2026 with amendments made at that meeting');
+    expect(t).not.toMatch(/may have changed/);
+  });
+
+  it('the footnote calls the $9.4M one-time money until the vote, not tax money, and says when the tax would start', () => {
+    const t = strip(html);
+    expect(t).toContain('Note: in FY27 the plan uses $9.4M of one-time money (reserves and a Successor Agency transfer) to soften Police, Fire and Parks, Rec & Waterfront cuts until the vote.');
+    expect(t).toContain('The tax itself would start April 1, 2027.');
   });
 
   it('uses no advocacy language', () => {

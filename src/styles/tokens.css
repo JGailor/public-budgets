@@ -1,7 +1,7 @@
 /*
  * Design tokens from epic 1. Color meanings are strict:
  *   red  = only "money short": deficits and cuts.
- *   gold = only one-time money: reserves, the sales-tax bridge.
+ *   gold = only one-time money: reserves, the bridge until the sales-tax vote.
  * Don't use either for decoration or emphasis.
  */
 :root {

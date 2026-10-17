@@ -31,7 +31,7 @@ describe('departments page figures', () => {
     const r = figureReceipt(budget, city, police.years.fy2027.figures.net.passes, page);
     expect(r.parts).toEqual([
       { label: 'Proposed cut', value: '$10,588,717' },
-      { label: '+ less softened by sales tax', value: '−$5,345,885' },
+      { label: '+ less softened by bridge money', value: '−$5,345,885' },
     ]);
   });
 

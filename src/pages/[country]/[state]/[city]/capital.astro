@@ -19,6 +19,7 @@ const budget = budgetFor(city)!;
 const c = capitalPage(budget, capitalGroupsFor(city.path));
 const bl = c.backlog.fact;
 const billions = (lo: number, hi: number) => `$${+(lo / 1e9).toFixed(2)}–${+(hi / 1e9).toFixed(2)}B`;
+const billion = (v: number) => `$${+(v / 1e9).toFixed(2)}B`;
 const pct = (v: number) => `${(v * 100).toFixed(3)}%`;
 const vars = (b: Block) =>
   [
@@ -48,15 +49,15 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
           <span class="scale-label program-label">{shortMoney(c.total.value)} planned FY27-28 <SourceChip city={city} figure={c.total.figure} /></span>
         </div>
         <div class="scale-row">
-          <span class="bar bar--need" style={`--low:${pct(c.scale.low)}`}>
-            <span class="need-label">
-              {billions(bl.low, bl.high)} estimated unfunded need: {bl.sidewalkMiles} miles of sidewalk, {bl.parks} parks, {bl.buildings} buildings
-            </span>
+          <span class="bar bar--need" style={`width:${pct(c.scale.need)}`}>
+            <span class="need-label">{billion(c.need.value)} unfunded capital and maintenance need</span>
           </span>
         </div>
         <p class="scale-key">
+          The City's FY2027–31 capital plan puts the need at {billion(c.need.value)} <SourceChip city={city} figure={c.need.figure} />, and expects it to grow
+          about {Math.round(c.need.growth * 100)}% a year. <SourceChip city={city} source={c.need.growthCite.source} at={c.need.growthCite} /> An earlier City
+          estimate was {billions(bl.low, bl.high)}, counting {bl.sidewalkMiles} miles of sidewalk, {bl.parks} parks and {bl.buildings} buildings.
           <SourceChip city={city} figure={c.backlog.figure} />
-          <span class="hatch-swatch" aria-hidden="true"></span> Hatched area = the range of the city's estimate
         </p>
       </div>
     </section>
@@ -175,31 +176,22 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
     position: relative;
     display: flex;
     align-items: center;
-    width: 100%;
     height: auto;
     min-height: 2.75rem;
-    background: linear-gradient(90deg, #3a3f46 0 var(--low), transparent var(--low)),
-      repeating-linear-gradient(-45deg, #3a3f46 0 2px, #e9e4d8 2px 6px);
+    background: #3a3f46;
   }
   .need-label {
-    max-width: var(--low);
     padding: 0.5rem 0.875rem;
     color: #fff;
     font-weight: 800;
     line-height: 1.35;
   }
   .scale-key {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    max-width: 48rem;
     margin: 0;
     color: var(--muted);
     font-size: 0.8125rem;
-  }
-  .hatch-swatch {
-    width: 1.5rem;
-    height: 0.875rem;
-    background: repeating-linear-gradient(-45deg, #3a3f46 0 2px, #e9e4d8 2px 6px);
+    line-height: 1.6;
   }
 
   /* Treemap */

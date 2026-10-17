@@ -61,7 +61,7 @@ export function departmentsPage(b: CityBudget, families: Families, names: Record
       figures: {
         baseline: { value: d.baseline, label: `${L}: General Fund baseline`, ref: d },
         cut: { value: d.reduction, label: `${L}: proposed cut`, ref: d, tone: 'short' },
-        softened: { value: d.salesTaxAllocation, label: `${L}: cut softened by one-time sales-tax money`, ref: d, tone: 'one-time' },
+        softened: { value: d.salesTaxAllocation, label: `${L}: cut softened by one-time bridge money`, ref: d, tone: 'one-time' },
         net: {
           passes: {
             value: d.netReduction,
@@ -70,7 +70,7 @@ export function departmentsPage(b: CityBudget, families: Families, names: Record
             tone: 'short',
             parts: [
               { label: 'Proposed cut', value: d.reduction },
-              { label: 'less softened by sales tax', value: -d.salesTaxAllocation },
+              { label: 'less softened by bridge money', value: -d.salesTaxAllocation },
             ],
           },
           fails: { value: d.reduction, label: `${L}: net cut if the sales tax fails (the full proposed cut)`, ref: d, tone: 'short' },

@@ -5,7 +5,7 @@
  * the data.
  */
 import { csvTables } from '../data/csv.ts';
-import type { CityBudget, Ref, Source, SourceId } from '../data/types.ts';
+import type { CityBudget, DocRef, Ref, Source, SourceId } from '../data/types.ts';
 import type { City } from './cities.ts';
 import { SITE } from './site.ts';
 
@@ -21,8 +21,8 @@ export interface Figure {
   value: number;
   /** What the number is: "FY2027 General Fund gap, after adjustments". */
   label: string;
-  /** The budget.json record it was read from (source, related, table, row). */
-  ref: Ref;
+  /** The budget.json record it was read from: a workbook row (table, row) or a City PDF page (page, quote). */
+  ref: Ref | DocRef;
   format?: FigureFormat;
   /** Color meaning: 'short' (deficits and cuts, red) or 'one-time' (gold). Negative values default to 'short'. */
   tone?: 'short' | 'one-time' | 'neutral';
@@ -62,6 +62,9 @@ export interface Receipt {
   sources: SourceId[];
   table?: string;
   row?: number;
+  /** PDF page and the sentence the figure is read from, for figures from City documents. */
+  page?: number;
+  quote?: string;
   /** Download for the table this figure came from. */
   csv?: string;
   parts?: { label: string; value: string }[];
@@ -114,7 +117,8 @@ export function sourcesById(budget: CityBudget): Map<SourceId, SourceView> {
 }
 
 /** "/us/ca/berkeley/data/deficit-bridge.csv" for the table a record came from. */
-export function csvHref(budget: CityBudget, city: City, ref: Ref): string | undefined {
+export function csvHref(budget: CityBudget, city: City, ref: Ref | DocRef): string | undefined {
+  if ('page' in ref) return undefined;
   for (const t of csvTables(budget)) {
     if ((t.rows as Ref[]).some((r) => r.table === ref.table && r.row === ref.row)) return `${city.path}data/${t.name}.csv`;
   }
@@ -132,7 +136,8 @@ export function figureReceipt(budget: CityBudget, city: City, figure: Figure, pa
     }
   }
   const value = formatValue(figure.value, figure.format);
-  const where = `${figure.ref.table}, row ${figure.ref.row}`;
+  const ref = figure.ref;
+  const where = 'page' in ref ? `p. ${ref.page}` : `${ref.table}, row ${ref.row}`;
   const citation = [
     `${figure.label}: ${value}.`,
     ...ids.map((id, i) => `${i === 0 ? 'Source' : 'Also'}: ${views.get(id)!.citation}${i === 0 ? ` (${where})` : ''}.`),
@@ -144,8 +149,7 @@ export function figureReceipt(budget: CityBudget, city: City, figure: Figure, pa
     tone: figure.tone ?? (figure.value < 0 ? 'short' : 'neutral'),
     label: figure.label,
     sources: ids,
-    table: figure.ref.table,
-    row: figure.ref.row,
+    ...('page' in ref ? { page: ref.page, quote: ref.quote } : { table: ref.table, row: ref.row }),
     csv: csvHref(budget, city, figure.ref),
     parts: figure.parts?.map((p, i) => ({
       label: `${i === 0 ? '' : '+ '}${p.label}`,
@@ -155,8 +159,33 @@ export function figureReceipt(budget: CityBudget, city: City, figure: Figure, pa
   };
 }
 
-export function sourceReceipt(budget: CityBudget, id: SourceId, pageUrl: URL): Receipt {
+/** Where in a document a statement comes from: the PDF page (if any) and the sentence it says. */
+export interface At {
+  page?: number;
+  quote?: string;
+}
+
+export function sourceReceipt(budget: CityBudget, id: SourceId, pageUrl: URL, at: At = {}): Receipt {
   const view = sourcesById(budget).get(id);
   if (!view) throw new Error(`unknown source ${id}`);
-  return { kind: 'source', sources: [id], citation: `${view.citation}.\nVia ${SITE.name}, ${pageUrl.href}` };
+  const where = at.page ? ` (p. ${at.page})` : '';
+  const said = at.quote ? `\n"${at.quote}"` : '';
+  return { kind: 'source', sources: [id], ...at, citation: `${view.citation}${where}.${said}\nVia ${SITE.name}, ${pageUrl.href}` };
+}
+
+/** PDF pages cited per source, from anything holding {source, page} (documentFacts, ballot.json): "1, 55, 96". */
+export function pagesBySource(...values: unknown[]): Map<SourceId, number[]> {
+  const pages = new Map<SourceId, Set<number>>();
+  const walk = (v: unknown) => {
+    if (Array.isArray(v)) return v.forEach(walk);
+    if (!v || typeof v !== 'object') return;
+    const o = v as Record<string, unknown>;
+    if (typeof o.source === 'string' && typeof o.page === 'number') {
+      const set = pages.get(o.source as SourceId) ?? new Set<number>();
+      pages.set(o.source as SourceId, set.add(o.page));
+    }
+    Object.values(o).forEach(walk);
+  };
+  values.forEach(walk);
+  return new Map([...pages].map(([id, set]) => [id, [...set].sort((a, b) => a - b)]));
 }

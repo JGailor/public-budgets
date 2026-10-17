@@ -49,7 +49,7 @@ export function headlines(b: CityBudget, families: Families) {
     positionsWithoutTax: withoutTax.total,
     cuts: {
       value: fy27.total.reduction,
-      label: 'Proposed General Fund department cuts, FY2027, before sales-tax money',
+      label: 'Proposed General Fund department cuts, FY2027, before the one-time bridge',
       ref: fy27.total,
       tone: 'short',
     } satisfies Figure,

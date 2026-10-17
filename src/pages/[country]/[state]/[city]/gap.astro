@@ -32,6 +32,7 @@ const geometry = (y: (typeof g.years)[number]) => {
   };
 };
 const notesSource = 'S15';
+const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 ---
 
 <Base title={`The gap · ${city.name}`} city={city} description={`How ${city.name} got from its first deficit estimate to the ${shortMoney(Math.abs(fy27.final.value))} gap it planned around, step by step, and how it plans to close it.`}>
@@ -131,7 +132,8 @@ const notesSource = 'S15';
         <p class="note">
           <SourceChip city={city} figure={g.close.bridge} />
           <SourceChip city={city} source={notesSource} />
-          In FY27 the tax money is applied as a one-time bridge while ongoing revenue ramps up.
+          In FY27 the plan uses one-time money (reserves and a Successor Agency transfer) to soften cuts until the vote. The tax
+          itself would start {taxStart}.
         </p>
       </div>
 

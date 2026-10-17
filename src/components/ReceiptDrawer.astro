@@ -122,7 +122,9 @@ const data = {
         { class: 'facts' },
         row('Document', `${primary.id} · ${primary.format} · ${primary.host}`),
         r.table ? row('Table', `${r.table}, row ${r.row}`) : null,
-        row('Basis', data.basis),
+        r.page ? row('Page', `p. ${r.page} of the PDF`) : null,
+        r.quote ? row('It says', h('q', { class: 'quote' }, r.quote)) : null,
+        r.page || r.quote ? null : row('Basis', data.basis),
         h('div', { 'data-used-on': '' }, h('dt', {}, 'Used on'), usedOn),
       ),
       r.parts &&
@@ -357,6 +359,9 @@ const data = {
   .receipt :global(.facts dd) {
     margin: 0;
     min-width: 0;
+  }
+  .receipt :global(.quote) {
+    font-style: italic;
   }
   .receipt :global(.built) {
     margin-top: 1.25rem;

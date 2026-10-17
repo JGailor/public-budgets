@@ -49,4 +49,9 @@ describe('the Gap page waterfall', () => {
     expect(text).toContain(`$${(t.salesTaxAllocation / 1e6).toFixed(1)}M softened`);
     expect(text).toContain(`Left over: $${Math.round(b.oneTimeResources.remaining / 1e3)}K`);
   });
+
+  it('the bridge note calls it one-time money until the vote', () => {
+    const t = readFileSync(join(import.meta.dirname, '../../dist/us/ca/berkeley/gap/index.html'), 'utf8').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    expect(t).toContain('In FY27 the plan uses one-time money (reserves and a Successor Agency transfer) to soften cuts until the vote. The tax itself would start April 1, 2027.');
+  });
 });

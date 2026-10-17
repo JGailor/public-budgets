@@ -21,19 +21,25 @@ const p = ballotPage(budget, ballotFileFor(city.path), shortNames(city.path, bud
 const t = p.salesTax.fact;
 const bond = p.bond.fact;
 const pct = (v: number) => `${+(v * 100).toFixed(2)}%`;
-const range = (lo: number, hi: number) => `$${(lo / 1e6).toFixed(1)}–${(hi / 1e6).toFixed(1)}M`;
+const range = (lo: number, hi: number) => `$${+(lo / 1e6).toFixed(1)}–${+(hi / 1e6).toFixed(1)}M`;
 const millions = (v: number) => `$${+(v / 1e6).toFixed(1)}M`;
 const fte = (v: number) => Math.round(v).toLocaleString('en-US');
 const committee = (p.plan.committee ?? '').replace(/\bCmte\b/, 'Committee');
 const billions = (lo: number, hi: number) => `$${+(lo / 1e9).toFixed(2)}–${+(hi / 1e9).toFixed(2)}B`;
+const billion = (v: number) => `$${+(v / 1e9).toFixed(2)}B`;
+const longDate = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const words = (n: number) => NUMBER_WORDS[n] ?? String(n);
+const v = p.salesTax;
+const u = p.bond;
 const thresholdLabel = (s: string) => (s === '2/3' ? 'Two-thirds vote' : s.charAt(0).toUpperCase() + s.slice(1));
 const resultLabel: Record<Outcome, string> = { passes: '…passes', fails: '…fails' };
 const people = (filled: number) => Array.from({ length: p.pictogramSlots }, (_, i) => i < filled);
 const list = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
-const planDate = new Date(`${p.plan.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const planDate = longDate(p.plan.date!);
 ---
 
-<Base title={`Your ballot · ${city.name}`} city={city} description={`What ${city.name}'s own budget plan says happens if the ${t.election} sales tax passes, and if it fails.`}>
+<Base title={`Your ballot · ${city.name}`} city={city} description={`What ${city.name}'s own budget plan says happens if Measure ${v.letter}, the ${t.election} sales tax, passes, and if it fails.`}>
   <div class="ballot-page wrap" data-result={p.state.result ?? 'pending'}>
     <section class="intro">
       <p class="eyebrow">{p.state.eyebrow}</p>
@@ -43,27 +49,37 @@ const planDate = new Date(`${p.plan.date}T12:00:00Z`).toLocaleDateString('en-US'
 
     <ul class="measures" role="list">
       <li class="card measure">
-        <p class="kicker">Measure · {thresholdLabel(t.threshold)}</p>
-        <h2>{pct(t.rate)} local sales tax</h2>
+        <p class="kicker">Measure {v.letter} · {thresholdLabel(t.threshold)}</p>
+        <h2>{pct(t.rate)} local sales tax <SourceChip city={city} figure={v.figure} /></h2>
         <p>
-          Would raise about {range(t.revenueLow, t.revenueHigh)} a year and bring {city.name}'s sales-tax rate to {pct(t.newRate)}. The city's
-          FY27-28 plan was built in two versions, one for each outcome.
+          A general tax: the money would go to the General Fund and could be spent on any city purpose. <SourceChip city={city} source={v.general.source} at={v.general} />{' '}
+          The City estimates it would raise {range(v.revenue.low, v.revenue.high)} a year
+          {v.revenue.cites.map((c) => <SourceChip city={city} source={c.source} at={c} />)}{' '}
+          and bring {city.name}'s sales-tax rate to {pct(t.newRate)}. It would start {longDate(v.term.start)} and last {v.term.until}.
+          <SourceChip city={city} source={v.term.cite.source} at={v.term.cite} />
         </p>
-        <SourceChip city={city} figure={p.salesTax.figure} />
+        <p>The city's FY27-28 plan was built in two versions, one for each outcome.</p>
       </li>
       <li class="card measure">
-        <p class="kicker">Measure · {thresholdLabel(bond.threshold)}</p>
-        <h2>{millions(bond.amount)} infrastructure bond</h2>
+        <p class="kicker">Measure {u.letter} · {thresholdLabel(bond.threshold)}</p>
+        <h2>{millions(bond.amount)} infrastructure bond <SourceChip city={city} figure={u.figure} /></h2>
         <p>
-          Borrowing for streets, buildings and parks, repaid by a {bond.repaidBy}. It doesn't touch the operating gap, but it targets an
-          estimated {billions(p.bond.backlog.ref.low, p.bond.backlog.ref.high)} repair backlog.
+          Borrowing for streets, buildings and parks, repaid by a {bond.repaidBy}. The City estimates about ${u.cost.perHundredK.toFixed(2)} a year per $100,000 of
+          assessed value on average over {u.cost.years} years, raising about {millions(u.cost.perYear)} a year.
+          <SourceChip city={city} source={u.cost.cite.source} at={u.cost.cite} /> Its highest rate would be about ${u.peak.perHundredK}, from {u.peak.from}.
+          <SourceChip city={city} source={u.peak.cite.source} at={u.peak.cite} />{' '}
+          The City Auditor would audit its spending at least every {words(u.audit.everyYears)} years. <SourceChip city={city} source={u.audit.cite.source} at={u.audit.cite} />
         </p>
-        <span class="chip-row"><SourceChip city={city} figure={p.bond.figure} /><SourceChip city={city} figure={p.bond.backlog} /></span>
+        <p>
+          It doesn't touch the operating gap. The City's capital plan puts its unfunded capital and maintenance need at {billion(u.need.value)}
+          <SourceChip city={city} figure={u.need} />; an earlier City estimate was {billions(u.backlog.ref.low, u.backlog.ref.high)}.
+          <SourceChip city={city} figure={u.backlog} />
+        </p>
       </li>
     </ul>
 
     <section class="scenarios-section" aria-labelledby="scenarios-h">
-      <p class="eyebrow">If the sales tax…</p>
+      <p class="eyebrow">If Measure {v.letter}, the sales tax…</p>
       <h2 id="scenarios-h" class="section-h">Same budget gap, two different sets of cuts.</h2>
       <ul class="scenarios" role="list">
         {
@@ -82,6 +98,12 @@ const planDate = new Date(`${p.plan.date}T12:00:00Z`).toLocaleDateString('en-US'
                       {s.positions.vacant} vacant · {s.positions.filled} filled (layoffs) <SourceChip city={city} figure={s.positions.figure} />
                     </span>
                   </span>
+                </p>
+                <p class="caveat">
+                  {s.caveat.text}
+                  {s.caveat.cites.map((c) => (
+                    <SourceChip city={city} source={c.source} at={c} />
+                  ))}
                 </p>
                 <p class="pict-label">People laid off</p>
                 <div class="pict" role="img" aria-label={`${s.positions.filled} people laid off, out of ${p.pictogramSlots} shown`}>
@@ -103,18 +125,17 @@ const planDate = new Date(`${p.plan.date}T12:00:00Z`).toLocaleDateString('en-US'
                       <SourceChip city={city} figure={s.workforce.figure} />
                     </dd>
                   </div>
-                  <div>
-                    <dt>{s.fireStation.label}</dt>
-                    <dd>
-                      {s.fireStation.text}
-                      <span class="reported">
-                        as reported{' '}
-                        {s.fireStation.sources.map((id) => (
+                  {s.rows.map((r) => (
+                    <div data-row={r.key}>
+                      <dt>{r.label}</dt>
+                      <dd>
+                        {r.text} <SourceChip city={city} source={r.cite.source} at={r.cite} />
+                        {r.also.map((id) => (
                           <SourceChip city={city} source={id} />
                         ))}
-                      </span>
-                    </dd>
-                  </div>
+                      </dd>
+                    </div>
+                  ))}
                 </dl>
               </div>
             </li>
@@ -124,9 +145,12 @@ const planDate = new Date(`${p.plan.date}T12:00:00Z`).toLocaleDateString('en-US'
     </section>
 
     <p class="footnote">
-      Note: even if the tax passes, the city's FY27 plan applies the first year of tax money ({shortMoney(p.salesTax.bridge.value)}) as a one-time
-      bridge to soften {list(p.softened)} cuts, while ongoing revenue ramps up. Figures come from the {planDate} {committee} plan and may
-      have changed at adoption. <SourceChip city={city} figure={p.salesTax.bridge} />
+      Note: in FY27 the plan uses {shortMoney(p.salesTax.bridge.value)} of one-time money (reserves and a Successor Agency
+      transfer) to soften {list(p.softened)} cuts until the vote. <SourceChip city={city} figure={p.salesTax.bridge} /><SourceChip city={city} source={p.oneTimeDelay.source} at={p.oneTimeDelay} />{' '}
+      The tax itself would start {longDate(v.term.start)}. Figures come from
+      the {planDate} {committee} plan and, where cited as {p.adoption.cite.source}, the adoption staff report. The Council adopted the budget
+      on {longDate(p.adoption.date)} with amendments made at that meeting, which these figures don't include.
+      <SourceChip city={city} source={p.adoption.cite.source} at={p.adoption.cite} />
     </p>
   </div>
 </Base>
@@ -292,14 +316,11 @@ const planDate = new Date(`${p.plan.date}T12:00:00Z`).toLocaleDateString('en-US'
     font-weight: 700;
     font-size: 1.0625rem;
   }
-  .reported {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    margin-inline-start: 0.375rem;
+  .caveat {
+    margin: -0.5rem 0 1.25rem;
     color: var(--muted);
-    font-weight: 400;
     font-size: 0.8125rem;
+    line-height: 1.5;
   }
   .footnote {
     margin: 0 0 3.5rem;

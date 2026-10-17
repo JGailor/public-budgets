@@ -3,19 +3,20 @@
  * Source chips for one figure: an S{n} button per source, opening the receipt.
  *   <SourceChip city={city} figure={{ value, label, ref }} />   receipt for a figure
  *   <SourceChip city={city} source="S2" />                     receipt for a whole document
+ *   <SourceChip city={city} source="S20" at={{ page, quote }} /> …at the page and sentence a statement comes from
  */
 import { budgetFor } from '../lib/budget';
 import type { City } from '../lib/cities';
-import { figureReceipt, sourceReceipt, sourcesById, type Figure } from '../lib/receipts';
+import { figureReceipt, sourceReceipt, sourcesById, type At, type Figure } from '../lib/receipts';
 import type { SourceId } from '../data/types';
 
-type Props = { city: City } & ({ figure: Figure; source?: never } | { source: SourceId; figure?: never });
+type Props = { city: City } & ({ figure: Figure; source?: never; at?: never } | { source: SourceId; at?: At; figure?: never });
 
-const { city, figure, source } = Astro.props;
+const { city, figure, source, at } = Astro.props;
 const budget = budgetFor(city);
 if (!budget) throw new Error(`SourceChip: ${city.path} has no budget data`);
 const pageUrl = new URL(Astro.url.pathname, Astro.site);
-const receipt = figure ? figureReceipt(budget, city, figure, pageUrl) : sourceReceipt(budget, source!, pageUrl);
+const receipt = figure ? figureReceipt(budget, city, figure, pageUrl) : sourceReceipt(budget, source!, pageUrl, at);
 const views = sourcesById(budget);
 ---
 
