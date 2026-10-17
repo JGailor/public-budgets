@@ -3,7 +3,7 @@
  * year, how the city plans to close the FY2027 gap, and the one-time money in
  * and out. All from budget.json; the page only renders.
  */
-import type { BridgeStep, CityBudget } from '../data/types.ts';
+import type { BridgeStep, CityBudget, StepNote } from '../data/types.ts';
 import type { Figure } from './receipts.ts';
 
 /** Plain-language step names, keyed by bridge step (the workbook's own labels are on each receipt). */
@@ -30,9 +30,14 @@ export interface WaterfallStep {
   from: number;
   to: number;
   figure: Figure;
+  /** "What is this step?", in plain words, with the City's wording it rests on. */
+  note: StepNote;
 }
 
-function waterfall(steps: BridgeStep[], year: Year): WaterfallStep[] {
+/** The City's label for the bridge use, and what it is in plain words (#25). */
+export const BRIDGE_PLAIN = 'Used to delay cuts until the sales-tax vote';
+
+function waterfall(steps: BridgeStep[], year: Year, notes: Record<string, StepNote>): WaterfallStep[] {
   const shown = steps.filter((s) => s.key !== 'after-revenue-projections'); // the mockup's 8 steps
   let running = 0;
   const out: WaterfallStep[] = [];
@@ -57,8 +62,11 @@ function waterfall(steps: BridgeStep[], year: Year): WaterfallStep[] {
       s.key === 'before-one-time-resources' || s.key === 'final-gap'
         ? since.map((o) => ({ label: o.label, value: o.value }))
         : undefined;
+    const note = notes[s.key];
+    if (!note) throw new Error(`${year} ${s.key}: no step note`);
     out.push({
       key: s.key,
+      note,
       label: LABELS[s.key] ?? s.label,
       kind,
       value,
@@ -78,7 +86,7 @@ function waterfall(steps: BridgeStep[], year: Year): WaterfallStep[] {
 
 export function gapPage(b: CityBudget) {
   const years = (['fy2027', 'fy2028'] as const).map((year) => {
-    const steps = waterfall(b.deficitBridge.steps, year);
+    const steps = waterfall(b.deficitBridge.steps, year, b.documentFacts.stepNotes);
     return { year, label: year === 'fy2027' ? 'FY2027' : 'FY2028', steps, final: steps.at(-1)!, lowest: Math.min(...steps.flatMap((s) => [s.from, s.to])) };
   });
 
@@ -113,8 +121,9 @@ export function gapPage(b: CityBudget) {
         tone: 'one-time',
         parts: [
           ...ot.sources.map((s) => ({ label: s.label, value: s.amount })),
-          ...ot.uses.map((u) => ({ label: `less ${u.label}`, value: -u.amount })),
+          ...ot.uses.map((u) => ({ label: u === bridge ? `${BRIDGE_PLAIN} (City: "${u.label}")` : u.label, value: -u.amount })),
         ],
+        partsTotal: 'left over',
       } satisfies Figure,
     },
   };

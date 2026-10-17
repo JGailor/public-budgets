@@ -30,9 +30,10 @@ describe('departments page figures', () => {
   it('the net-if-passes receipt shows how it is built, and the parts add up', () => {
     const r = figureReceipt(budget, city, police.years.fy2027.figures.net.passes, page);
     expect(r.parts).toEqual([
-      { label: 'Proposed cut', value: '$10,588,717' },
-      { label: '+ less softened by bridge money', value: '−$5,345,885' },
+      { sign: '+', label: 'Proposed cut', value: '$10,588,717' },
+      { sign: '−', label: 'Softened by bridge money', value: '$5,345,885' },
     ]);
+    expect(r.total).toBe('$5,242,832');
   });
 
   it('leaves out IT Cost Allocation, and orders every view', () => {

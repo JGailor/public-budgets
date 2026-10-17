@@ -36,10 +36,10 @@ test.describe('the Gap page', () => {
 
   test('a step chip opens its receipt, with how a subtotal is built', async ({ page }) => {
     await page.goto(PAGE);
-    await page.locator('[data-year="fy2027"] .step--subtotal [data-source-chip]').click();
+    await page.locator('[data-year="fy2027"] .step--subtotal .chip-cell [data-source-chip]').click();
     const d = page.locator('dialog[data-receipt-dialog]');
     await expect(d.locator('.figure')).toHaveText('−$31,349,339');
     await expect(d.locator('.facts')).toContainText('Deficit Bridge FY27-28, row 11');
-    await expect(d.locator('.built dl > div')).toHaveCount(5);
+    await expect(d.locator('.built dl > div')).toHaveCount(6); // five steps and the total
   });
 });

@@ -28,6 +28,12 @@ export interface Ref {
  * PDF viewer numbers it, "Page N of 260", not the printed folio) and the exact
  * sentence, which the build checks against source/excerpts/{source}.json.
  */
+/** A plain-language explanation and the City wording it rests on. */
+export interface StepNote {
+  text: string;
+  cites: DocRef[];
+}
+
 export interface DocRef {
   source: SourceId;
   related?: SourceId[];
@@ -290,6 +296,8 @@ export interface DocumentFacts {
   /** FY27–31 CIP "Capital & Maint. Need" total, and its stated yearly growth. */
   capitalNeed: DocRef & { amount: number };
   capitalNeedGrowth: DocRef & { rate: number };
+  /** "What is this step?": a plain sentence per deficit-bridge step (and the overview's grouped adjustments), with the S1 wording it rests on. */
+  stepNotes: Record<string, StepNote>;
   /** The City's official ballot titles ("Measure V - Transactions and Use (Sales) General Tax Measure (majority)"), split up. */
   salesTaxTitle: DocRef & { letter: string; title: string; vote: string };
   bondTitle: DocRef & { letter: string; title: string; vote: string };

@@ -27,11 +27,13 @@ test.describe('source chips and receipts (desktop)', () => {
     await expect(d.locator('.doc-meta')).toHaveText('Budget & Finance Committee · April 16, 2026');
     await expect(d.locator('.facts')).toContainText('Deficit Bridge FY27-28, row 13');
     await expect(d.locator('.facts')).toContainText('Budgetary/cash basis');
+    // One sign per line, then the amount without one; the figure closes the sum (#25).
     await expect(d.locator('.built dl > div')).toHaveText([
-      /Initial estimate\s*−\$32,256,300/,
-      /\+ Revenue projections\s*\$5,111,718/,
-      /\+ Three adjustments\s*−\$4,204,757/,
-      /\+ One-time money\s*\$2,100,000/,
+      /^− Initial estimate\s*\$32,256,300$/,
+      /^\+ Revenue projections\s*\$5,111,718$/,
+      /^− Three adjustments\s*\$4,204,757$/,
+      /^\+ One-time money\s*\$2,100,000$/,
+      /^= −\$29,249,339$/,
     ]);
     await expect(d.getByRole('link', { name: 'Open the PDF ↗' })).toHaveAttribute('href', /berkeleyca\.gov\/.*\.pdf$/);
     await expect(d.getByRole('link', { name: 'CSV' })).toHaveAttribute('href', '/us/ca/berkeley/data/deficit-bridge.csv');

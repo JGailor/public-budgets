@@ -70,7 +70,7 @@ export function departmentsPage(b: CityBudget, families: Families, names: Record
             tone: 'short',
             parts: [
               { label: 'Proposed cut', value: d.reduction },
-              { label: 'less softened by bridge money', value: -d.salesTaxAllocation },
+              { label: 'Softened by bridge money', value: -d.salesTaxAllocation },
             ],
           },
           fails: { value: d.reduction, label: `${L}: net cut if the sales tax fails (the full proposed cut)`, ref: d, tone: 'short' },

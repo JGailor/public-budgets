@@ -20,6 +20,7 @@
   /* Money short: deficits and cuts (drawn as red diagonal hatching; deficit bars solid) */
   --red: #c8432b;
   --red-light: #f6ded6;
+  --red-text: #a8361f; /* red for small text: 5.9:1 on paper, where --red is 4.4:1 */
 
   /* One-time money */
   --gold: #d99a1e;
