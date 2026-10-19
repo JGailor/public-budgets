@@ -39,9 +39,9 @@ test.describe('landing page', () => {
   test('"Where every $100 goes" responds to hover and click, like the overview', async ({ page }) => {
     await page.goto('/');
     const card = page.locator('.city-card');
-    await card.locator('.sq[data-dept="police"]').first().hover();
+    await card.locator('.sq[data-item="police"]').first().hover();
     await expect(card.locator('[data-panel="police"]')).toBeVisible();
-    await card.locator('.sq[data-dept="fire"]').first().click();
+    await card.locator('.sq[data-item="fire"]').first().click();
     await expect(card.locator('[data-panel="fire"]')).toBeVisible();
     await expect(card.getByRole('link', { name: 'Department details' }).filter({ visible: true })).toHaveAttribute('href', '/us/ca/berkeley/departments/#fire');
   });
@@ -71,7 +71,7 @@ test.describe('landing page on a phone', () => {
 
   test('a tap on a square opens its department as a bottom sheet', async ({ page }) => {
     await page.goto('/');
-    await page.locator('.city-card .sq[data-dept="prw"]').first().tap();
+    await page.locator('.city-card .sq[data-item="prw"]').first().tap();
     const tip = page.locator('.city-card [data-tip]');
     await expect(tip).toHaveClass(/sheet/);
     await expect(tip.locator('[data-panel="prw"]')).toBeVisible();

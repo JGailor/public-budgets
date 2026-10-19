@@ -1,11 +1,12 @@
 /**
- * Figures for a city's Revenue page: the FY2026 mix by group, every line item
+ * Figures for a city's Revenue page: the FY2026 $100 chart by group, every line item
  * with its mid-year pace and change on last year, and the insight cards. All
  * from budget.json and revenue-groups.json.
  */
 import type { CityBudget, RevenueLine } from '../data/types.ts';
 import type { Figure } from './receipts.ts';
 import type { RevenueGroup } from './revenue-groups.ts';
+import { per100, type WaffleItem } from './waffle.ts';
 
 export const SORTS = ['biggest', 'fastest', 'az'] as const;
 export type Sort = (typeof SORTS)[number];
@@ -46,13 +47,29 @@ export function revenuePage(b: CityBudget, groups: RevenueGroup[]) {
   };
   const rank = (name: string) => Object.fromEntries(SORTS.map((s) => [s, ranked[s].indexOf(name)])) as Record<Sort, number>;
 
-  const mix = [...groups].sort((a, c) => (a.id === 'other' ? 1 : c.id === 'other' ? -1 : c.adopted - a.adopted));
-  let before = 0;
-  const mixBlocks = mix.map((g) => {
-    const start = before;
-    before += g.share;
-    return { g, start };
-  });
+  // The $100 chart (#35): one square per dollar, by group, biggest first and "Other" last (as the
+  // mix bar it replaces had it); each group's details list its lines.
+  const shares = per100(groups, (g) => g.adopted).sort((a, c) => Number(a.item.id === 'other') - Number(c.item.id === 'other'));
+  const chart = shares.map((s) => ({
+    item: {
+      id: s.item.id,
+      name: s.item.name,
+      color: s.item.color,
+      value: s.item.adopted,
+      squares: s.squares,
+      exact: s.exact,
+      href: `#rev-${s.item.id}`,
+      details: 'Line items',
+    } satisfies WaffleItem,
+    group: s.item,
+    /** The group's total, built from its lines (a sum of workbook rows, so the receipt shows how). */
+    figure: {
+      value: s.item.adopted,
+      label: `${s.item.name}: FY2026 adopted budget, ${s.item.lines.length} line ${s.item.lines.length === 1 ? 'item' : 'items'}`,
+      ref: s.item.lines[0],
+      ...(s.item.lines.length > 1 ? { parts: s.item.lines.map((l) => ({ label: l.name, value: l.fy2026Adopted })) } : {}),
+    } satisfies Figure,
+  }));
 
   const transfer = line('Property Transfer Tax');
   const measureP = line('Property Transfer Tax — Measure P');
@@ -65,7 +82,7 @@ export function revenuePage(b: CityBudget, groups: RevenueGroup[]) {
     received: rev.total.pctOfAdoptedReceived ?? 0,
     totalPace: pace(rev.total.pctOfAdoptedReceived),
     lineCount: rev.lines.length,
-    mix: mixBlocks,
+    chart,
     property,
     lines: lines.map((x) => ({ ...x, rank: rank(x.l.name) })),
     max: Math.max(...rev.lines.map((l) => l.fy2026Adopted)),

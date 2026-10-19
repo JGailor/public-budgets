@@ -1,53 +1,50 @@
 ---
 /**
- * The $100 waffle: one square per dollar of the FY2027 department baseline,
- * columns filled top to bottom, biggest department first.
+ * The $100 waffle: one square per dollar of a total, columns filled top to
+ * bottom, biggest item first. Departments of the FY2027 baseline on the
+ * overview and homepage; groups of FY2026 revenue on the Revenue page (#35).
  *
- * Hover or focus a square: its department is highlighted (the rest dim) and a
- * tooltip shows its name and whole dollars per $100 (#33: the baseline and cut
- * live on the Departments page, where each cut names its ballot outcome).
+ * Hover or focus a square: its item is highlighted (the rest dim) and a
+ * tooltip shows its name and whole dollars per $100, with a link to its
+ * details (#33: the figures live there, with their receipts).
  * Click, Enter or tap pins it; on a phone the pinned tooltip is a bottom sheet.
  * The grid is one Tab stop; arrow keys move square by square.
  * "Show as a table" is the text alternative.
  */
-import type { DepartmentReduction } from '../data/types';
-import { budgetFor } from '../lib/budget';
-import type { City } from '../lib/cities';
-import { fullNames } from '../lib/departments';
-import type { Families } from '../lib/families';
-import type { Share } from '../lib/waffle';
+import type { WaffleItem } from '../lib/waffle';
 import { squares } from '../lib/waffle';
 
 interface Props {
-  city: City;
-  shares: Share<DepartmentReduction>[];
-  families: Families;
+  /** Biggest first; their squares total exactly 100. */
+  items: WaffleItem[];
+  /** What the 100 squares are, e.g. "Berkeley's FY2027 department baseline". */
+  label: string;
+  /** What one item is, for the caption: "department", "source". */
+  noun: string;
+  table: { caption: string; name: string; value: string };
 }
 
-const { city, shares, families } = Astro.props;
-const cells = squares(shares);
-const firstIndex = new Map<string, number>();
-cells.forEach((d, i) => firstIndex.has(d.id) || firstIndex.set(d.id, i));
-const per100Label = (s: Share<DepartmentReduction>) => `$${s.exact.toFixed(2)}`;
-// The chart has 100 squares, so it speaks in whole dollars: a department's squares (#33). The table keeps cents.
-const whole = (s: Share<DepartmentReduction>) => `$${s.squares}`;
-const byId = new Map(shares.map((s) => [s.item.id, s]));
-const name = fullNames(city.path, budgetFor(city)!);
+const { items, label, noun, table } = Astro.props;
+const total = items.reduce((a, it) => a + it.squares, 0);
+if (total !== 100) throw new Error(`Waffle "${label}": squares total ${total}, not 100`);
+const cells = squares(items.map((item) => ({ item, squares: item.squares, exact: item.exact })));
+// The chart has 100 squares, so it speaks in whole dollars: an item's squares (#33). The table keeps cents.
+const whole = (it: WaffleItem) => `$${it.squares}`;
 ---
 
 <div class="waffle" data-waffle>
-  <div class="grid" role="group" aria-label={`${city.name}'s FY2027 department baseline: one square per dollar of every $100. Use the arrow keys to move between squares; press Enter to pin a department.`}>
+  <div class="grid" role="group" aria-label={`${label}: one square per dollar of every $100. Use the arrow keys to move between squares; press Enter to pin a ${noun}.`}>
     {
-      cells.map((d, i) => (
+      cells.map((it, i) => (
         <button
           type="button"
           class="sq"
-          data-dept={d.id}
+          data-item={it.id}
           data-index={i}
           tabindex={i === 0 ? 0 : -1}
-          style={`background:${families.color(d.id)}`}
-          aria-label={`${name[d.id]}: ${whole(byId.get(d.id)!)} of every $100`}
-          aria-controls={`waffle-panel-${d.id}`}
+          style={`background:${it.color}`}
+          aria-label={`${it.name}: ${whole(it)} of every $100`}
+          aria-controls={`waffle-panel-${it.id}`}
         />
       ))
     }
@@ -56,17 +53,17 @@ const name = fullNames(city.path, budgetFor(city)!);
   <div class="tip" data-tip hidden>
     <button type="button" class="tip-close" data-tip-close aria-label="Close">×</button>
     {
-      shares.map((s) => (
-        <div class="panel" id={`waffle-panel-${s.item.id}`} data-panel={s.item.id} hidden>
+      items.map((it) => (
+        <div class="panel" id={`waffle-panel-${it.id}`} data-panel={it.id} hidden>
           <p class="panel-name">
-            <span class="dot" style={`background:${families.color(s.item.id)}`} aria-hidden="true" />
-            {name[s.item.id]}
+            <span class="dot" style={`background:${it.color}`} aria-hidden="true" />
+            {it.name}
           </p>
           <p class="panel-figure">
-            <span class="num">{whole(s)}</span> <span class="of">of every $100</span>
+            <span class="num">{whole(it)}</span> <span class="of">of every $100</span>
           </p>
-          <a class="panel-link" href={`${city.path}departments/#${s.item.id}`}>
-            Department details <span aria-hidden="true">→</span>
+          <a class="panel-link" href={it.href} data-details={it.id}>
+            {it.details} <span aria-hidden="true">→</span>
           </a>
         </div>
       ))
@@ -75,30 +72,30 @@ const name = fullNames(city.path, budgetFor(city)!);
 
   <!-- Says the chart is interactive (#33): on a phone the squares look like a picture until touched. -->
   <p class="caption">
-    <span class="caption--touch">Tap a square to see the department.</span><span class="caption--hover">Hover or click a square to see the department.</span>
+    <span class="caption--touch">Tap a square to see the {noun}.</span><span class="caption--hover">Hover or click a square to see the {noun}.</span>
   </p>
 
   <details class="as-table">
     <summary>Show as a table</summary>
     <div class="table-scroll">
       <table>
-        <caption class="visually-hidden">FY2027 General Fund department baseline, per $100</caption>
+        <caption class="visually-hidden">{table.caption}</caption>
         <thead>
           <tr>
-            <th scope="col">Department</th>
-            <th scope="col">FY2027 baseline</th>
+            <th scope="col">{table.name}</th>
+            <th scope="col">{table.value}</th>
             <th scope="col">Of every $100</th>
             <th scope="col">Squares</th>
           </tr>
         </thead>
         <tbody>
           {
-            shares.map((s) => (
+            items.map((it) => (
               <tr>
-                <th scope="row">{s.item.name}</th>
-                <td>${s.item.baseline.toLocaleString('en-US')}</td>
-                <td>{per100Label(s)}</td>
-                <td>{s.squares}</td>
+                <th scope="row">{it.name}</th>
+                <td>${it.value.toLocaleString('en-US')}</td>
+                <td>${it.exact.toFixed(2)}</td>
+                <td>{it.squares}</td>
               </tr>
             ))
           }
@@ -120,9 +117,9 @@ const name = fullNames(city.path, budgetFor(city)!);
     const sheet = () => !matchMedia('(hover: hover) and (min-width: 48rem)').matches;
 
     function show(sq: HTMLButtonElement) {
-      const dept = sq.dataset.dept!;
-      for (const s of squares) s.classList.toggle('dim', s.dataset.dept !== dept);
-      for (const [id, p] of panels) p.hidden = id !== dept;
+      const item = sq.dataset.item!;
+      for (const s of squares) s.classList.toggle('dim', s.dataset.item !== item);
+      for (const [id, p] of panels) p.hidden = id !== item;
       tip.hidden = false;
       tip.classList.toggle('pinned', !!pinned);
       tip.classList.toggle('sheet', !!pinned && sheet());
@@ -171,7 +168,7 @@ const name = fullNames(city.path, budgetFor(city)!);
         quietFocus = false;
         return;
       }
-      if (!pinned || pinned.dataset.dept !== sq.dataset.dept) {
+      if (!pinned || pinned.dataset.item !== sq.dataset.item) {
         pinned = null;
         show(sq);
       }
@@ -182,7 +179,7 @@ const name = fullNames(city.path, budgetFor(city)!);
     grid.addEventListener('click', (e) => {
       const sq = (e.target as Element).closest<HTMLButtonElement>('.sq');
       if (!sq) return;
-      pinned = pinned?.dataset.dept === sq.dataset.dept ? null : sq;
+      pinned = pinned?.dataset.item === sq.dataset.item ? null : sq;
       if (pinned) show(sq);
       else unpin();
     });

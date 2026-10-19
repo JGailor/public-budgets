@@ -28,6 +28,20 @@ export function per100<T>(items: T[], value: (t: T) => number): Share<T>[] {
   return shares.sort((a, b) => b.exact - a.exact);
 }
 
+/** One item of a drawn waffle: what its squares are called and colored, and where its details are. */
+export interface WaffleItem {
+  id: string;
+  name: string;
+  color: string;
+  /** The dollars it stands for, for the table. */
+  value: number;
+  squares: number;
+  exact: number;
+  /** Its details, a tap away (#33), and the link's words: "Department details". */
+  href: string;
+  details: string;
+}
+
 /** The 100 squares in fill order: columns top to bottom, biggest item first. */
 export function squares<T>(shares: Share<T>[]): T[] {
   return shares.flatMap((s) => Array<T>(s.squares).fill(s.item));

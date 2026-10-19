@@ -9,6 +9,7 @@ import Waffle from '../components/Waffle.astro';
 import Base from '../layouts/Base.astro';
 import { budgetFor } from '../lib/budget';
 import { CITY_PAGES, cities } from '../lib/cities';
+import { departmentItems } from '../lib/departments';
 import { familiesFor } from '../lib/families';
 import { shortMoney } from '../lib/format';
 import { headlines } from '../lib/headlines';
@@ -85,7 +86,12 @@ const requestTemplate = `${SITE.repo}/issues/new`;
 
     <div class="card city-card">
       <h2 class="card-title">Where every $100 goes</h2>
-      <Waffle city={city} shares={h.shares} families={families} />
+      <Waffle
+        items={departmentItems(city.path, budget, h.shares, families)}
+        label={`${city.name}'s FY2027 department baseline`}
+        noun="department"
+        table={{ caption: 'FY2027 General Fund department baseline, per $100', name: 'Department', value: 'FY2027 baseline' }}
+      />
       <ul class="legend">
         {
           families.list.map((f) => (

@@ -77,7 +77,7 @@ describe('overview checks', () => {
     const police = depts.find((d) => d.id === 'police')!;
     const exact = ((police.baseline / total) * 100).toFixed(2);
     expect(exact).toBe('37.42');
-    expect(html.match(/class="sq" data-dept="police"/g)).toHaveLength(37);
+    expect(html.match(/class="sq" data-item="police"/g)).toHaveLength(37);
     // #33: 100 squares can't show cents, so the chart and its sheet speak in whole dollars, one per square.
     expect(html).toContain('aria-label="Police: $37 of every $100"');
     expect(html).toMatch(/<p class="panel-figure"[^>]*>\s*<span class="num"[^>]*>\$37<\/span>/);
@@ -100,7 +100,7 @@ describe('overview checks', () => {
   });
 
   it('the waffle has exactly 100 squares', () => {
-    expect(html.match(/class="sq" data-dept=/g)).toHaveLength(100);
+    expect(html.match(/class="sq" data-item=/g)).toHaveLength(100);
   });
 
   it('families $57 / $22 / $17 / $4 in the legend', () => {

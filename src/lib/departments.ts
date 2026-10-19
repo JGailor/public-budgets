@@ -6,7 +6,7 @@
 import type { CityBudget, DepartmentReduction } from '../data/types.ts';
 import type { Families } from './families.ts';
 import type { Figure } from './receipts.ts';
-import { per100 } from './waffle.ts';
+import { per100, type Share, type WaffleItem } from './waffle.ts';
 
 const displayFiles = import.meta.glob<{ shortNames: Record<string, string>; fullNames?: Record<string, string> }>('/data/cities/*/*/*/departments.json', {
   eager: true,
@@ -35,6 +35,21 @@ export function fullNames(cityPath: string, b: CityBudget): Record<string, strin
   for (const [id, n] of Object.entries(out))
     if (/\(|\b(Dir|Svcs|Rec|Dept)\.?\b/.test(n)) throw new Error(`${cityPath}departments.json: "${id}" needs a fullNames entry; "${n}" is abbreviated`);
   return out;
+}
+
+/** The department waffle's squares: each department's full name and family color, linking to its details. */
+export function departmentItems(cityPath: string, b: CityBudget, shares: Share<DepartmentReduction>[], families: Families): WaffleItem[] {
+  const name = fullNames(cityPath, b);
+  return shares.map((s) => ({
+    id: s.item.id,
+    name: name[s.item.id],
+    color: families.color(s.item.id),
+    value: s.item.baseline,
+    squares: s.squares,
+    exact: s.exact,
+    href: `${cityPath}departments/#${s.item.id}`,
+    details: 'Department details',
+  }));
 }
 
 export const YEARS = ['fy2027', 'fy2028'] as const;
