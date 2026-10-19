@@ -41,7 +41,8 @@ describe('$100 chart colours', () => {
     ['homepage', ''],
   ]) {
     it(`no square on the ${page} chart reads as red or gold`, () => {
-      const colors = [...new Set([...dist(path).matchAll(/class="sq"[^>]*style="background:(#[0-9a-fA-F]{6})/g)].map((m) => m[1]))];
+      // The interactive chart's squares are buttons; the homepage's static chart (MiniWaffle) draws spans.
+      const colors = [...new Set([...dist(path).matchAll(/(?:class="sq"[^>]*style|<span style)="background:(#[0-9a-fA-F]{6})/g)].map((m) => m[1]))];
       expect(colors.length).toBeGreaterThan(3);
       for (const c of colors) expect(readsAs(c), c).toBeUndefined();
     });

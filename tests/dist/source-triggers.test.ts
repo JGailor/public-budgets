@@ -23,10 +23,10 @@ function reachable(r: Receipt): string[] {
 // 0.5% and $300M figures now live on the Ballot page alone (checked below). Nothing else may go missing.
 const STRIP = /^source \| {2}\| {2}\| S\d+ \| {2}\| $/;
 const CARD3 = /^figure \| (0\.5%|\$300,000,000) \| Measure [A-Z]: proposed (local sales tax|infrastructure bond) on the /;
-// #33: a square's sheet on the overview and the homepage shows only the name, whole dollars and Department
+// #33: a square's sheet on the overview shows only the name, whole dollars and Department
 // details; each department's baseline receipt lives on the Departments page (checked below).
 const SHEET = /^figure \| \$[\d,]+ \| .+ General Fund baseline, FY2027 \| S1 \| {2}\| $/;
-const RETIRED: Record<string, RegExp> = { '/us/ca/berkeley/': new RegExp(`${STRIP.source}|${CARD3.source}|${SHEET.source}`), '/': SHEET };
+const RETIRED: Record<string, RegExp> = { '/us/ca/berkeley/': new RegExp(`${STRIP.source}|${CARD3.source}|${SHEET.source}`) };
 
 describe('every receipt that had a chip is still reachable on its page (#29)', () => {
   for (const [path, keys] of Object.entries(before)) {
@@ -45,7 +45,8 @@ describe('every receipt that had a chip is still reachable on its page (#29)', (
 
   it("each department baseline the sheets dropped still opens its receipt on the Departments page (#33)", () => {
     const depts = receipts(html('/us/ca/berkeley/departments/'));
-    for (const path of ['/', '/us/ca/berkeley/']) {
+    // The overview's sheets carried them. (The homepage's static chart never did: main's homepage stays, #28.)
+    for (const path of ['/us/ca/berkeley/']) {
       const dropped = before[path].filter((k) => SHEET.test(k));
       expect(dropped, path).toHaveLength(16);
       for (const k of dropped) {

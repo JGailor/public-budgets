@@ -129,8 +129,8 @@ test.describe('the overview, cut to the essentials (#33)', () => {
   });
 });
 
-// #33 review: without hover, nothing else says the chart can be tapped.
-for (const [where, url] of [['overview', PAGE], ['homepage', '/']]) {
+// #33 review: without hover, nothing else says the chart can be tapped. (The homepage's chart is a static link, #28.)
+for (const [where, url] of [['overview', PAGE]]) {
   test(`the ${where} chart says it can be tapped on a phone, and hovered or clicked on a desktop`, async ({ browser }) => {
     const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
     const p = await phone.newPage();

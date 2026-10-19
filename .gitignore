@@ -6,3 +6,6 @@ node_modules/
 .DS_Store
 /test-results/
 /playwright-report/
+
+# Scratch scripts (screenshots, one-off checks): run, then delete; never commit.
+*.tmp.mjs

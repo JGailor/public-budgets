@@ -15,12 +15,23 @@ const text = (path: string) =>
     .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ');
 
+const EYEBROW = /<(\w+) class="(?:[^"]* )?(?:eyebrow|kicker)[ "][^>]*>([\s\S]*?)<\/\1>/g;
+// The homepage keeps these for now, case by case (Jeremy on #28); "Free · Independent · Every number sourced" is gone.
+const HOMEPAGE_KEEPS = ['Berkeley, CA · FY2027', 'Source receipt', 'How it works', 'Built for the questions people actually ask', 'Cities'];
+
 describe('no eyebrows (#32)', () => {
-  it('no element on any page has class eyebrow or kicker', () => {
-    const all = pages(dist);
+  it('no element on any page but the homepage has class eyebrow or kicker', () => {
+    const all = pages(dist).filter((f) => f !== join(dist, 'index.html'));
     expect(all.length).toBeGreaterThan(8);
     const hits = all.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/class="(?:[^"]* )?(eyebrow|kicker)[ "]/g)].map((m) => `${f.slice(dist.length)}: ${m[1]}`));
     expect(hits).toEqual([]);
+  });
+
+  it('the homepage has exactly the five eyebrows it keeps, and none in the source drawer', () => {
+    const h = read('/');
+    const kept = [...h.matchAll(EYEBROW)].map((m) => m[2].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim());
+    expect(kept).toEqual(HOMEPAGE_KEEPS);
+    expect([...h.matchAll(/<dialog[\s\S]*?<\/dialog>/g)].join('')).not.toMatch(/class="(?:[^"]* )?(eyebrow|kicker)[ "]/);
   });
 
   // Each fact an eyebrow carried, now in a heading or a first sentence.
