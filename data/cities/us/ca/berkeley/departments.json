@@ -1,10 +1,16 @@
 {
-  "note": "Shorter display names for long department names, from the approved #1 mockups (mockups/build/gen.py SHORT). Receipts and tables keep the official names.",
+  "note": "Shorter display names for long department names, from the approved #1 mockups (mockups/build/gen.py SHORT). Receipts and tables keep the official names. fullNames (#33) spell out the budget's abbreviated names, with no parenthetical abbreviation, for the chart's tap-a-square sheet.",
   "shortNames": {
     "odpa": "Police Accountability",
     "hhcs": "Health, Housing & Community",
     "prw": "Parks, Rec & Waterfront",
     "cmo": "City Manager's Office",
     "it-cost-allocation-plan": "IT Cost Allocation"
+  },
+  "fullNames": {
+    "odpa": "Office of the Director of Police Accountability",
+    "hhcs": "Health, Housing & Community Services",
+    "prw": "Parks, Recreation & Waterfront",
+    "cmo": "City Manager's Office"
   }
 }

@@ -20,11 +20,11 @@ describe('departments page (built)', () => {
     expect(text).toContain(`FY27 baseline ${m(police.baseline)}`);
     expect(text).toContain(`Proposed cut ${m(police.reduction)} (${pct(police.reductionPct)})`);
     expect(text).toContain(`Softened by bridge money +${m(police.salesTaxAllocation)}`);
-    expect(text).toContain(`Net cut if tax passes ${m(police.netReduction)} (${pct(police.netReductionPct)})`);
+    expect(text).toContain(`Net cut if Measure V passes ${m(police.netReduction)} (${pct(police.netReductionPct)})`);
   });
 
   it('FY27 Police, tax fails: the net cut is the full cut', () => {
-    expect(text).toContain(`Net cut if tax fails ${m(police.reduction)} (${pct(police.reductionPct)})`);
+    expect(text).toContain(`Net cut if Measure V fails ${m(police.reduction)} (${pct(police.reductionPct)})`);
   });
 
   it('every department but IT Cost Allocation has a row, and IT Cost Allocation is footnoted', () => {

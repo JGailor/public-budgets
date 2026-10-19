@@ -14,12 +14,22 @@ const total = depts.reduce((a, d) => a + d.baseline, 0);
 
 const unescape = (s: string) => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 const receiptsIn = (fragment: string) => [...fragment.matchAll(/data-receipt="([^"]*)"/g)].map((m) => JSON.parse(unescape(m[1])));
-const lede = html.match(/<p class="lede"[^>]*>[\s\S]*?<\/p>/)![0];
+// #33: the lede is one sentence; the three sizes sit behind its ⓘ.
+const lede = html.match(/<p class="sizes"[^>]*>[\s\S]*?<\/p>/)![0];
 // The lede minus its glossary tooltip and the tooltip's script.
 const ledeText = unwrapFigures(lede).replace(/<script[\s\S]*?<\/script>|<span class="tip"[\s\S]*?<\/span>/g, '').replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1');
 
 describe('the whole budget, before the waffle (#24)', () => {
   const d = b.documentFacts!;
+
+  it('leads with one sentence and puts the three sizes behind its ⓘ (#33)', () => {
+    const one = html.match(/<p class="lede"[^>]*>([\s\S]*?)<\/p>/)![1];
+    expect(one.replace(/<button[\s\S]*<\/button>|<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()).toBe(
+      'Each square is $1 of every $100 the City plans to spend on departments this year.',
+    );
+    expect(one).toMatch(/<button type="button" class="info" aria-expanded="false" aria-controls="lede-sizes"/);
+    expect(html).toMatch(/<div class="info-panel" id="lede-sizes" hidden data-info-panel[^>]*>\s*<p class="sizes"/);
+  });
 
   it("says what the whole budget is and what the waffle shows, from data", () => {
     expect(d.allFunds.amount).toBe(916_819_369);
@@ -27,7 +37,7 @@ describe('the whole budget, before the waffle (#24)', () => {
     // No chip labels in the sentence any more: each figure is its own receipt (#29).
     expect(ledeText).toContain("Berkeley's whole budget for fiscal year 2027 is $916.8M. Most of it is set aside for specific uses, like sewers, parking or grants.");
     expect(ledeText).toContain('The $313.8M General Fund is the part the Council can spend on anything.');
-    expect(ledeText).toContain(`This chart shows the $283.8M of it planned for departments, before cuts.`);
+    expect(ledeText).toContain(`The chart shows the $283.8M of it planned for departments, before cuts.`);
   });
 
   it('chips each figure: the adoption report p.1 sentence for the two totals, S1 for the baseline', () => {
@@ -63,13 +73,30 @@ describe('the three cards, in plain language (#24)', () => {
 });
 
 describe('overview checks', () => {
-  it('Police = 37 squares and "$37.42 of every $100"', () => {
+  it('Police = 37 squares and "$37 of every $100"; the table keeps $37.42', () => {
     const police = depts.find((d) => d.id === 'police')!;
     const exact = ((police.baseline / total) * 100).toFixed(2);
     expect(exact).toBe('37.42');
     expect(html.match(/class="sq" data-dept="police"/g)).toHaveLength(37);
-    expect(html).toContain(`aria-label="Police: $${exact} of every $100"`);
-    expect(text).toContain(`$${exact} of every $100`);
+    // #33: 100 squares can't show cents, so the chart and its sheet speak in whole dollars, one per square.
+    expect(html).toContain('aria-label="Police: $37 of every $100"');
+    expect(html).toMatch(/<p class="panel-figure"[^>]*>\s*<span class="num"[^>]*>\$37<\/span>/);
+    expect(html).toMatch(/<th scope="row"[^>]*>Police<\/th>\s*<td[^>]*>\$106,198,574<\/td>\s*<td[^>]*>\$37\.42<\/td>/);
+  });
+
+  it("a square's sheet shows only the name, whole dollars and Department details (#33)", () => {
+    const panels = [...html.matchAll(/<div class="panel" id="waffle-panel-([^"]+)"[^>]*>([\s\S]*?)<\/a>\s*<\/div>/g)];
+    expect(panels).toHaveLength(16);
+    for (const [, id, p] of panels) {
+      const t = p.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      expect(t, id).toMatch(/^[A-Z][^$()]+ \$\d+ of every \$100 Department details →$/);
+      expect(p, id).not.toMatch(/data-receipt|baseline|proposed cut/);
+    }
+    const name = (id: string) => html.match(new RegExp(`id="waffle-panel-${id}"[\\s\\S]*?</span>\\s*([^<]+?)\\s*</p>`))![1];
+    expect(name('hhcs')).toBe('Health, Housing &amp; Community Services');
+    expect(name('odpa')).toBe('Office of the Director of Police Accountability');
+    expect(name('prw')).toBe('Parks, Recreation &amp; Waterfront');
+    expect(name('cmo')).toBe("City Manager&#39;s Office");
   });
 
   it('the waffle has exactly 100 squares', () => {
@@ -94,13 +121,12 @@ describe('overview checks', () => {
     }
   });
 
-  it('keeps the note that the compounding chart is an illustration', () => {
-    expect(text).toContain('Illustration: lines show the cited average rates applied to 100, not actual yearly figures.');
-    expect(text).toContain("Year-by-year spending for FY22–FY25 isn't in the sources.");
-  });
-
-  it('counts its sources from the data', () => {
-    const city = b.sources.filter((s) => s.type === 'city').length;
-    expect(text).toContain(`${b.sources.length} sources: ${city} city documents, ${b.sources.length - city} news reports`);
+  // #33: card 2 already says 8% vs 6.5%, and Sources stays in the nav and footer.
+  it('cuts the compounding chart and the "Don\'t take our word for it" section', () => {
+    expect(text).not.toContain('Small differences, compounded');
+    expect(text).not.toContain("Don't take our word for it");
+    expect(html).not.toContain('class="growth"');
+    expect(text).toMatch(/costs grew about 8% a year and its income about 6\.5%/);
+    expect(html.match(/<a [^>]*href="\/us\/ca\/berkeley\/sources\/"/g)!.length).toBeGreaterThanOrEqual(2);
   });
 });

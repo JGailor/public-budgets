@@ -4,16 +4,17 @@
  * columns filled top to bottom, biggest department first.
  *
  * Hover or focus a square: its department is highlighted (the rest dim) and a
- * tooltip shows the exact dollars per $100, the baseline and a source chip.
+ * tooltip shows its name and whole dollars per $100 (#33: the baseline and cut
+ * live on the Departments page, where each cut names its ballot outcome).
  * Click, Enter or tap pins it; on a phone the pinned tooltip is a bottom sheet.
  * The grid is one Tab stop; arrow keys move square by square.
  * "Show as a table" is the text alternative.
  */
-import Sourced from './Sourced.astro';
 import type { DepartmentReduction } from '../data/types';
+import { budgetFor } from '../lib/budget';
 import type { City } from '../lib/cities';
+import { fullNames } from '../lib/departments';
 import type { Families } from '../lib/families';
-import { shortMoney } from '../lib/format';
 import type { Share } from '../lib/waffle';
 import { squares } from '../lib/waffle';
 
@@ -28,7 +29,10 @@ const cells = squares(shares);
 const firstIndex = new Map<string, number>();
 cells.forEach((d, i) => firstIndex.has(d.id) || firstIndex.set(d.id, i));
 const per100Label = (s: Share<DepartmentReduction>) => `$${s.exact.toFixed(2)}`;
+// The chart has 100 squares, so it speaks in whole dollars: a department's squares (#33). The table keeps cents.
+const whole = (s: Share<DepartmentReduction>) => `$${s.squares}`;
 const byId = new Map(shares.map((s) => [s.item.id, s]));
+const name = fullNames(city.path, budgetFor(city)!);
 ---
 
 <div class="waffle" data-waffle>
@@ -42,7 +46,7 @@ const byId = new Map(shares.map((s) => [s.item.id, s]));
           data-index={i}
           tabindex={i === 0 ? 0 : -1}
           style={`background:${families.color(d.id)}`}
-          aria-label={`${d.name}: ${per100Label(byId.get(d.id)!)} of every $100`}
+          aria-label={`${name[d.id]}: ${whole(byId.get(d.id)!)} of every $100`}
           aria-controls={`waffle-panel-${d.id}`}
         />
       ))
@@ -56,15 +60,10 @@ const byId = new Map(shares.map((s) => [s.item.id, s]));
         <div class="panel" id={`waffle-panel-${s.item.id}`} data-panel={s.item.id} hidden>
           <p class="panel-name">
             <span class="dot" style={`background:${families.color(s.item.id)}`} aria-hidden="true" />
-            {s.item.name}
+            {name[s.item.id]}
           </p>
           <p class="panel-figure">
-            <span class="num">{per100Label(s)}</span> <span class="of">of every $100</span>
-          </p>
-          <p class="panel-meta">
-            <Sourced city={city} figure={{ value: s.item.baseline, label: `${s.item.name} General Fund baseline, FY2027`, ref: s.item }}>
-              {shortMoney(s.item.baseline)}
-            </Sourced> FY27 baseline · {shortMoney(s.item.reduction)} proposed cut
+            <span class="num">{whole(s)}</span> <span class="of">of every $100</span>
           </p>
           <a class="panel-link" href={`${city.path}departments/#${s.item.id}`}>
             Department details <span aria-hidden="true">→</span>
@@ -300,10 +299,6 @@ const byId = new Map(shares.map((s) => [s.item.id, s]));
     color: rgb(255 255 255 / 0.8);
     font-size: 0.875rem;
   }
-  .panel-meta {
-    color: rgb(255 255 255 / 0.85);
-    font-size: 0.8125rem;
-  }
   .panel-link {
     display: none;
     margin-top: 0.75rem;
@@ -325,8 +320,7 @@ const byId = new Map(shares.map((s) => [s.item.id, s]));
     color: var(--ink);
     box-shadow: 0 -12px 40px rgb(22 25 29 / 0.2);
   }
-  .tip.sheet .of,
-  .tip.sheet .panel-meta {
+  .tip.sheet .of {
     color: var(--muted);
   }
   .tip.sheet .panel-link {

@@ -20,6 +20,8 @@ export const getStaticPaths = cityStaticPaths;
 const { city } = Astro.props as { city: City };
 const budget = budgetFor(city)!;
 const p = departmentsPage(budget, familiesFor(city, budget), shortNames(city.path, budget));
+// Every cut says which ballot outcome it assumes (#33).
+const measure = `Measure ${budget.documentFacts.salesTaxMeasure.letter}`;
 const primary = sourcesById(budget).get('S1')!;
 const yearLabel = (y: Year) => (y === 'fy2027' ? 'FY2027' : 'FY2028');
 const short = (y: Year) => (y === 'fy2027' ? 'FY27' : 'FY28');
@@ -191,7 +193,9 @@ const selectRules = p.rows
                       </div>
                       {TAXES.map((t) => (
                         <div class={`tax tax--${t}`}>
-                          <dt>Net cut if tax {t}</dt>
+                          <dt>
+                            Net cut if {measure} {t}
+                          </dt>
                           <dd class="num short">
                             <Sourced city={city} figure={v.figures.net[t]}>{v.netIf[t].value === 0 ? 'none' : `${money(v.netIf[t].value)} (${pct(v.netIf[t].pct)})`}</Sourced>
                           </dd>

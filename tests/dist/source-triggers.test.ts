@@ -23,7 +23,10 @@ function reachable(r: Receipt): string[] {
 // 0.5% and $300M figures now live on the Ballot page alone (checked below). Nothing else may go missing.
 const STRIP = /^source \| {2}\| {2}\| S\d+ \| {2}\| $/;
 const CARD3 = /^figure \| (0\.5%|\$300,000,000) \| Measure [A-Z]: proposed (local sales tax|infrastructure bond) on the /;
-const RETIRED: Record<string, RegExp> = { '/us/ca/berkeley/': new RegExp(`${STRIP.source}|${CARD3.source}`) };
+// #33: a square's sheet on the overview and the homepage shows only the name, whole dollars and Department
+// details; each department's baseline receipt lives on the Departments page (checked below).
+const SHEET = /^figure \| \$[\d,]+ \| .+ General Fund baseline, FY2027 \| S1 \| {2}\| $/;
+const RETIRED: Record<string, RegExp> = { '/us/ca/berkeley/': new RegExp(`${STRIP.source}|${CARD3.source}|${SHEET.source}`), '/': SHEET };
 
 describe('every receipt that had a chip is still reachable on its page (#29)', () => {
   for (const [path, keys] of Object.entries(before)) {
@@ -34,10 +37,23 @@ describe('every receipt that had a chip is still reachable on its page (#29)', (
     });
   }
 
-  it('the retired strip still points to every source', () => {
+  it('the retired strip is gone, and the Sources page is still in the nav and footer (#33)', () => {
     const h = html('/us/ca/berkeley/');
-    expect(h).toMatch(/<a class="btn btn--light" href="\/us\/ca\/berkeley\/sources\/"[^>]*>Browse all sources<\/a>/);
+    expect(h.match(/<a [^>]*href="\/us\/ca\/berkeley\/sources\/"/g)!.length).toBeGreaterThanOrEqual(2);
     expect(receipts(h).flatMap(reachable).filter((k) => RETIRED['/us/ca/berkeley/'].test(k))).toEqual([]);
+  });
+
+  it("each department baseline the sheets dropped still opens its receipt on the Departments page (#33)", () => {
+    const depts = receipts(html('/us/ca/berkeley/departments/'));
+    for (const path of ['/', '/us/ca/berkeley/']) {
+      const dropped = before[path].filter((k) => SHEET.test(k));
+      expect(dropped, path).toHaveLength(16);
+      for (const k of dropped) {
+        const [, value, , sources] = k.split(' | ');
+        // Its FY2027 baseline: a row's panel, or the "Not shown" footnote for the excluded accounting line.
+        expect(depts.some((r) => r.kind === 'figure' && r.value === value && r.sources.join('+') === sources && /FY2027: (General Fund )?baseline\b/.test(r.label!)), k).toBe(true);
+      }
+    }
   });
 
   it("the measures' figures card 3 dropped still open their receipts on the Ballot page (#31)", () => {
