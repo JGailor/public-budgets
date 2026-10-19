@@ -4,6 +4,7 @@
  * Every number comes from overview() in src/lib/overview.ts; tests/dist
  * recomputes the story's checks from budget.json.
  */
+import SourceChip from '../../../../components/SourceChip.astro';
 import Sourced from '../../../../components/Sourced.astro';
 import StepInfo from '../../../../components/StepInfo.astro';
 import Term from '../../../../components/Term.astro';
@@ -24,6 +25,8 @@ const { city } = Astro.props as { city: City };
 const budget = budgetFor(city)!;
 const families = familiesFor(city, budget);
 const o = overview(budget, families, revenueGroupsFor(city, budget));
+// Card 2's "Why?" (#38): the City's own reasons, cost side and revenue side together, in its order, not ranked.
+const why = [budget.documentFacts.notes.costDrivers, budget.documentFacts.notes.payAndBenefits];
 const has = (slug: string) => CITY_PAGES.some((p) => (p.slug as string) === slug);
 const pct = (share: number) => `${Math.round(share * 100)}%`;
 const fte = Math.round(o.fte.value).toLocaleString('en-US');
@@ -144,6 +147,17 @@ const numberWords: Record<number, string> = { 10: 'ten' };
         <p class="body">
           For {numberWords[g.years] ?? g.years} years, the City's costs grew about <Sourced city={city} figure={o.growth.figure}>{rate(g.spendingRate)}</Sourced>{' '}
           a year and its income about {rate(g.revenueRate)}. So it starts each year short.
+        </p>
+        <p class="why">
+          {
+            why.map((n, i) => (
+              <>
+                {i > 0 && ' '}
+                {n.text}
+                <SourceChip city={city} source={n.cites[0].source} at={n.cites[0]} also={n.cites.slice(1)} />
+              </>
+            ))
+          }
         </p>
         <!-- Each bar's value is its own receipt (#29), so the values are HTML buttons over the SVG's top margin. -->
         <ul class="wf-values" style={`--n:${wf.length}`} role="list">
@@ -408,6 +422,12 @@ const numberWords: Record<number, string> = { 10: 'ten' };
     margin: 0;
     color: var(--muted);
     line-height: 1.6;
+  }
+  .why {
+    margin: 0.75rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.55;
   }
   .mix {
     display: flex;

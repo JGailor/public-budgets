@@ -2427,6 +2427,48 @@
         ]
       }
     },
+    "notes": {
+      "costDrivers": {
+        "text": "Why? The City points to rising personnel, pension and health-care costs, inflation, and programs that were paid for with one-time money, along with limits on state and federal revenue.",
+        "cites": [
+          {
+            "source": "S1",
+            "page": 4,
+            "quote": "Rising costs in personnel, pension, and health care • Inflation • Programs supported by one - time funds • State/federal revenue limitations and economic uncertainty"
+          }
+        ]
+      },
+      "payAndBenefits": {
+        "text": "This year's budget also builds in pay increases already set in labor agreements and higher health, dental and CalPERS pension contributions.",
+        "cites": [
+          {
+            "source": "S20",
+            "page": 2,
+            "quote": "Personnel budgets incorporate projected equity and cost ‑ of ‑ living adjustments pursuant to current labor agreements and updated benefit rates, including health and dental cost increases, CalPERS contribution amounts"
+          }
+        ]
+      },
+      "auditorRevenues": {
+        "text": "The City Auditor's report on FY 2012 to FY 2021 found that the City's revenues increased and outpaced expenses in most years. It looked at all governmental activities, not just the General Fund.",
+        "cites": [
+          {
+            "source": "S8",
+            "page": 49,
+            "quote": "The City’s revenues have increased since FY 2012 and outpaced expenses most years"
+          },
+          {
+            "source": "S8",
+            "page": 49,
+            "quote": "We used various financial indicators to analyze the City’s financial condition between FY 2012 and FY 2021"
+          },
+          {
+            "source": "S8",
+            "page": 13,
+            "quote": "The City’s governmental activities revenues generally outpaced expenses"
+          }
+        ]
+      }
+    },
     "salesTaxTitle": {
       "source": "S25",
       "quote": "Measure V - Transactions and Use (Sales) General Tax Measure (majority)",

@@ -29,6 +29,10 @@ const pageList = (ps: number[]) => `${ps.length > 1 ? 'pp.' : 'p.'} ${ps.join(',
 const meta = (id: (typeof sources)[number]['id'], date?: string) =>
   [raw.get(id)!.publisher, date, raw.get(id)!.usedFor, pages.has(id) ? pageList(pages.get(id)!) : undefined].filter(Boolean).join(' · ');
 const adoption = budget.documentFacts.adoption;
+// #38: overview card 2's growth rates and the Auditor's finding cover different years and funds.
+const auditor = budget.documentFacts.notes.auditorRevenues;
+const growth = budget.citedFacts.growth;
+const pctOf = (r: number) => `${(r * 100).toLocaleString('en-US')}%`;
 const adoptedOn = new Date(`${adoption.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
 const program = budget.documentFacts.capitalProgram;
 const workbookProgram = budget.capitalProgram.total;
@@ -151,6 +155,15 @@ const humanize = (name: string) =>
             <p>
               {`${shortMoney(liability('FY2012').amount, 0)} (${fy('FY2012')}), ${shortMoney(liability('FY2021').amount, 0)} (${fy('FY2021')}), ~${shortMoney(liability('Recent').amount, 0)} (2026)`}{' '}
               use different assumptions. Treat the trend as directional.<SourceChip city={city} source="S8" also={[{ source: 'S12' }, { source: 'S17' }]} />
+            </p>
+          </li>
+          <li class="gap card" data-gap="growth-vs-auditor">
+            <h3>Two findings on costs and revenue measure different things</h3>
+            <p>
+              The overview's {pctOf(growth.spendingRate)} vs {pctOf(growth.revenueRate)} yearly growth is City staff's figure for the General Fund, as reported by the
+              Berkeley Scanner.<SourceChip city={city} source={growth.source} />{' '}
+              {auditor.text}<SourceChip city={city} source={auditor.cites[0].source} at={auditor.cites[0]} also={auditor.cites.slice(1)} />{' '}
+              The years and the funds differ, so the two aren't necessarily in conflict.
             </p>
           </li>
           <li class="gap card" data-gap="adoption">

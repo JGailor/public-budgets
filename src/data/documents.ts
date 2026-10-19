@@ -11,6 +11,7 @@ export interface DocumentsFile {
   quotes: Record<string, DocRef>;
   capitalProgram: { source: SourceId; byFund: number; generalFund: string; generalFundBreakdown: number[] };
   stepNotes: Record<string, StepNote>;
+  notes: Record<string, StepNote>;
 }
 /** Page number → page text, as extracted from the PDF. */
 export type Excerpts = Record<SourceId, Record<string, string>>;
@@ -136,6 +137,20 @@ export function capitalFromDocument(spec: DocumentsFile['capitalProgram'], excer
 }
 
 /** Adds the documents' sources (numbered after the workbook's) and their facts to the budget; returns errors. */
+/** Sentences in our words that rest on the City's: each needs text, and each cite's quote must be on its page. */
+function checkedNotes(notes: Record<string, StepNote>, field: string, known: Set<string>, excerpts: Excerpts): Record<string, StepNote> {
+  return Object.fromEntries(
+    Object.entries(notes).map(([key, n]) => {
+      if (!n.text.trim() || !n.cites.length) throw new Error(`documents.json ${field}.${key}: needs text and at least one cite`);
+      for (const ref of n.cites) {
+        if (!known.has(ref.source)) throw new Error(`documents.json ${field}.${key}: unknown source ${ref.source}`);
+        checkQuote(ref, excerpts, `documents.json ${field}.${key}`);
+      }
+      return [key, n];
+    }),
+  );
+}
+
 export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, excerpts: Excerpts): { budget: CityBudget; errors: string[] } {
   const errors: string[] = [];
   const first = budget.sources.length + 1;
@@ -209,16 +224,8 @@ export function applyDocuments(budget: WorkbookBudget, file: DocumentsFile, exce
       generalFund,
       capitalProgram: capitalFromDocument(file.capitalProgram, excerpts),
       oneTimeDelay: q('oneTimeDelay'),
-      stepNotes: Object.fromEntries(
-        Object.entries(file.stepNotes).map(([key, n]) => {
-          if (!n.text.trim() || !n.cites.length) throw new Error(`documents.json stepNotes.${key}: needs text and at least one cite`);
-          for (const ref of n.cites) {
-            if (!known.has(ref.source)) throw new Error(`documents.json stepNotes.${key}: unknown source ${ref.source}`);
-            checkQuote(ref, excerpts, `documents.json stepNotes.${key}`);
-          }
-          return [key, n];
-        }),
-      ),
+      stepNotes: checkedNotes(file.stepNotes, 'stepNotes', known, excerpts),
+      notes: checkedNotes(file.notes, 'notes', known, excerpts),
       salesTaxTitle: { ...stTitle, letter: stTitleM[1], title: stTitleM[2].trim(), vote: stTitleM[3] },
       bondTitle: { ...bTitle, letter: bTitleM[1], title: bTitleM[2].trim(), vote: bTitleM[3] },
     };

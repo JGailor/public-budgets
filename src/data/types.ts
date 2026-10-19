@@ -301,6 +301,8 @@ export interface DocumentFacts {
   capitalNeedGrowth: DocRef & { rate: number };
   /** "What is this step?": a plain sentence per deficit-bridge step (and the overview's grouped adjustments), with the S1 wording it rests on. */
   stepNotes: Record<string, StepNote>;
+  /** Other cited sentences, keyed by where they're used: overview card 2's "Why?" (costDrivers, payAndBenefits); a Sources page known gap (auditorRevenues). */
+  notes: Record<string, StepNote>;
   /** The City's official ballot titles ("Measure V - Transactions and Use (Sales) General Tax Measure (majority)"), split up. */
   salesTaxTitle: DocRef & { letter: string; title: string; vote: string };
   bondTitle: DocRef & { letter: string; title: string; vote: string };
