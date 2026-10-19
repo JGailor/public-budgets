@@ -128,3 +128,23 @@ test.describe('the overview, cut to the essentials (#33)', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
   });
 });
+
+// #33 review: without hover, nothing else says the chart can be tapped.
+for (const [where, url] of [['overview', PAGE], ['homepage', '/']]) {
+  test(`the ${where} chart says it can be tapped on a phone, and hovered or clicked on a desktop`, async ({ browser }) => {
+    const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const p = await phone.newPage();
+    await p.goto(url);
+    // One of the two wordings shows; the other is display:none, so screen readers hear one too.
+    await expect(p.locator('.waffle .caption span').filter({ visible: true })).toHaveText(['Tap a square to see the department.']);
+    const [grid, cap, table] = await Promise.all(['.waffle .grid', '.waffle .caption', '.waffle .as-table'].map((s) => p.locator(s).boundingBox()));
+    expect(cap!.y).toBeGreaterThanOrEqual(grid!.y + grid!.height);
+    expect(cap!.y).toBeLessThan(table!.y);
+    await phone.close();
+    const desk = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const d = await desk.newPage();
+    await d.goto(url);
+    await expect(d.locator('.waffle .caption span').filter({ visible: true })).toHaveText(['Hover or click a square to see the department.']);
+    await desk.close();
+  });
+}
