@@ -34,8 +34,8 @@ const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'sev
 const words = (n: number) => NUMBER_WORDS[n] ?? String(n);
 const v = p.salesTax;
 const u = p.bond;
-const thresholdLabel = (s: string) => (s === '2/3' ? 'Two-thirds vote' : s.charAt(0).toUpperCase() + s.slice(1));
-const resultLabel: Record<Outcome, string> = { passes: '…passes', fails: '…fails' };
+const threshold = (s: string) => (s === '2/3' ? 'a two-thirds vote' : `a ${s}`);
+const resultLabel: Record<Outcome, string> = { passes: `If Measure ${v.letter} passes`, fails: `If Measure ${v.letter} fails` };
 const people = (filled: number) => Array.from({ length: p.pictogramSlots }, (_, i) => i < filled);
 const list = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
 const planDate = longDate(p.plan.date!);
@@ -44,14 +44,12 @@ const planDate = longDate(p.plan.date!);
 <Base title={`Your ballot · ${city.name}`} city={city} description={`What ${city.name}'s own budget plan says happens if Measure ${v.letter}, the ${t.election} sales tax, passes, and if it fails.`}>
   <div class="ballot-page wrap" data-result={p.state.result ?? 'pending'}>
     <section class="intro">
-      <p class="eyebrow">{p.state.eyebrow}</p>
       <h1>{p.state.heading}</h1>
       <p class="lede">{p.state.lede}</p>
     </section>
 
     <!-- What changes comes first (#31): both outcomes side by side at every width, one builder, one template. -->
-    <section class="scenarios-section" aria-labelledby="scenarios-h">
-      <p class="eyebrow" id="scenarios-h">If Measure {v.letter}, the sales tax…</p>
+    <section class="scenarios-section">
       <ul class="scenarios" role="list">
         {
           p.scenarios.map((s) => (
@@ -120,13 +118,12 @@ const planDate = longDate(p.plan.date!);
       <h2 id="measures-h" class="section-h">The two measures</h2>
       <ul class="measures" role="list">
         <li class="card measure">
-          <p class="kicker">Measure {v.letter} · {thresholdLabel(t.threshold)}</p>
           <h3>
-            A <Sourced city={city} figure={v.figure}>{pct(t.rate)}</Sourced> sales tax for any city purpose.
+            Measure {v.letter}: a <Sourced city={city} figure={v.figure}>{pct(t.rate)}</Sourced> sales tax for any city purpose.
             <SourceChip city={city} source={v.general.source} at={v.general} />
           </h3>
           <p class="line">
-            The City estimates it would raise <Sourced city={city} source={v.revenue.cites[0].source} at={v.revenue.cites[0]} also={v.revenue.cites.slice(1)}
+            It needs {threshold(t.threshold)} to pass. The City estimates it would raise <Sourced city={city} source={v.revenue.cites[0].source} at={v.revenue.cites[0]} also={v.revenue.cites.slice(1)}
               >{range(v.revenue.low, v.revenue.high)}</Sourced
             > a year.
           </p>
@@ -143,9 +140,8 @@ const planDate = longDate(p.plan.date!);
           </details>
         </li>
         <li class="card measure">
-          <p class="kicker">Measure {u.letter} · {thresholdLabel(bond.threshold)}</p>
-          <h3>A <Sourced city={city} figure={u.figure}>{millions(bond.amount)}</Sourced> bond for streets, buildings and parks.</h3>
-          <p class="line">It doesn't change this year's gap.</p>
+          <h3>Measure {u.letter}: a <Sourced city={city} figure={u.figure}>{millions(bond.amount)}</Sourced> bond for streets, buildings and parks.</h3>
+          <p class="line">It needs {threshold(bond.threshold)} to pass. It doesn't change this year's gap.</p>
           <details class="details">
             <summary>Details<span class="visually-hidden"> on Measure {u.letter}</span></summary>
             <p class="official">Official title: “{u.official.title}” <SourceChip city={city} source={u.official.cite.source} at={u.official.cite} /></p>
@@ -183,14 +179,6 @@ const planDate = longDate(p.plan.date!);
 </Base>
 
 <style>
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
   .card {
     background: var(--card);
     border-radius: 0.875rem;
@@ -335,20 +323,12 @@ const planDate = longDate(p.plan.date!);
     padding: 1.5rem 1.75rem;
     border-top: 6px solid var(--bay);
   }
-  .kicker {
-    margin: 0 0 0.5rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
   .measure h3 {
     margin: 0 0 0.5rem;
     font-size: 1.5rem;
     line-height: 1.25;
   }
-  .measure p:not(.kicker) {
+  .measure p {
     max-width: 30rem;
     margin: 0 0 1rem;
     color: var(--muted);

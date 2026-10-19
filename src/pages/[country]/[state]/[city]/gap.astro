@@ -41,8 +41,7 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
   <div class="gap-page wrap">
     <section class="intro">
       <div>
-        <p class="eyebrow">The structural deficit · FY2027</p>
-        <h1>The ${headline} million gap, step by step</h1>
+        <h1>The ${headline} million gap in FY2027, step by step</h1>
         <p class="lede">
           Each year the city projects what it will cost to keep doing what it does today, and what it expects to collect. Here's how the city's own
           estimate moved from the first projection to the number it planned around.
@@ -105,8 +104,7 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
 
     <section class="closing">
       <div class="plans">
-        <p class="eyebrow">How the city plans to close it</p>
-        <h2>Mostly with ongoing cuts of about {Math.round(g.close.fails.pct * 100)}%.</h2>
+        <h2>The city plans to close it mostly with ongoing cuts of about {Math.round(g.close.fails.pct * 100)}%.</h2>
 
         <div class="plan">
           <p class="plan-head">
@@ -180,14 +178,6 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
 </Base>
 
 <style>
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
   .card {
     background: var(--card);
     border-radius: 0.875rem;

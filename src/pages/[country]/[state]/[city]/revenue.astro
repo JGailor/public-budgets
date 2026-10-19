@@ -37,7 +37,6 @@ const t = r.insights;
 <Base title={`Revenue · ${city.name}`} city={city} description={`Where ${city.name}'s ${shortMoney(r.total.value)} in General Fund revenue comes from, line by line, and how much had arrived by mid-year.`}>
   <div class="rev-page wrap">
     <section class="intro">
-      <p class="eyebrow">Revenue · FY2026</p>
       <h1>Where the money comes from</h1>
       <p class="lede">
         {city.name} budgeted <Sourced city={city} figure={r.total}>{shortMoney(r.total.value)}</Sourced> in General Fund revenue for FY2026, including transfers from other funds.
@@ -161,14 +160,6 @@ const t = r.insights;
 <style is:global set:html={sortRules}></style>
 
 <style>
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
   .card {
     background: var(--card);
     border-radius: 0.875rem;

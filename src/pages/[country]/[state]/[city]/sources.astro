@@ -53,7 +53,6 @@ const humanize = (name: string) =>
 <Base title={`Sources & methods · ${city.name}`} city={city} description={`The ${sources.length} public documents behind every number on ${city.name}'s pages, the known gaps in the data, and the downloads.`}>
   <div class="sources-page wrap">
     <section class="intro">
-      <p class="eyebrow">Sources &amp; methods</p>
       <h1>Every number has a receipt</h1>
       <p class="lede">
         Each figure on this site traces to one of these {counts.all} documents. City documents are primary; news reports are used for context and are
@@ -196,14 +195,6 @@ const humanize = (name: string) =>
 </Base>
 
 <style>
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
   .card {
     background: var(--card);
     border-radius: 0.875rem;

@@ -25,7 +25,7 @@ describe('the whole budget, before the waffle (#24)', () => {
     expect(d.allFunds.amount).toBe(916_819_369);
     expect(d.generalFund.amount).toBe(313_849_211);
     // No chip labels in the sentence any more: each figure is its own receipt (#29).
-    expect(ledeText).toContain("Berkeley's whole budget this year is $916.8M. Most of it is set aside for specific uses, like sewers, parking or grants.");
+    expect(ledeText).toContain("Berkeley's whole budget for fiscal year 2027 is $916.8M. Most of it is set aside for specific uses, like sewers, parking or grants.");
     expect(ledeText).toContain('The $313.8M General Fund is the part the Council can spend on anything.');
     expect(ledeText).toContain(`This chart shows the $283.8M of it planned for departments, before cuts.`);
   });

@@ -81,7 +81,8 @@ describe('ballot page figures', () => {
   });
 
   it('results are a data change: pending, passed and failed', () => {
-    expect(ballotState(withStatus('pending'))).toMatchObject({ decided: false, result: null, eyebrow: 'November 3, 2026', heading: 'What changes if the sales tax passes or fails' });
+    expect(ballotState(withStatus('pending')).lede).toMatch(/^The election is November 3, 2026\. /);
+    expect(ballotState(withStatus('pending'))).toMatchObject({ decided: false, result: null, heading: 'What changes if the sales tax passes or fails' });
     expect(ballotState(withStatus('passed')).heading).toMatch(/^The sales tax passed\./);
     expect(ballotState(withStatus('pending'), 'Measure V').heading).toBe('What changes if Measure V passes or fails');
     expect(ballotState(withStatus('passed'), 'Measure V')).toMatchObject({ decided: true, result: 'passes', heading: expect.stringMatching(/^Measure V passed\./) });

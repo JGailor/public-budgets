@@ -26,7 +26,7 @@ describe('landing page numbers trace to the data', () => {
     for (const gone of ['department spending, mapped', 'numbers without a receipt', 'How it works', 'Keep the receipt', 'wherethemoneywent.com / us', 'Free · Independent'])
       expect(text).not.toContain(gone);
     // The receipt drawer's own label is shared by every page; #32 handles it.
-    expect(html.replace(/<dialog[\s\S]*?<\/dialog>/g, '')).not.toContain('class="eyebrow"');
+    expect(html).not.toContain('class="eyebrow"');
   });
 
   it('Police and Fire per $100, by largest remainder', () => {

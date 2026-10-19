@@ -41,10 +41,9 @@ const selectRules = p.rows
 <Base title={`Departments · ${city.name}`} city={city} description={`Who's being asked to cut, and by how much, in ${city.name}'s FY2027 and FY2028 budgets, with and without the November sales tax.`}>
   <div class="dept-page wrap" data-dept-page>
     <section class="intro">
-      <p class="eyebrow">Departments · <span class="yr yr--fy2027">FY2027</span><span class="yr yr--fy2028">FY2028</span> proposed</p>
-      <h1>Who's being asked to cut, and by how much</h1>
+      <h1>Who's being asked to cut in <span class="yr yr--fy2027">FY2027</span><span class="yr yr--fy2028">FY2028</span>, and by how much</h1>
       <p class="lede">
-        Every department was asked to find savings. Together they come to <Sourced city={city} figure={p.total.cut}>{money(p.total.cut.value)}</Sourced>,
+        Every department was asked to find savings in the proposed budget. Together they come to <Sourced city={city} figure={p.total.cut}>{money(p.total.cut.value)}</Sourced>,
         about {Math.round(p.total.pct * 100)}% of the {money(p.total.baseline)} baseline. Toggle the sales tax to see which cuts it would soften.
       </p>
     </section>
@@ -287,14 +286,6 @@ const selectRules = p.rows
 </script>
 
 <style>
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
   .intro {
     padding-block: clamp(2rem, 5vw, 3.5rem) 1.5rem;
   }
