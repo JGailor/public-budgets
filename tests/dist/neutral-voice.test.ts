@@ -7,7 +7,7 @@ import type { Receipt } from '../../src/lib/receipts';
 const LOADED = [
   'propping up', 'propped up', 'props up', 'prop up', 'bloat', 'slash', 'gutting', 'gutted', 'lavish', 'wasteful', 'squander',
   'reckless', 'bailout', 'bail out', 'handout', 'ballooning', 'skyrocket', 'runaway', 'draconian', 'crippl', 'devastat',
-  'staggering', 'whopping', 'raiding', 'boondoggle', 'giveaway', 'windfall', 'out of control', 'fiscal cliff',
+  'staggering', 'whopping', 'raiding', 'boondoggle', 'giveaway', 'windfall', 'out of control', 'fiscal cliff', 'leans on',
 ];
 const loaded = (text: string) => LOADED.filter((w) => new RegExp(`\\b${w}`, 'i').test(text));
 
