@@ -15,12 +15,18 @@ const millions = (n: number) => `$${(Math.abs(n) / 1e6).toFixed(1)}M`;
 describe('landing page numbers trace to the data', () => {
   const depts = b.departmentReductions.find((y) => y.year === 'FY2027')!.departments;
 
-  it('department dollars mapped', () => {
-    expect(text).toContain(`${millions(depts.reduce((a, d) => a + d.baseline, 0))} of Berkeley department spending, mapped`);
+  it('the headline and the gap in the subhead (#28)', () => {
+    const gap = b.deficitBridge.steps.find((s) => s.key === 'final-gap')!.fy2027;
+    expect(text).toContain("Berkeley's costs keep growing faster than its income.");
+    // The gap's chip sits right after it, so its label is in the text: "gap S1, closed".
+    expect(text).toContain(`This year that's a ${millions(gap)} gap S1, closed with cuts, one-time money and, if voters approve it, a sales tax.`);
   });
 
-  it('source count', () => {
-    expect(text).toMatch(new RegExp(`\\b${b.sources.length} public sources, each one linked`));
+  it('the cut sections stay cut: no stats strip, no How it works, no path line, no eyebrows (#28)', () => {
+    for (const gone of ['department spending, mapped', 'numbers without a receipt', 'How it works', 'Keep the receipt', 'wherethemoneywent.com / us', 'Free · Independent'])
+      expect(text).not.toContain(gone);
+    // The receipt drawer's own label is shared by every page; #32 handles it.
+    expect(html.replace(/<dialog[\s\S]*?<\/dialog>/g, '')).not.toContain('class="eyebrow"');
   });
 
   it('Police and Fire per $100, by largest remainder', () => {
@@ -35,7 +41,6 @@ describe('landing page numbers trace to the data', () => {
   it('the gap', () => {
     const gap = b.deficitBridge.steps.find((s) => s.key === 'final-gap')!.fy2027;
     expect(text).toContain(`A ${millions(gap)} gap after adjustments.`);
-    expect(text).toContain(`−$${Math.abs(gap).toLocaleString('en-US')}`);
   });
 
   it('positions cut with and without the sales tax', () => {
