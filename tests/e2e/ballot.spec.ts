@@ -112,3 +112,54 @@ test("each measure card links its own City documents, opening in a new tab", asy
     await expect(full).toHaveAttribute('href', /Full%20Text\.pdf$/);
   }
 });
+
+// #36: each department's cut, passes or fails.
+test('the department switch works by tap at 390px: Police shows $5.2M if it passes, $10.6M if it fails', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const page = await ctx.newPage();
+  await page.goto(PAGE);
+  const police = page.locator('.dc-row[data-dept="police"]');
+  await expect(police.locator('.dc-v').filter({ visible: true })).toHaveText(['$5.2M']);
+  await page.locator('label[for="dc-fails"]').tap();
+  await expect(police.locator('.dc-v').filter({ visible: true })).toHaveText(['$10.6M']);
+  await expect(police.locator('.dc-why').filter({ visible: true })).toHaveText(['the full proposed cut']);
+  // If it fails, the softened part is cut too: red, like the rest of the bar.
+  const [cut, soft] = await Promise.all(['.dc-cut', '.dc-soft'].map((s) => police.locator(s).evaluate((e) => getComputedStyle(e).backgroundColor)));
+  expect(soft).toBe(cut);
+  await page.locator('label[for="dc-passes"]').tap();
+  await expect(police.locator('.dc-v').filter({ visible: true })).toHaveText(['$5.2M']);
+  await page.locator('.dc-same summary').tap();
+  await expect(page.locator('.dc-same li[data-dept="hhcs"]')).toBeVisible();
+  await page.getByRole('link', { name: 'All departments' }).tap();
+  await expect(page).toHaveURL(/\/us\/ca\/berkeley\/departments\/$/);
+  await ctx.close();
+});
+
+test('the department switch works by keyboard at 390px: arrow keys move between outcomes', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(PAGE);
+  await page.locator('#dc-passes').focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('#dc-fails')).toBeChecked();
+  await expect(page.locator('#dc-fails')).toBeFocused();
+  await expect(page.locator('.dc-row[data-dept="fire"] .dc-v').filter({ visible: true })).toHaveText(['$6.7M']);
+  await page.keyboard.press('ArrowLeft');
+  await expect(page.locator('#dc-passes')).toBeChecked();
+  await expect(page.locator('.dc-row[data-dept="fire"] .dc-v').filter({ visible: true })).toHaveText(['$3.0M']);
+});
+
+test('both department-switch states are styled identically: the chosen label, and the other one', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(PAGE);
+  const look = (id: string) =>
+    page.locator(`label[for="${id}"]`).evaluate((e) => {
+      const s = getComputedStyle(e);
+      return [s.color, s.backgroundColor, s.fontWeight, s.fontSize, s.boxShadow, s.borderRadius, s.paddingLeft, s.paddingTop].join('|');
+    });
+  const passesOn = [await look('dc-passes'), await look('dc-fails')];
+  await page.locator('label[for="dc-fails"]').click();
+  await page.mouse.move(0, 0);
+  const failsOn = [await look('dc-fails'), await look('dc-passes')];
+  expect(failsOn).toEqual(passesOn);
+  expect(passesOn[0]).not.toEqual(passesOn[1]);
+});
