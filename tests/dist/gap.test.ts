@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CityBudget } from '../../src/data/types';
+import { unwrapFigures } from './figures';
 
 // Reads the rendered Gap page: every waterfall step's chip carries its exact figure.
 const root = join(import.meta.dirname, '../..');
@@ -43,7 +44,7 @@ describe('the Gap page waterfall', () => {
 
   it('shows how the city plans to close FY2027', () => {
     const t = b.departmentReductions[0].total;
-    const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const text = unwrapFigures(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     expect(text).toContain(`$${(t.reduction / 1e6).toFixed(1)}M in department cuts (${(t.reductionPct * 100).toFixed(1)}%)`);
     expect(text).toContain(`$${(t.netReduction / 1e6).toFixed(1)}M in cuts (${(t.netReductionPct * 100).toFixed(1)}%)`);
     expect(text).toContain(`$${(t.salesTaxAllocation / 1e6).toFixed(1)}M softened`);

@@ -2,21 +2,39 @@ import { expect, test, type Page } from '@playwright/test';
 
 const PAGE = '/test/receipts/';
 const dialog = (page: Page) => page.locator('dialog[data-receipt-dialog]');
-const chip = (page: Page, figure: string, id: string) => page.locator(`[data-figure="${figure}"] [data-source-chip="${id}"]`);
+// Since #29 each figure is its own trigger (and a statement has one ⓘ), whatever sources it has.
+const chip = (page: Page, figure: string) => page.locator(`[data-figure="${figure}"] [data-source-chip]`);
 
 test.describe('source chips and receipts (desktop)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('chips are buttons named after their document; city dark, news light', async ({ page }) => {
+  test('a figure is a button named for its value and its documents, dotted-underlined, with no chip label (#29)', async ({ page }) => {
     await page.goto(PAGE);
-    await expect(page.getByRole('button', { name: 'S1 — Source 1: FY27-FY28 Budget Balancing Plan', exact: true }).first()).toBeVisible();
-    await expect(chip(page, 'gap', 'S1')).toHaveCSS('background-color', 'rgb(14, 107, 111)');
-    await expect(chip(page, 'gap', 'S15')).toHaveCSS('background-color', 'rgb(220, 237, 235)');
+    const police = page.getByRole('button', { name: '$106.2M, source: FY27-FY28 Budget Balancing Plan', exact: true });
+    await expect(police).toBeVisible();
+    await expect(police).toHaveText('$106.2M');
+    await expect(police).toHaveCSS('text-decoration-style', 'dotted');
+    // Several documents: all named, in order.
+    await expect(chip(page, 'liability')).toHaveAccessibleName(/^\$773\.1M, source: .+ and .+$/);
+    await expect(page.locator('[data-source-chip]').filter({ hasText: /^S\d+$/ })).toHaveCount(0);
+  });
+
+  test('a statement without a figure gets one quiet ⓘ that names its document', async ({ page }) => {
+    await page.goto(PAGE);
+    const info = chip(page, 'document');
+    await expect(info).toHaveAccessibleName(/^Source: .+/);
+    await expect(info).toHaveText('');
+    const box = (await info.boundingBox())!;
+    expect(Math.round(box.width)).toBe(24);
+    expect(Math.round(box.height)).toBe(24);
+    await info.click();
+    await expect(dialog(page)).toBeVisible();
+    await expect(dialog(page).locator('.figure')).toHaveCount(0);
   });
 
   test('a figure chip opens a full receipt as a right-hand drawer', async ({ page }) => {
     await page.goto(PAGE);
-    await chip(page, 'gap', 'S1').click();
+    await chip(page, 'gap').click();
     const d = dialog(page);
     await expect(d).toBeVisible();
     await expect(d.locator('.figure')).toHaveText('−$29,249,339');
@@ -52,37 +70,37 @@ test.describe('source chips and receipts (desktop)', () => {
 
   test('Esc closes it and focus returns to the chip', async ({ page }) => {
     await page.goto(PAGE);
-    await chip(page, 'police', 'S1').focus();
+    await chip(page, 'police').focus();
     await page.keyboard.press('Enter');
     await expect(dialog(page)).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(dialog(page)).toBeHidden();
-    await expect(chip(page, 'police', 'S1')).toBeFocused();
+    await expect(chip(page, 'police')).toBeFocused();
   });
 
   // The browser restores focus itself when the chip was focused before opening (above). These two
   // cover the cases it doesn't: a click that doesn't focus the button (Safari), and the deep link.
   test('focus returns to the chip even when the click did not focus it', async ({ page }) => {
     await page.goto(PAGE);
-    await chip(page, 'police', 'S1').evaluate((el: HTMLElement) => el.click());
+    await chip(page, 'police').evaluate((el: HTMLElement) => el.click());
     await expect(dialog(page)).toBeVisible();
     await page.keyboard.press('Escape');
-    await expect(chip(page, 'police', 'S1')).toBeFocused();
+    await expect(chip(page, 'police')).toBeFocused();
   });
 
   test('the close button and a click on the backdrop close it too', async ({ page }) => {
     await page.goto(PAGE);
-    await chip(page, 'police', 'S1').click();
+    await chip(page, 'police').click();
     await dialog(page).getByRole('button', { name: 'Close receipt' }).click();
     await expect(dialog(page)).toBeHidden();
-    await chip(page, 'police', 'S1').click();
+    await chip(page, 'police').click();
     await page.mouse.click(100, 450);
     await expect(dialog(page)).toBeHidden();
   });
 
   test('focus stays inside the receipt, forwards and backwards', async ({ page }) => {
     await page.goto(PAGE);
-    await chip(page, 'gap', 'S1').click();
+    await chip(page, 'gap').click();
     const inside = () => page.evaluate(() => !!document.activeElement?.closest('dialog[data-receipt-dialog]'));
     for (let i = 0; i < 15; i++) {
       await page.keyboard.press('Tab');
@@ -96,8 +114,8 @@ test.describe('source chips and receipts (desktop)', () => {
 
   test('a figure from several sources lists all of them', async ({ page }) => {
     await page.goto(PAGE);
-    await expect(page.locator('[data-figure="liability"] [data-source-chip]')).toHaveText(['S17', 'S8']);
-    await chip(page, 'liability', 'S17').click();
+    await expect(chip(page, 'liability')).toHaveAttribute('data-source-chip', 'S17 S8');
+    await chip(page, 'liability').click();
     const d = dialog(page);
     await expect(d.locator('.badges')).toHaveText(/Reporting\s*Berkeleyside/);
     await expect(d.locator('.also')).toHaveText(/Also from\s*S8\s*City of Berkeley: Financial Condition FY2012–FY2021 \(Auditor\)/);
@@ -106,7 +124,7 @@ test.describe('source chips and receipts (desktop)', () => {
   test('"Copy citation" copies a full citation with the document URL', async ({ page, context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await page.goto(PAGE);
-    await chip(page, 'gap', 'S1').click();
+    await chip(page, 'gap').click();
     await dialog(page).getByRole('button', { name: 'Copy citation' }).click();
     await expect(dialog(page).getByRole('status')).toHaveText('Citation copied');
     const copied = await page.evaluate(() => navigator.clipboard.readText());
@@ -115,14 +133,14 @@ test.describe('source chips and receipts (desktop)', () => {
     expect(copied).toContain('Via Where the Money Went, https://wherethemoneywent.com/test/receipts/');
   });
 
-  test('?source=S1 opens that source\'s receipt; focus goes to its chip on close', async ({ page }) => {
+  test('?source=S1 opens that source\'s receipt; focus goes to a trigger naming it on close', async ({ page }) => {
     await page.goto(`${PAGE}?source=S1`);
     const d = dialog(page);
     await expect(d).toBeVisible();
     await expect(d.locator('.doc-title')).toHaveText('FY27-FY28 Budget Balancing Plan');
     await expect(d.locator('.figure')).toHaveCount(0);
     await page.keyboard.press('Escape');
-    await expect(page.locator('[data-source-chip="S1"]').first()).toBeFocused();
+    await expect(page.locator('[data-source-chip~="S1"]').first()).toBeFocused();
   });
 
   test('an unknown ?source does nothing', async ({ page }) => {
@@ -154,7 +172,7 @@ test.describe('receipts on a phone', () => {
 
   test('the receipt is a bottom sheet, and nothing in it overflows', async ({ page }) => {
     await page.goto(PAGE);
-    await chip(page, 'gap', 'S1').click();
+    await chip(page, 'gap').click();
     const d = dialog(page);
     await expect(d).toBeVisible();
     const box = (await d.boundingBox())!;

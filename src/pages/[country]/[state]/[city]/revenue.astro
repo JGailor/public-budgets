@@ -5,7 +5,7 @@
  * Sorts and "Show all" are CSS (radios, a checkbox, :has()), so they work
  * without JavaScript.
  */
-import SourceChip from '../../../../components/SourceChip.astro';
+import Sourced from '../../../../components/Sourced.astro';
 import Term from '../../../../components/Term.astro';
 import Base from '../../../../layouts/Base.astro';
 import { budgetFor } from '../../../../lib/budget';
@@ -40,9 +40,8 @@ const t = r.insights;
       <p class="eyebrow">Revenue · FY2026</p>
       <h1>Where the money comes from</h1>
       <p class="lede">
-        {city.name} budgeted {shortMoney(r.total.value)} in General Fund revenue for FY2026, including transfers from other funds.
+        {city.name} budgeted <Sourced city={city} figure={r.total}>{shortMoney(r.total.value)}</Sourced> in General Fund revenue for FY2026, including transfers from other funds.
         {r.totalPace === 'on-pace' ? ' By the halfway point of the year, about half had arrived. That\'s on pace.' : ` By the halfway point of the year, ${pct(r.received)} had arrived.`}
-        <SourceChip city={city} figure={r.total} />
       </p>
     </section>
 
@@ -104,7 +103,7 @@ const t = r.insights;
               <li class="line" style={SORTS.map((s) => `--rank-${s}:${rank[s]}`).join(';')} {...more}>
                 <span class="l-name">{l.name}</span>
                 <span class="l-budget">
-                  <span class="num">{shortMoney(l.fy2026Adopted)}</span>
+                  <span class="num"><Sourced city={city} figure={figures.adopted}>{shortMoney(l.fy2026Adopted)}</Sourced></span>
                   <span class="mag" aria-hidden="true"><span style={`width:${((l.fy2026Adopted / r.max) * 100).toFixed(2)}%`} /></span>
                 </span>
                 <span class={`l-pace pace--${pace}`}>
@@ -116,7 +115,6 @@ const t = r.insights;
                   <span class="visually-hidden">Vs. last year: </span>
                   {change === null ? 'new' : (<><span aria-hidden="true">{change >= 0 ? '▲' : '▼'}</span> <span class="num">{signedPct(change)}</span></>)}
                 </span>
-                <span class="l-chip"><SourceChip city={city} figure={figures.adopted} /></span>
               </li>
             );
           })
@@ -138,26 +136,23 @@ const t = r.insights;
       <li class="card insight insight--bay">
         <h2>Home sales lifted transfer taxes</h2>
         <p>
-          Property transfer tax receipts were up {pct(t.transfer.line.changeVsFy2025Pct!)} on last year at mid-year, and the Measure P share was up
-          {' '}{pct(t.transfer.measureP.changeVsFy2025Pct!)}.
+          Property transfer tax receipts were up <Sourced city={city} figure={t.transfer.figure}>{pct(t.transfer.line.changeVsFy2025Pct!)}</Sourced> on last year
+          at mid-year, and the Measure P share was up <Sourced city={city} figure={t.transfer.measurePFigure}>{pct(t.transfer.measureP.changeVsFy2025Pct!)}</Sourced>.
         </p>
-        <p class="chips-row"><SourceChip city={city} figure={t.transfer.figure} /><SourceChip city={city} figure={t.transfer.measurePFigure} /></p>
       </li>
       <li class="card insight insight--neutral">
         <h2>Timing isn't trouble</h2>
         <p>
-          Business license tax shows only {pct(t.timing.line.pctOfAdoptedReceived!)} received by mid-year. A low mid-year number can reflect when a tax is
+          Business license tax shows only <Sourced city={city} figure={t.timing.figure}>{pct(t.timing.line.pctOfAdoptedReceived!)}</Sourced> received by mid-year. A low mid-year number can reflect when a tax is
           billed, so read it alongside last year's.
         </p>
-        <p class="chips-row"><SourceChip city={city} figure={t.timing.figure} /></p>
       </li>
       <li class="card insight insight--red">
         <h2>A one-off jump in transfers</h2>
         <p>
-          <Term city={city} name="Transfers">Transfers</Term> in rose from {shortMoney(t.transfers.line.fy2025MidYearActual)} to {shortMoney(t.transfers.line.fy2026MidYearActual)}{' '}
+          <Term city={city} name="Transfers">Transfers</Term> in rose from {shortMoney(t.transfers.line.fy2025MidYearActual)} to <Sourced city={city} figure={t.transfers.figure}>{shortMoney(t.transfers.line.fy2026MidYearActual)}</Sourced>{' '}
           at mid-year, reflecting the Successor Agency wind-down and reserve moves. That money is one-time.
         </p>
-        <p class="chips-row"><SourceChip city={city} figure={t.transfers.figure} /></p>
       </li>
     </ul>
   </div>
@@ -328,7 +323,7 @@ const t = r.insights;
   .cols,
   .line {
     display: grid;
-    grid-template-columns: minmax(10rem, 1.3fr) 1.6fr 1.6fr 6rem 2.5rem;
+    grid-template-columns: minmax(10rem, 1.3fr) 1.6fr 1.6fr 6rem;
     gap: 1rem;
     align-items: center;
   }
@@ -428,9 +423,6 @@ const t = r.insights;
   .l-change.new {
     color: var(--muted);
   }
-  .l-chip :global(.chips) {
-    margin: 0;
-  }
   .lines-foot {
     display: flex;
     flex-wrap: wrap;
@@ -517,13 +509,6 @@ const t = r.insights;
     color: var(--muted);
     line-height: 1.6;
   }
-  .chips-row {
-    display: flex;
-    gap: 0.25rem;
-  }
-  .chips-row :global(.chips) {
-    margin: 0;
-  }
 
   /* Phones: name and change on top, the two bars below. */
   @media (max-width: 47.99rem) {
@@ -531,8 +516,8 @@ const t = r.insights;
       display: none;
     }
     .line {
-      grid-template-columns: 1fr auto auto;
-      grid-template-areas: 'name change chip' 'budget budget budget' 'pace pace pace';
+      grid-template-columns: 1fr auto;
+      grid-template-areas: 'name change' 'budget budget' 'pace pace';
       row-gap: 0.375rem;
     }
     .l-name {
@@ -540,9 +525,6 @@ const t = r.insights;
     }
     .l-change {
       grid-area: change;
-    }
-    .l-chip {
-      grid-area: chip;
     }
     .l-budget {
       grid-area: budget;

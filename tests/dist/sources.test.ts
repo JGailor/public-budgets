@@ -2,12 +2,13 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CityBudget } from '../../src/data/types';
+import { unwrapFigures } from './figures';
 
 const root = join(import.meta.dirname, '../..');
 const dist = join(root, 'dist');
 const b: CityBudget = JSON.parse(readFileSync(join(root, 'data/cities/us/ca/berkeley/budget.json'), 'utf8'));
 const html = readFileSync(join(dist, 'us/ca/berkeley/sources/index.html'), 'utf8');
-const strip = (h: string) => h.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+const strip = (h: string) => unwrapFigures(h).replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 const text = strip(html);
 const pages = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? pages(join(dir, e.name)) : e.name.endsWith('.html') ? [join(dir, e.name)] : []));
@@ -40,7 +41,7 @@ describe('sources page', () => {
   it('every chip used anywhere on the site points at a source listed here', () => {
     const listed = new Set(rows.map((r) => r.id));
     const used = new Set<string>();
-    for (const file of pages(dist)) for (const m of readFileSync(file, 'utf8').matchAll(/data-source-chip="(S\d+)"/g)) used.add(m[1]);
+    for (const file of pages(dist)) for (const m of readFileSync(file, 'utf8').matchAll(/data-source-chip="([S\d ]+)"/g)) for (const id of m[1].split(' ')) used.add(id);
     expect(used.size).toBeGreaterThan(5);
     for (const id of used) expect(listed, id).toContain(id);
   });

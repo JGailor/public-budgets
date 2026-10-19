@@ -1,0 +1,61 @@
+---
+/**
+ * A figure that is its own receipt (#29): the number is a button, with a dotted
+ * underline, that opens the source drawer. Its accessible name says where it is from:
+ * "$29.2M, source: FY27-FY28 Budget Balancing Plan".
+ *   <Sourced city={city} figure={h.gap}>$29.2M</Sourced>
+ *   <Sourced city={city} source="S20" at={{ page, quote }}>$916.8M</Sourced>
+ * Same receipt and the same data-source-chip hook as SourceChip, so the drawer, deep
+ * links and tests treat both alike.
+ */
+import type { City } from '../lib/cities';
+import { receiptTarget, sourceList, type ReceiptTarget } from '../lib/receipt-target';
+
+type Props = { city: City; class?: string } & ReceiptTarget;
+
+const { city, class: className, ...target } = Astro.props;
+const { receipt, names } = receiptTarget(city, target as ReceiptTarget, new URL(Astro.url.pathname, Astro.site));
+const html = await Astro.slots.render('default');
+const text = html
+  .replace(/<[^>]+>/g, '')
+  .replace(/&#39;/g, "'")
+  .replace(/&amp;/g, '&')
+  .replace(/\s+/g, ' ')
+  .trim();
+if (!text) throw new Error('Sourced: needs the figure as its content');
+---
+
+<button
+  type="button"
+  class:list={['sourced', className]}
+  data-receipt={JSON.stringify(receipt)}
+  data-source-chip={receipt.sources.join(' ')}
+  aria-haspopup="dialog"
+  aria-label={`${text}, source: ${sourceList(names)}`}><Fragment set:html={html} /></button
+>
+
+<style>
+  .sourced {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    text-decoration: underline dotted;
+    text-decoration-thickness: max(1.5px, 0.06em);
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+  }
+  .sourced:hover {
+    text-decoration-style: solid;
+  }
+  .sourced:focus-visible {
+    outline: 2px solid var(--bay);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+</style>

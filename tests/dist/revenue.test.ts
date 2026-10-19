@@ -2,12 +2,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CityBudget } from '../../src/data/types';
+import { unwrapFigures } from './figures';
 
 const root = join(import.meta.dirname, '../..');
 const b: CityBudget = JSON.parse(readFileSync(join(root, 'data/cities/us/ca/berkeley/budget.json'), 'utf8'));
 const groups = JSON.parse(readFileSync(join(root, 'data/cities/us/ca/berkeley/revenue-groups.json'), 'utf8')).groups as { id: string; name: string; lines: string[] }[];
 const html = readFileSync(join(root, 'dist/us/ca/berkeley/revenue/index.html'), 'utf8');
-const text = html.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ');
+const text = unwrapFigures(html).replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ');
 const line = (n: string) => b.revenue.lines.find((l) => l.name === n)!;
 
 describe('revenue page (built)', () => {
@@ -27,9 +28,10 @@ describe('revenue page (built)', () => {
     expect(text).toContain(`+${change}%`);
   });
 
-  it('has all 24 line items, each with a source chip', () => {
-    expect(html.match(/<li class="line"/g)).toHaveLength(b.revenue.lines.length);
-    expect(html.match(/class="l-chip"/g)).toHaveLength(b.revenue.lines.length);
+  it('has all 24 line items, each budget figure its own receipt (#29)', () => {
+    const lines = [...html.matchAll(/<li class="line"[\s\S]*?<\/li>/g)].map((m) => m[0]);
+    expect(lines).toHaveLength(b.revenue.lines.length);
+    for (const l of lines) expect(l).toMatch(/<span class="l-budget"[^>]*>\s*<span class="num"[^>]*><button[^>]*class="sourced/);
   });
 
   it('the insight cards quote the data', () => {

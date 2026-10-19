@@ -7,6 +7,7 @@
  */
 import ReadMore from '../../../../components/ReadMore.astro';
 import SourceChip from '../../../../components/SourceChip.astro';
+import Sourced from '../../../../components/Sourced.astro';
 import Base from '../../../../layouts/Base.astro';
 import { ballotFileFor, ballotPage, type Outcome } from '../../../../lib/ballot';
 import { budgetFor } from '../../../../lib/budget';
@@ -51,13 +52,13 @@ const planDate = longDate(p.plan.date!);
     <ul class="measures" role="list">
       <li class="card measure">
         <p class="kicker">Measure {v.letter} · {thresholdLabel(t.threshold)}</p>
-        <h2>{pct(t.rate)} local sales tax <SourceChip city={city} figure={v.figure} /></h2>
+        <h2><Sourced city={city} figure={v.figure}>{pct(t.rate)}</Sourced> local sales tax</h2>
         <p class="official">Official title: “{v.official.title}” <SourceChip city={city} source={v.official.cite.source} at={v.official.cite} /></p>
         <p>
           A general tax: the money would go to the General Fund and could be spent on any city purpose. <SourceChip city={city} source={v.general.source} at={v.general} />{' '}
-          The City estimates it would raise {range(v.revenue.low, v.revenue.high)} a year
-          {v.revenue.cites.map((c) => <SourceChip city={city} source={c.source} at={c} />)}{' '}
-          and bring {city.name}'s sales-tax rate to {pct(t.newRate)}. It would start {longDate(v.term.start)} and last {v.term.until}.
+          The City estimates it would raise <Sourced city={city} source={v.revenue.cites[0].source} at={v.revenue.cites[0]} also={v.revenue.cites.slice(1)}
+            >{range(v.revenue.low, v.revenue.high)}</Sourced
+          > a year and bring {city.name}'s sales-tax rate to {pct(t.newRate)}. It would start {longDate(v.term.start)} and last {v.term.until}.
           <SourceChip city={city} source={v.term.cite.source} at={v.term.cite} />
         </p>
         <p>The city's FY27-28 plan was built in two versions, one for each outcome.</p>
@@ -65,19 +66,19 @@ const planDate = longDate(p.plan.date!);
       </li>
       <li class="card measure">
         <p class="kicker">Measure {u.letter} · {thresholdLabel(bond.threshold)}</p>
-        <h2>{millions(bond.amount)} infrastructure bond <SourceChip city={city} figure={u.figure} /></h2>
+        <h2><Sourced city={city} figure={u.figure}>{millions(bond.amount)}</Sourced> infrastructure bond</h2>
         <p class="official">Official title: “{u.official.title}” <SourceChip city={city} source={u.official.cite.source} at={u.official.cite} /></p>
         <p>
-          Borrowing for streets, buildings and parks, repaid by a {bond.repaidBy}. The City estimates about ${u.cost.perHundredK.toFixed(2)} a year per $100,000 of
-          assessed value on average over {u.cost.years} years, raising about {millions(u.cost.perYear)} a year.
-          <SourceChip city={city} source={u.cost.cite.source} at={u.cost.cite} /> Its highest rate would be about ${u.peak.perHundredK}, from {u.peak.from}.
-          <SourceChip city={city} source={u.peak.cite.source} at={u.peak.cite} />{' '}
+          Borrowing for streets, buildings and parks, repaid by a {bond.repaidBy}. The City estimates about <Sourced city={city} source={u.cost.cite.source} at={u.cost.cite}
+            >${u.cost.perHundredK.toFixed(2)}</Sourced
+          > a year per $100,000 of assessed value on average over {u.cost.years} years, raising about {millions(u.cost.perYear)} a year. Its highest
+          rate would be about <Sourced city={city} source={u.peak.cite.source} at={u.peak.cite}>${u.peak.perHundredK}</Sourced>, from {u.peak.from}.{' '}
           The City Auditor would audit its spending at least every {words(u.audit.everyYears)} years. <SourceChip city={city} source={u.audit.cite.source} at={u.audit.cite} />
         </p>
         <p>
-          It doesn't touch the operating gap. The City's capital plan puts its unfunded capital and maintenance need at {billion(u.need.value)}
-          <SourceChip city={city} figure={u.need} />; an earlier City estimate was {billions(u.backlog.ref.low, u.backlog.ref.high)}.
-          <SourceChip city={city} figure={u.backlog} />
+          It doesn't touch the operating gap. The City's capital plan puts its unfunded capital and maintenance need at{' '}
+          <Sourced city={city} figure={u.need}>{billion(u.need.value)}</Sourced>; an earlier City estimate was{' '}
+          <Sourced city={city} figure={u.backlog}>{billions(u.backlog.ref.low, u.backlog.ref.high)}</Sourced>.
         </p>
         <ReadMore city={city} letter={u.letter} links={u.read} />
       </li>
@@ -96,19 +97,19 @@ const planDate = longDate(p.plan.date!);
               </h3>
               <div class="scenario-body">
                 <p class="big">
-                  <span class="num big-n">{s.positions.total}</span>
+                  <span class="num big-n">
+                    <Sourced city={city} figure={s.positions.figure}>{s.positions.total}</Sourced>
+                  </span>
                   <span class="big-l">
                     positions eliminated
                     <span class="sub">
-                      {s.positions.vacant} vacant · {s.positions.filled} filled (layoffs) <SourceChip city={city} figure={s.positions.figure} />
+                      {s.positions.vacant} vacant · {s.positions.filled} filled (layoffs)
                     </span>
                   </span>
                 </p>
                 <p class="caveat">
                   {s.caveat.text}
-                  {s.caveat.cites.map((c) => (
-                    <SourceChip city={city} source={c.source} at={c} />
-                  ))}
+                  <SourceChip city={city} source={s.caveat.cites[0].source} at={s.caveat.cites[0]} also={s.caveat.cites.slice(1)} />
                 </p>
                 <p class="pict-label">People laid off</p>
                 <div class="pict" role="img" aria-label={`${s.positions.filled} people laid off, out of ${p.pictogramSlots} shown`}>
@@ -120,24 +121,23 @@ const planDate = longDate(p.plan.date!);
                   <div>
                     <dt>Department cuts</dt>
                     <dd>
-                      {shortMoney(s.cuts.value)} ({(s.cuts.pct * 100).toFixed(1)}% of baseline) <SourceChip city={city} figure={s.cuts.figure} />
+                      <Sourced city={city} figure={s.cuts.figure}>{shortMoney(s.cuts.value)}</Sourced> ({(s.cuts.pct * 100).toFixed(1)}% of baseline)
                     </dd>
                   </div>
                   <div>
                     <dt>City workforce after FY27</dt>
                     <dd>
-                      <span class="num">{fte(s.workforce.after)}</span> FTE (from <span class="num">{fte(s.workforce.before)}</span>){' '}
-                      <SourceChip city={city} figure={s.workforce.figure} />
+                      <span class="num">
+                        <Sourced city={city} figure={s.workforce.figure}>{fte(s.workforce.after)}</Sourced>
+                      </span> FTE (from <span class="num">{fte(s.workforce.before)}</span>)
                     </dd>
                   </div>
                   {s.rows.map((r) => (
                     <div data-row={r.key}>
                       <dt>{r.label}</dt>
                       <dd>
-                        {r.text} <SourceChip city={city} source={r.cite.source} at={r.cite} />
-                        {r.also.map((id) => (
-                          <SourceChip city={city} source={id} />
-                        ))}
+                        {r.text}
+                        <SourceChip city={city} source={r.cite.source} at={r.cite} also={r.also.map((source) => ({ source }))} />
                       </dd>
                     </div>
                   ))}
@@ -150,8 +150,12 @@ const planDate = longDate(p.plan.date!);
     </section>
 
     <p class="footnote">
-      Note: in FY27 the plan uses {shortMoney(p.salesTax.bridge.value)} of one-time money (reserves and a Successor Agency
-      transfer) to soften {list(p.softened)} cuts until the vote. <SourceChip city={city} figure={p.salesTax.bridge} /><SourceChip city={city} source={p.oneTimeDelay.source} at={p.oneTimeDelay} />{' '}
+      Note: in FY27 the plan uses <Sourced city={city} figure={p.salesTax.bridge}>{shortMoney(p.salesTax.bridge.value)}</Sourced> of one-time money (reserves
+      and a Successor Agency transfer) to soften {list(p.softened)} cuts until the vote.<SourceChip
+        city={city}
+        source={p.oneTimeDelay.source}
+        at={p.oneTimeDelay}
+      />{' '}
       The tax itself would start {longDate(v.term.start)}. Figures come from
       the {planDate} {committee} plan and, where cited as {p.adoption.cite.source}, the adoption staff report. The Council adopted the budget
       on {longDate(p.adoption.date)} with amendments made at that meeting, which these figures don't include.

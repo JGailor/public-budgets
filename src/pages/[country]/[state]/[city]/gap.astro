@@ -4,6 +4,7 @@
  * it planned around, and how it plans to close it. Figures come from gapPage()
  * in src/lib/gap.ts; tests/dist checks the story's numbers from budget.json.
  */
+import Sourced from '../../../../components/Sourced.astro';
 import SourceChip from '../../../../components/SourceChip.astro';
 import StepInfo from '../../../../components/StepInfo.astro';
 import Term from '../../../../components/Term.astro';
@@ -80,7 +81,9 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
                   <span class="track">
                     <span class="bar" />
                   </span>
-                  <span class="value num">{signed(s.value)}</span>
+                  <span class="value num">
+                    <Sourced city={city} figure={s.figure}>{signed(s.value)}</Sourced>
+                  </span>
                   <span class="label">
                     {s.kind === 'one-time' ? (
                       <Term city={city} name="One-time (one-time resources)">
@@ -90,9 +93,6 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
                       s.label
                     )}{' '}
                     <StepInfo city={city} id={`note-${y.year}-${s.key}`} label={s.label} note={s.note} part="button" />
-                  </span>
-                  <span class="chip-cell">
-                    <SourceChip city={city} figure={s.figure} />
                   </span>
                   <StepInfo city={city} id={`note-${y.year}-${s.key}`} label={s.label} note={s.note} part="panel" />
                 </li>
@@ -111,8 +111,9 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
         <div class="plan">
           <p class="plan-head">
             <span>If the sales tax fails</span>
-            <span class="short">{shortMoney(g.close.fails.cuts.value)} in department cuts ({pct(g.close.fails.pct)})</span>
-            <SourceChip city={city} figure={g.close.fails.cuts} />
+            <span class="short">
+              <Sourced city={city} figure={g.close.fails.cuts}>{shortMoney(g.close.fails.cuts.value)}</Sourced> in department cuts ({pct(g.close.fails.pct)})
+            </span>
           </p>
           <div class="plan-bar" role="img" aria-label={`If the sales tax fails: ${shortMoney(g.close.fails.cuts.value)} in department cuts.`}>
             <span class="cut" style="flex:1"></span>
@@ -122,21 +123,25 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
         <div class="plan">
           <p class="plan-head">
             <span>If the sales tax passes</span>
-            <span class="short">{shortMoney(g.close.passes.cuts.value)} in cuts ({pct(g.close.passes.pct)})</span>
-            <SourceChip city={city} figure={g.close.passes.cuts} />
+            <span class="short">
+              <Sourced city={city} figure={g.close.passes.cuts}>{shortMoney(g.close.passes.cuts.value)}</Sourced> in cuts ({pct(g.close.passes.pct)})
+            </span>
           </p>
           <div class="plan-bar" role="img" aria-label={`If the sales tax passes: ${shortMoney(g.close.passes.cuts.value)} in cuts, and ${shortMoney(g.close.passes.softened.value)} of cuts softened by one-time money.`}>
             <span class="cut" style={`flex:${g.close.passes.cuts.value}`}></span>
             <span class="softened" style={`flex:${g.close.passes.softened.value}`}>{shortMoney(g.close.passes.softened.value)} softened</span>
           </div>
-          <p class="plan-chip"><SourceChip city={city} figure={g.close.passes.softened} /></p>
+          <!-- The bar is an image, so its "softened" figure can't be a button inside it; it is one here. -->
+          <p class="plan-chip">
+            <Sourced city={city} figure={g.close.passes.softened}>{shortMoney(g.close.passes.softened.value)}</Sourced> of cuts softened by one-time money
+          </p>
         </div>
 
         <p class="note">
-          <SourceChip city={city} figure={g.close.bridge} />
-          <SourceChip city={city} source={notesSource} />
-          In FY27 the plan uses one-time money (reserves and a Successor Agency transfer) to soften cuts until the vote. The tax
-          itself would start {taxStart}.
+          In FY27 the plan uses one-time money (reserves and a Successor Agency transfer) to soften cuts until the vote.<SourceChip
+            city={city}
+            figure={g.close.bridge}
+          /> The tax itself would start {taxStart}.<SourceChip city={city} source={notesSource} />
         </p>
       </div>
 
@@ -149,8 +154,7 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
               <li>
                 <span class="sw sw--in" aria-hidden="true" />
                 <span class="flow-label">{s.label}</span>
-                <span class="num">{shortMoney(s.amount, 2)}</span>
-                <SourceChip city={city} figure={s.figure} />
+                <span class="num"><Sourced city={city} figure={s.figure}>{shortMoney(s.amount, 2)}</Sourced></span>
               </li>
             ))
           }
@@ -162,15 +166,13 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
               <li>
                 <span class="sw sw--out" aria-hidden="true" />
                 <span class="flow-label">{u.label}</span>
-                <span class="num">{shortMoney(u.amount, 2)}</span>
-                <SourceChip city={city} figure={u.figure} />
+                <span class="num"><Sourced city={city} figure={u.figure}>{shortMoney(u.amount, 2)}</Sourced></span>
               </li>
             ))
           }
         </ul>
         <p class="left-over">
-          Left over: <span class="num">{shortMoney(g.oneTime.remaining)}</span>
-          <SourceChip city={city} figure={g.oneTime.remainingFigure} />
+          Left over: <span class="num"><Sourced city={city} figure={g.oneTime.remainingFigure}>{shortMoney(g.oneTime.remaining)}</Sourced></span>
         </p>
       </aside>
     </section>
@@ -300,9 +302,6 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
     font-weight: 600;
     font-size: 0.8125rem;
   }
-  .chip-cell :global(.chips) {
-    margin-inline-start: 0;
-  }
   .axis {
     position: absolute;
     inset: 0 0 auto 0;
@@ -351,7 +350,7 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
     .step {
       position: relative;
       display: grid;
-      grid-template-rows: var(--chart) auto auto auto;
+      grid-template-rows: var(--chart) auto auto;
       justify-items: center;
       text-align: center;
       row-gap: 0.5rem;
@@ -400,7 +399,7 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
     .step {
       display: grid;
       grid-template-columns: 1fr auto;
-      grid-template-areas: 'label value' 'track track' 'chip chip' 'note note';
+      grid-template-areas: 'label value' 'track track' 'note note';
       gap: 0.375rem 0.75rem;
       padding-block: 0.75rem;
       border-bottom: 1px solid var(--rule);
@@ -426,9 +425,6 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
     }
     .step--final .bar {
       outline-offset: 2px;
-    }
-    .chip-cell {
-      grid-area: chip;
     }
     .step :global(.info-panel) {
       grid-area: note;
@@ -466,9 +462,6 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
   .plan-head .short {
     font-size: 1.1875rem;
   }
-  .plan-head :global(.chips) {
-    margin-inline-start: 0;
-  }
   .plan-bar {
     display: flex;
     height: 2.75rem;
@@ -491,15 +484,14 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
   }
   .plan-chip {
     margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
     text-align: right;
   }
   .note {
     margin: 1.25rem 0 0;
     color: var(--muted);
     font-size: 0.875rem;
-  }
-  .note :global(.chips) {
-    margin: 0 0.25rem 0 0;
   }
   .one-time {
     align-self: start;
@@ -522,16 +514,13 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
   }
   .flows li {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 0.625rem;
     padding-block: 0.375rem;
   }
   .flows .num {
     font-weight: 700;
-  }
-  .flows :global(.chips) {
-    margin: 0;
   }
   .sw {
     width: 0.625rem;
@@ -559,9 +548,6 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
     margin: 1rem 0 0;
     color: #8a5f0b;
     font-weight: 800;
-  }
-  .left-over :global(.chips) {
-    margin-inline-start: auto;
   }
   @media (min-width: 64rem) {
     .closing {

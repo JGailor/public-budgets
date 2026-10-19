@@ -6,7 +6,7 @@
  * choice in the URL (?year=2028&tax=fails&sort=cut). #{id} selects a
  * department: a side panel on desktop, a full-screen detail on phones.
  */
-import SourceChip from '../../../../components/SourceChip.astro';
+import Sourced from '../../../../components/Sourced.astro';
 import Base from '../../../../layouts/Base.astro';
 import { budgetFor } from '../../../../lib/budget';
 import { cityStaticPaths, type City } from '../../../../lib/cities';
@@ -44,9 +44,8 @@ const selectRules = p.rows
       <p class="eyebrow">Departments · <span class="yr yr--fy2027">FY2027</span><span class="yr yr--fy2028">FY2028</span> proposed</p>
       <h1>Who's being asked to cut, and by how much</h1>
       <p class="lede">
-        Every department was asked to find savings. Together they come to {money(p.total.cut.value)}, about {Math.round(p.total.pct * 100)}% of
-        the {money(p.total.baseline)} baseline. Toggle the sales tax to see which cuts it would soften.
-        <SourceChip city={city} figure={p.total.cut} />
+        Every department was asked to find savings. Together they come to <Sourced city={city} figure={p.total.cut}>{money(p.total.cut.value)}</Sourced>,
+        about {Math.round(p.total.pct * 100)}% of the {money(p.total.baseline)} baseline. Toggle the sales tax to see which cuts it would soften.
       </p>
     </section>
 
@@ -129,8 +128,13 @@ const selectRules = p.rows
           }
         </ol>
         <p class="footnote">
-          Not shown: {p.excluded.map((x) => `${x.d.name} (${money(x.d.baseline)} baseline, cut entirely)`).join(', ')}.
-          <SourceChip city={city} figure={p.excluded[0].figure} />
+          Not shown:{' '}
+          {p.excluded.map((x, i) => (
+            <>
+              {i > 0 && ', '}
+              {x.d.name} (<Sourced city={city} figure={x.figure}>{money(x.d.baseline)}</Sourced> baseline, cut entirely)
+            </>
+          ))}.
           {p.note}
         </p>
       </div>
@@ -170,31 +174,36 @@ const selectRules = p.rows
                     <dl class="facts">
                       <div>
                         <dt>{short(y)} baseline</dt>
-                        <dd class="num">{money(v.d.baseline)}</dd>
-                        <dd><SourceChip city={city} figure={v.figures.baseline} /></dd>
+                        <dd class="num">
+                          <Sourced city={city} figure={v.figures.baseline}>{money(v.d.baseline)}</Sourced>
+                        </dd>
                       </div>
                       <div>
                         <dt>Proposed cut</dt>
-                        <dd class="num short">{v.d.reduction === 0 ? 'none' : `${money(v.d.reduction)} (${pct(v.d.reductionPct)})`}</dd>
-                        <dd><SourceChip city={city} figure={v.figures.cut} /></dd>
+                        <dd class="num short">
+                          <Sourced city={city} figure={v.figures.cut}>{v.d.reduction === 0 ? 'none' : `${money(v.d.reduction)} (${pct(v.d.reductionPct)})`}</Sourced>
+                        </dd>
                       </div>
                       <div class="tax tax--passes">
                         <dt>Softened by bridge money</dt>
-                        <dd class="num once">{v.d.salesTaxAllocation === 0 ? 'none' : `+${money(v.d.salesTaxAllocation)}`}</dd>
-                        <dd><SourceChip city={city} figure={v.figures.softened} /></dd>
+                        <dd class="num once">
+                          <Sourced city={city} figure={v.figures.softened}>{v.d.salesTaxAllocation === 0 ? 'none' : `+${money(v.d.salesTaxAllocation)}`}</Sourced>
+                        </dd>
                       </div>
                       {TAXES.map((t) => (
                         <div class={`tax tax--${t}`}>
                           <dt>Net cut if tax {t}</dt>
-                          <dd class="num short">{v.netIf[t].value === 0 ? 'none' : `${money(v.netIf[t].value)} (${pct(v.netIf[t].pct)})`}</dd>
-                          <dd><SourceChip city={city} figure={v.figures.net[t]} /></dd>
+                          <dd class="num short">
+                            <Sourced city={city} figure={v.figures.net[t]}>{v.netIf[t].value === 0 ? 'none' : `${money(v.netIf[t].value)} (${pct(v.netIf[t].pct)})`}</Sourced>
+                          </dd>
                         </div>
                       ))}
                       {TAXES.map((t) => (
                         <div class={`tax tax--${t}`}>
                           <dt>{short(other)} net cut</dt>
-                          <dd class="num">{o.netIf[t].value === 0 ? 'none' : money(o.netIf[t].value)}</dd>
-                          <dd><SourceChip city={city} figure={o.figures.net[t]} /></dd>
+                          <dd class="num">
+                            <Sourced city={city} figure={o.figures.net[t]}>{o.netIf[t].value === 0 ? 'none' : money(o.netIf[t].value)}</Sourced>
+                          </dd>
                         </div>
                       ))}
                     </dl>
@@ -517,9 +526,6 @@ const selectRules = p.rows
     color: var(--muted);
     font-size: 0.8125rem;
   }
-  .footnote :global(.chips) {
-    margin-inline-end: 0.25rem;
-  }
 
   /* The detail panel */
   .panel {
@@ -568,7 +574,7 @@ const selectRules = p.rows
   }
   .facts > div {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto;
     align-items: center;
     gap: 0.5rem;
     padding-block: 0.625rem;
@@ -590,9 +596,6 @@ const selectRules = p.rows
   }
   .once {
     color: #8a5f0b;
-  }
-  .facts :global(.chips) {
-    margin: 0;
   }
   .panel-note {
     margin: 1rem 0 0;

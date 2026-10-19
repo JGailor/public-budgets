@@ -2,12 +2,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CityBudget } from '../../src/data/types';
+import { unwrapFigures } from './figures';
 
 // The story's checks, recomputed from budget.json without the site's helpers.
 const root = join(import.meta.dirname, '../..');
 const b: CityBudget = JSON.parse(readFileSync(join(root, 'data/cities/us/ca/berkeley/budget.json'), 'utf8'));
 const html = readFileSync(join(root, 'dist/us/ca/berkeley/index.html'), 'utf8');
-const text = html.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1');
+const text = unwrapFigures(html).replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1');
 const depts = b.departmentReductions.find((y) => y.year === 'FY2027')!.departments;
 const total = depts.reduce((a, d) => a + d.baseline, 0);
 
@@ -15,7 +16,7 @@ const unescape = (s: string) => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'")
 const receiptsIn = (fragment: string) => [...fragment.matchAll(/data-receipt="([^"]*)"/g)].map((m) => JSON.parse(unescape(m[1])));
 const lede = html.match(/<p class="lede"[^>]*>[\s\S]*?<\/p>/)![0];
 // The lede minus its glossary tooltip and the tooltip's script.
-const ledeText = lede.replace(/<script[\s\S]*?<\/script>|<span class="tip"[\s\S]*?<\/span>/g, '').replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1');
+const ledeText = unwrapFigures(lede).replace(/<script[\s\S]*?<\/script>|<span class="tip"[\s\S]*?<\/span>/g, '').replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/\s+/g, ' ').replace(/ ([,.])/g, '$1');
 
 describe('the whole budget, before the waffle (#24)', () => {
   const d = b.documentFacts!;
@@ -23,9 +24,10 @@ describe('the whole budget, before the waffle (#24)', () => {
   it("says what the whole budget is and what the waffle shows, from data", () => {
     expect(d.allFunds.amount).toBe(916_819_369);
     expect(d.generalFund.amount).toBe(313_849_211);
-    expect(ledeText).toContain("Berkeley's whole budget this year is $916.8M S20. Most of it is set aside for specific uses, like sewers, parking or grants.");
-    expect(ledeText).toContain('The $313.8M General Fund S20 is the part the Council can spend on anything.');
-    expect(ledeText).toContain(`This chart shows the $283.8M of it planned for departments, before cuts S1.`);
+    // No chip labels in the sentence any more: each figure is its own receipt (#29).
+    expect(ledeText).toContain("Berkeley's whole budget this year is $916.8M. Most of it is set aside for specific uses, like sewers, parking or grants.");
+    expect(ledeText).toContain('The $313.8M General Fund is the part the Council can spend on anything.');
+    expect(ledeText).toContain(`This chart shows the $283.8M of it planned for departments, before cuts.`);
   });
 
   it('chips each figure: the adoption report p.1 sentence for the two totals, S1 for the baseline', () => {
@@ -55,7 +57,7 @@ describe('the three cards, in plain language (#24)', () => {
   });
 
   it('card 3 explains both measures and names the measure in each outcome', () => {
-    expect(text).toMatch(/Measure V would add a 0\.5% sales tax( S\d+)+\. Measure U would let the City borrow \$300M for repairs \(a bond\)( S\d+)+\. The City's budget plan counts on the sales tax\./);
+    expect(text).toContain("Measure V would add a 0.5% sales tax. Measure U would let the City borrow $300M for repairs (a bond). The City's budget plan counts on the sales tax.");
     expect(text).toContain('105 positions cut if Measure V passes');
     expect(text).toContain('138 positions cut if Measure V fails');
   });

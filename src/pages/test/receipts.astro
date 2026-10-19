@@ -5,6 +5,7 @@
  * up in a receipt's "Used on" line. The browser tests in tests/e2e drive it.
  */
 import SourceChip from '../../components/SourceChip.astro';
+import Sourced from '../../components/Sourced.astro';
 import Term from '../../components/Term.astro';
 import Base from '../../layouts/Base.astro';
 import { budgetFor } from '../../lib/budget';
@@ -22,12 +23,12 @@ const fy2021 = b.personnelAndPension.unfundedLiabilities.find((l) => l.asOf === 
 <Base title="Receipt test page" city={city} noindex>
   <div class="wrap">
     <h1>Receipt test page</h1>
-    <p>Three figures, each with its source chips. Not part of the site.</p>
+    <p>Three figures, each its own receipt, and a statement with a quiet ⓘ. Not part of the site.</p>
 
     <ul class="figures">
       <li data-figure="gap">
-        <span class="num">−$29.2M</span> FY2027 gap
-        <SourceChip
+        <Sourced
+          class="num"
           city={city}
           figure={{
             value: gap.fy2027,
@@ -40,16 +41,17 @@ const fy2021 = b.personnelAndPension.unfundedLiabilities.find((l) => l.asOf === 
               { label: 'Three adjustments', value: adjustments.reduce((a, s) => a + s.fy2027, 0) },
               { label: 'One-time money', value: step('one-time-resources').fy2027 },
             ],
-          }}
-        />
+          }}>−$29.2M</Sourced
+        > FY2027 gap
       </li>
       <li data-figure="police">
-        <span class="num">$106.2M</span> Police baseline, FY2027
-        <SourceChip city={city} figure={{ value: police.baseline, label: 'Police General Fund baseline, FY2027', ref: police }} />
+        <Sourced class="num" city={city} figure={{ value: police.baseline, label: 'Police General Fund baseline, FY2027', ref: police }}>$106.2M</Sourced> Police
+        baseline, FY2027
       </li>
       <li data-figure="liability">
-        <span class="num">$773.1M</span> unfunded liabilities, FY2021
-        <SourceChip city={city} figure={{ value: fy2021.amount, label: 'Unfunded pension and retiree-health liabilities, FY2021', ref: fy2021 }} />
+        <Sourced class="num" city={city} figure={{ value: fy2021.amount, label: 'Unfunded pension and retiree-health liabilities, FY2021', ref: fy2021 }}
+          >$773.1M</Sourced
+        > unfunded liabilities, FY2021
       </li>
     </ul>
 

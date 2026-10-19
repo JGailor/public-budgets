@@ -73,12 +73,13 @@ const data = {
     return h('div', {}, h('dt', {}, term), h('dd', {}, def));
   }
 
-  function sourceLine(s: SourceView) {
+  function sourceLine(s: SourceView, cites: Receipt['also'] = []) {
     return h(
       'li',
       {},
       h('span', { class: `mini mini--${s.type}` }, s.id),
       h('a', { href: s.url, target: '_blank', rel: 'noopener' }, `${s.publisher}${s.date ? `, ${s.date}` : ''}: ${s.title}`),
+      ...cites.flatMap((c) => [c.page ? ` (p. ${c.page})` : '', c.quote ? h('q', { class: 'quote quote--also' }, c.quote) : '']),
     );
   }
 
@@ -124,6 +125,10 @@ const data = {
         r.table ? row('Table', `${r.table}, row ${r.row}`) : null,
         r.page ? row('Page', `p. ${r.page} of the PDF`) : null,
         r.quote ? row('It says', h('q', { class: 'quote' }, r.quote)) : null,
+        // More of the same document behind the same statement (#29): its page and what it says there.
+        ...(r.also ?? [])
+          .filter((c) => c.source === primary.id)
+          .map((c) => row(c.page ? `Also p. ${c.page}` : 'Also', c.quote ? h('q', { class: 'quote' }, c.quote) : '')),
         r.page || r.quote ? null : row('Basis', data.basis),
         h('div', { 'data-used-on': '' }, h('dt', {}, 'Used on'), usedOn),
       ),
@@ -153,7 +158,7 @@ const data = {
       ...(['city', 'news'] as const).map((type) => {
         const list = others.filter((s) => s.type === type);
         return list.length
-          ? h('div', { class: 'also' }, h('p', { class: 'also-title' }, type === 'city' ? 'Also from' : 'Also reported in'), h('ul', {}, ...list.map(sourceLine)))
+          ? h('div', { class: 'also' }, h('p', { class: 'also-title' }, type === 'city' ? 'Also from' : 'Also reported in'), h('ul', {}, ...list.map((s) => sourceLine(s, r.also?.filter((c) => c.source === s.id)))))
           : null;
       }),
     ];
@@ -209,7 +214,7 @@ const data = {
 
   const deepLink = new URLSearchParams(location.search).get('source')?.toUpperCase();
   if (deepLink && data.sourceReceipts[deepLink]) {
-    open(data.sourceReceipts[deepLink], document.querySelector<HTMLElement>(`[data-source-chip="${deepLink}"]`));
+    open(data.sourceReceipts[deepLink], document.querySelector<HTMLElement>(`[data-source-chip~="${deepLink}"]`));
   }
 </script>
 
@@ -370,6 +375,11 @@ const data = {
   .receipt :global(.quote) {
     font-style: italic;
   }
+  /* What another document says, under its line in "Also from" (#29). */
+  .receipt :global(.quote--also) {
+    flex-basis: 100%;
+    color: var(--muted);
+  }
   .receipt :global(.built) {
     margin-top: 1.25rem;
     padding: 1rem;
@@ -479,7 +489,8 @@ const data = {
   }
   .receipt :global(.also li) {
     display: flex;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
     align-items: baseline;
     padding-block: 0.25rem;
   }

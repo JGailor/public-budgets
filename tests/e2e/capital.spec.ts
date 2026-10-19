@@ -42,7 +42,7 @@ test('the scale draws the program and the need on one axis', async ({ page }) =>
 
 test('the General Fund receipt lists its five programs', async ({ page }) => {
   await page.goto(PAGE);
-  await page.locator('.gf-note .chips button').first().click();
+  await page.locator('.gf-note [data-source-chip]').first().click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   for (const p of ['Streets', 'Facilities', 'Camps', 'Sidewalks', 'Parks']) await expect(dialog).toContainText(p);

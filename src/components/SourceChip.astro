@@ -1,70 +1,59 @@
 ---
 /**
- * Source chips for one figure: an S{n} button per source, opening the receipt.
+ * The receipt for a statement that has no figure to tap (#29): one small, quiet ⓘ
+ * at the end of the sentence. A figure is its own button instead; see Sourced.
  *   <SourceChip city={city} figure={{ value, label, ref }} />   receipt for a figure
  *   <SourceChip city={city} source="S2" />                     receipt for a whole document
  *   <SourceChip city={city} source="S20" at={{ page, quote }} /> …at the page and sentence a statement comes from
+ * data-source-chip lists every source id, space-separated; select one with [data-source-chip~="S1"].
  */
-import { budgetFor } from '../lib/budget';
 import type { City } from '../lib/cities';
-import { figureReceipt, sourceReceipt, sourcesById, type At, type Figure } from '../lib/receipts';
-import type { SourceId } from '../data/types';
+import { receiptTarget, sourceList, type ReceiptTarget } from '../lib/receipt-target';
 
-type Props = { city: City } & ({ figure: Figure; source?: never; at?: never } | { source: SourceId; at?: At; figure?: never });
+type Props = { city: City } & ReceiptTarget;
 
-const { city, figure, source, at } = Astro.props;
-const budget = budgetFor(city);
-if (!budget) throw new Error(`SourceChip: ${city.path} has no budget data`);
-const pageUrl = new URL(Astro.url.pathname, Astro.site);
-const receipt = figure ? figureReceipt(budget, city, figure, pageUrl) : sourceReceipt(budget, source!, pageUrl, at);
-const views = sourcesById(budget);
+const { city, ...target } = Astro.props;
+const { receipt, names } = receiptTarget(city, target as ReceiptTarget, new URL(Astro.url.pathname, Astro.site));
 ---
 
-<span class="chips" data-receipt={JSON.stringify(receipt)}>
-  {
-    receipt.sources.map((id) => {
-      const s = views.get(id)!;
-      return (
-        <button type="button" class:list={['chip', `chip--${s.type}`]} data-source-chip={id} aria-haspopup="dialog" aria-label={s.name}>
-          {id}
-        </button>
-      );
-    })
-  }
-</span>
+<span class="chips" data-receipt={JSON.stringify(receipt)}
+  ><button type="button" class="cite" data-source-chip={receipt.sources.join(' ')} aria-haspopup="dialog" aria-label={`Source: ${sourceList(names)}`}
+    ><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"
+      ><circle cx="8" cy="8" r="6.75" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path
+        d="M8 7.25v4"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"></path><circle cx="8" cy="4.9" r="1" fill="currentColor"></circle></svg
+    ></button
+  ></span
+>
 
 <style>
   .chips {
     display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    margin-inline-start: 0.375rem;
     vertical-align: middle;
+    margin-inline-start: 0.125rem;
   }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.5rem;
-    padding: 0 0.5rem;
+  /* Quiet: muted and small, but a full 24px target. */
+  .cite {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-block: -0.25rem;
+    padding: 0;
     border: 0;
-    border-radius: var(--radius-pill);
-    font: 700 0.6875rem/1 var(--font-sans);
-    letter-spacing: 0.02em;
+    border-radius: 50%;
+    background: none;
+    color: var(--muted);
     cursor: pointer;
   }
-  /* City documents read as primary: solid bay. News reports read as context: light. */
-  .chip--city {
-    background: var(--bay);
-    color: #fff;
-  }
-  .chip--news {
-    background: var(--bay-light);
+  .cite:hover {
     color: var(--bay);
+    background: var(--bay-light);
   }
-  .chip:hover {
-    filter: brightness(1.1);
-  }
-  .chip--news:hover {
-    filter: brightness(0.95);
+  .cite:focus-visible {
+    outline: 2px solid var(--bay);
+    outline-offset: 1px;
   }
 </style>

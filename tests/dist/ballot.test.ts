@@ -2,11 +2,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CityBudget } from '../../src/data/types';
+import { unwrapFigures } from './figures';
 
 const root = join(import.meta.dirname, '../..');
 const b: CityBudget = JSON.parse(readFileSync(join(root, 'data/cities/us/ca/berkeley/budget.json'), 'utf8'));
 const html = readFileSync(join(root, 'dist/us/ca/berkeley/ballot/index.html'), 'utf8');
-const strip = (h: string) => h.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ');
+const strip = (h: string) => unwrapFigures(h).replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ');
 const cards = [...html.matchAll(/<li class="card scenario"[^>]*data-outcome="(passes|fails)"[^>]*>([\s\S]*?)<\/li>\s*(?=<li class="card scenario"|<\/ul>)/g)].map((m) => ({
   outcome: m[1],
   html: m[2],
@@ -47,7 +48,7 @@ describe('ballot page (built)', () => {
         .replace(/>[^<]*</g, '><')
         .replace(/class="person on/g, 'class="person')
         // Chips keep their source ids: both outcomes cite the same documents, in the same places.
-        .replace(/data-source-chip="(S\d+)"/g, 'chip-$1');
+        .replace(/data-source-chip="([S\d ]+)"/g, 'chip-$1');
     expect(skeleton(cards[0].html)).toBe(skeleton(cards[1].html));
   });
 

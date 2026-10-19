@@ -12,8 +12,9 @@ import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
 import { CITY_PAGES } from '../lib/city-pages.ts';
 
-// A source chip, or a plain link to a source document (the Ballot page's "Read Measure V" links).
-const CHIP = /data-source-(?:chip|link)="(S\d+)"/g;
+// A source trigger (a quiet ⓘ, or a figure that opens its receipt), or a plain link to a source
+// document (the Ballot page's "Read Measure V" links). One trigger can name several sources: "S1 S12" (#29).
+const CHIP = /data-source-(?:chip|link)="(S\d+(?: S\d+)*)"/g;
 
 function htmlFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -44,7 +45,7 @@ export function buildUsage(dist: string) {
     const pages = [...htmlFiles(join(dist, cityPath)), ...(existsSync(join(dist, 'index.html')) ? [join(dist, 'index.html')] : [])];
     for (const file of pages) {
       const pagePath = '/' + relative(dist, file).split(sep).join('/').replace(/index\.html$/, '');
-      const ids = new Set([...readFileSync(file, 'utf8').matchAll(CHIP)].map((m) => m[1]));
+      const ids = new Set([...readFileSync(file, 'utf8').matchAll(CHIP)].flatMap((m) => m[1].split(' ')));
       for (const id of ids) {
         if (!usage[id]) throw new Error(`${pagePath}: chip for ${id}, which isn't in ${cityPath}'s sources`);
         usage[id].push({ path: pagePath, label: label(cityPath, pagePath) });

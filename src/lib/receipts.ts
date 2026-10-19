@@ -49,8 +49,6 @@ export interface SourceView {
   /** "PDF" or "Web page", from the URL. */
   format: string;
   host: string;
-  /** "S1 — Source 1: FY27-FY28 Budget Balancing Plan": the chip's accessible name, which starts with its visible label (WCAG 2.5.3). */
-  name: string;
   citation: string;
 }
 
@@ -73,6 +71,8 @@ export interface Receipt {
   parts?: { sign: '+' | '−'; label: string; value: string }[];
   /** "= $12,113 left over": the figure itself, closing the sum. */
   total?: string;
+  /** The other cites behind the same statement, each with its page and sentence if known (#29). */
+  also?: AlsoCite[];
   citation: string;
 }
 
@@ -112,7 +112,6 @@ export function sourceView(s: Source): SourceView {
     url: s.url,
     format: /\.pdf$/i.test(url.pathname) ? 'PDF' : 'Web page',
     host: url.hostname.replace(/^www\./, ''),
-    name: `${s.id} — Source ${s.number}: ${s.title}`,
     citation: `${by}. "${s.title}."${date ? ` ${date}.` : ''} ${s.url}`,
   };
 }
@@ -172,12 +171,38 @@ export interface At {
   quote?: string;
 }
 
-export function sourceReceipt(budget: CityBudget, id: SourceId, pageUrl: URL, at: At = {}): Receipt {
-  const view = sourcesById(budget).get(id);
+/** Another document (or another page of the same one) behind the same statement. */
+export interface AlsoCite {
+  source: SourceId;
+  page?: number;
+  quote?: string;
+}
+
+/**
+ * The receipt for a statement: its document, page and sentence. `also` adds the other
+ * documents or pages the same sentence rests on, so one trigger lists them all (#29).
+ */
+export function sourceReceipt(budget: CityBudget, id: SourceId, pageUrl: URL, at: At = {}, also: AlsoCite[] = []): Receipt {
+  const views = sourcesById(budget);
+  const view = views.get(id);
   if (!view) throw new Error(`unknown source ${id}`);
-  const where = at.page ? ` (p. ${at.page})` : '';
-  const said = at.quote ? `\n"${at.quote}"` : '';
-  return { kind: 'source', sources: [id], ...at, citation: `${view.citation}${where}.${said}\nVia ${SITE.name}, ${pageUrl.href}` };
+  const sources: SourceId[] = [id];
+  const more: AlsoCite[] = [];
+  for (const { source, page, quote } of also) {
+    if (!views.has(source)) throw new Error(`unknown source ${source}`);
+    if (!sources.includes(source)) sources.push(source);
+    if (source === id && page === at.page && quote === at.quote) continue;
+    if (source !== id || page || quote) more.push({ source, ...(page ? { page } : {}), ...(quote ? { quote } : {}) });
+  }
+  const cite = (c: { source: SourceId; page?: number; quote?: string }) =>
+    `${views.get(c.source)!.citation}${c.page ? ` (p. ${c.page})` : ''}.${c.quote ? `\n"${c.quote}"` : ''}`;
+  return {
+    kind: 'source',
+    sources,
+    ...at,
+    ...(more.length ? { also: more } : {}),
+    citation: `${cite({ source: id, ...at })}${more.map((c) => `\nAlso: ${cite(c)}`).join('')}\nVia ${SITE.name}, ${pageUrl.href}`,
+  };
 }
 
 /** PDF pages cited per source, from anything holding {source, page} (documentFacts, ballot.json): "1, 55, 96". */

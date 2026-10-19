@@ -4,7 +4,7 @@
  * from the first city's budget.json via headlines(); tests/dist checks each
  * one against an independent calculation.
  */
-import SourceChip from '../components/SourceChip.astro';
+import Sourced from '../components/Sourced.astro';
 import Waffle from '../components/Waffle.astro';
 import Base from '../layouts/Base.astro';
 import { budgetFor } from '../lib/budget';
@@ -25,7 +25,7 @@ const ballot = CITY_PAGES.some((p) => (p.slug as string) === 'ballot') ? { slug:
 const questions = [
   {
     q: 'Where does the money go?',
-    a: `Police and Fire are $${h.safetyPer100} of every $100.`,
+    a: ['Police and Fire are ', `$${h.safetyPer100}`, ' of every $100.'],
     figure: h.safety,
     href: city.path,
     page: 'Overview',
@@ -33,7 +33,7 @@ const questions = [
   },
   {
     q: 'Why is there a deficit?',
-    a: `A ${shortMoney(Math.abs(h.gap.value))} gap after adjustments.`,
+    a: ['A ', shortMoney(Math.abs(h.gap.value)), ' gap after adjustments.'],
     figure: h.gap,
     href: pageHref('gap'),
     page: 'The Gap',
@@ -41,7 +41,7 @@ const questions = [
   },
   {
     q: `What if Measure ${budget.documentFacts.salesTaxMeasure.letter}, the sales tax, passes?`,
-    a: `${h.positionsWithTax.value} positions cut instead of ${h.positionsWithoutTax}.`,
+    a: ['', `${h.positionsWithTax.value}`, ` positions cut instead of ${h.positionsWithoutTax}.`],
     figure: h.positionsWithTax,
     href: pageHref(ballot.slug),
     page: ballot.label,
@@ -50,7 +50,7 @@ const questions = [
   },
   {
     q: "Who's cutting what?",
-    a: `${shortMoney(h.cuts.value)} across ${h.departmentsCut} departments.`,
+    a: ['', shortMoney(h.cuts.value), ` across ${h.departmentsCut} departments.`],
     figure: h.cuts,
     href: pageHref('departments'),
     page: 'Departments',
@@ -74,8 +74,8 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     <div class="hero-copy">
       <h1>{city.name}'s costs keep growing faster than its income.</h1>
       <p class="lede">
-        This year that's a {shortMoney(Math.abs(h.gap.value))} gap <SourceChip city={city} figure={h.gap} />, closed with cuts, one-time money and,
-        if voters approve it, a sales tax.
+        This year that's a <Sourced city={city} figure={h.gap}>{shortMoney(Math.abs(h.gap.value))}</Sourced> gap, closed with cuts, one-time money
+        and, if voters approve it, a sales tax.
       </p>
       <p class="ctas">
         <a class="btn btn--bay" href={city.path}>Explore {city.name}'s budget <span aria-hidden="true">→</span></a>
@@ -106,8 +106,9 @@ const requestTemplate = `${SITE.repo}/issues/new`;
         questions.map((x) => (
           <li class={`card question question--${x.tone}`}>
             <h3>{x.q}</h3>
-            <p class="answer">{x.a}</p>
-            <SourceChip city={city} figure={x.figure} />
+            <p class="answer">
+              {x.a[0]}<Sourced city={city} figure={x.figure}>{x.a[1]}</Sourced>{x.a[2]}
+            </p>
             <a class="open" href={x.href}>
               Open {x.page} <span aria-hidden="true">→</span>
             </a>
@@ -149,8 +150,8 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     <div class="promise">
       <h2>Our promise</h2>
       <p>
-        We're independent and nonpartisan, and we don't take positions on ballot measures. Every figure links to the public document it
-        came from. When we find a mistake, we fix it in public.
+        We're independent and nonpartisan, and we don't take positions on ballot measures. Tap any number to see the page it came from.
+        When we find a mistake, we fix it in public.
       </p>
     </div>
   </section>
@@ -312,10 +313,6 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     margin: 0;
     color: var(--answer);
     font-weight: 700;
-  }
-  .question :global(.chips) {
-    margin-inline-start: 0;
-    align-self: flex-start;
   }
   .open {
     margin-top: auto;
