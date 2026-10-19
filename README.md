@@ -69,7 +69,7 @@ Describe what the City did in the City's terms. No adjectives on money ("proppin
 
 ## The overview page
 
-`/{city}/` shows where every $100 goes. Its figures come from `overview()` in `src/lib/overview.ts`; the interactive waffle is `src/components/Waffle.astro` (one Tab stop, arrow keys between squares, Enter or a tap pins an item; a bottom sheet on phones; "Show as a table" is the text alternative). It draws any list of `WaffleItem`s whose squares total 100: departments on the overview and homepage (`departmentItems()`), revenue groups first on the Revenue page (`revenuePage().chart`). Revenue groups are in `data/cities/{city}/revenue-groups.json`, checked to cover every revenue line exactly once. Figures the workbook states in sentences (the 8%/6.5% growth rates, the 0.5% sales tax, the $300M bond) are extracted into `budget.json` as `citedFacts`, each with its source.
+`/{city}/` shows where every $100 goes. Its figures come from `overview()` in `src/lib/overview.ts`; the interactive waffle is `src/components/Waffle.astro` (one Tab stop, arrow keys between squares, Enter or a tap pins an item; a bottom sheet on phones; "Show as a table" is the text alternative). It draws any list of `WaffleItem`s whose squares total 100: departments on the overview (`departmentItems()`), revenue groups first on the Revenue page (`revenuePage().chart`). Revenue groups are in `data/cities/{city}/revenue-groups.json`, checked to cover every revenue line exactly once. Figures the workbook states in sentences (the 8%/6.5% growth rates, the 0.5% sales tax, the $300M bond) are extracted into `budget.json` as `citedFacts`, each with its source.
 
 ## The ballot page
 
