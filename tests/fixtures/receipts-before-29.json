@@ -1,25 +1,11 @@
 {
  "/": [
-  "figure | $1,150,454 | Information Technology General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $1,289,953 | Office of Dir. of Police Accountability (ODPA) General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $106,198,574 | Police General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $13,233,201 | Parks, Recreation & Waterfront (PRW) General Fund baseline, FY2027 | S1 |  | ",
   "figure | $161,849,263 | Police and Fire department baselines, FY2027 | S1 |  | ",
-  "figure | $18,713,660 | City Manager's Office (CMO) General Fund baseline, FY2027 | S1 |  | ",
+  "figure | $283,764,035 | General Fund department baseline before proposed cuts, FY2027 (planning figure) | S1 |  | ",
   "figure | $29,251,348 | Proposed General Fund department cuts, FY2027, before the one-time bridge | S1 |  | ",
-  "figure | $3,666,161 | Planning & Development General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $3,929,199 | City Auditor General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $3,952,847 | City Clerk General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $37,548,665 | Health, Housing & Community Svcs (HHCS) General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $5,212,918 | Human Resources General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $55,650,689 | Fire General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $6,899,331 | Mayor & Council General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $600,000 | IT Cost Allocation Plan General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $7,696,001 | City Attorney General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $8,135,147 | Public Works General Fund baseline, FY2027 | S1 |  | ",
-  "figure | $9,887,235 | Finance General Fund baseline, FY2027 | S1 |  | ",
   "figure | 105 | Positions cut if the sales tax passes (138 if it fails) | S1 |  | ",
-  "figure | −$29,249,339 | FY2027 General Fund gap, after adjustments | S1 |  | "
+  "figure | −$29,249,339 | FY2027 General Fund gap, after adjustments | S1 |  | ",
+  "source |  |  | S7 |  | "
  ],
  "/us/ca/berkeley/": [
   "figure | $1,150,454 | Information Technology General Fund baseline, FY2027 | S1 |  | ",
