@@ -73,6 +73,11 @@ const name = fullNames(city.path, budgetFor(city)!);
     }
   </div>
 
+  <!-- Says the chart is interactive (#33): on a phone the squares look like a picture until touched. -->
+  <p class="caption">
+    <span class="caption--touch">Tap a square to see the department.</span><span class="caption--hover">Hover or click a square to see the department.</span>
+  </p>
+
   <details class="as-table">
     <summary>Show as a table</summary>
     <div class="table-scroll">
@@ -330,6 +335,23 @@ const name = fullNames(city.path, budgetFor(city)!);
     border-color: transparent;
   }
 
+  .caption {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .caption--hover {
+    display: none;
+  }
+  /* The same test the script uses to choose a tooltip over a bottom sheet. */
+  @media (hover: hover) and (min-width: 48rem) {
+    .caption--touch {
+      display: none;
+    }
+    .caption--hover {
+      display: inline;
+    }
+  }
   .as-table {
     margin-top: 1rem;
     font-size: 0.875rem;
