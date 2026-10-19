@@ -6,7 +6,7 @@ test.describe('landing page', () => {
   test('the header links to its sections and to Berkeley', async ({ page }) => {
     await page.goto('/');
     const nav = page.locator('nav.desktop');
-    for (const name of ['Cities', 'Our promise', 'Data']) await expect(nav.getByRole('link', { name })).toBeVisible();
+    for (const name of ['How it works', 'Cities', 'Our promise', 'Data']) await expect(nav.getByRole('link', { name })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Explore Berkeley →' })).toHaveAttribute('href', '/us/ca/berkeley/');
     await nav.getByRole('link', { name: 'Our promise' }).click();
     await expect(page.locator('#promise')).toBeInViewport();
@@ -30,20 +30,11 @@ test.describe('landing page', () => {
     }
   });
 
-  test('the gap in the subhead opens its receipt', async ({ page }) => {
+  test('the hero receipt card opens the full receipt for the gap', async ({ page }) => {
     await page.goto('/');
-    await page.locator('.lede [data-source-chip="S1"]').click();
+    await expect(page.locator('.receipt-figure')).toHaveText('−$29,249,339');
+    await page.locator('.receipt-card [data-source-chip="S1"]').click();
     await expect(page.locator('dialog[data-receipt-dialog] .figure')).toHaveText('−$29,249,339');
-  });
-
-  test('"Where every $100 goes" responds to hover and click, like the overview', async ({ page }) => {
-    await page.goto('/');
-    const card = page.locator('.city-card');
-    await card.locator('.sq[data-dept="police"]').first().hover();
-    await expect(card.locator('[data-panel="police"]')).toBeVisible();
-    await card.locator('.sq[data-dept="fire"]').first().click();
-    await expect(card.locator('[data-panel="fire"]')).toBeVisible();
-    await expect(card.getByRole('link', { name: 'Department details' }).filter({ visible: true })).toHaveAttribute('href', '/us/ca/berkeley/departments/#fire');
   });
 
   test('"Request your city" opens a prefilled GitHub request', async ({ page, context }) => {
@@ -60,21 +51,56 @@ test.describe('landing page', () => {
   });
 });
 
-test.describe('landing page on a phone', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-
-  test('at least 30% shorter than the 6.5 screens (5,499px) it was before #28', async ({ page }) => {
+// On desktop the receipt card floats over the waffle's bottom-right corner, as mocked (L1); the
+// legend must stay readable. Stacked layouts (below 1024px) may cover nothing at all.
+for (const [width, targets] of [
+  [390, '.mini-waffle .grid span, .mini-waffle .legend li'],
+  [768, '.mini-waffle .grid span, .mini-waffle .legend li'],
+  [1024, '.mini-waffle .legend li'],
+  [1280, '.mini-waffle .legend li'],
+  [1440, '.mini-waffle .legend li'],
+] as const) {
+  test(`at ${width}px the floating receipt covers no ${width < 1024 ? 'waffle square or ' : ''}legend entry`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
-    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(5499 * 0.7);
+    const covered = await page.evaluate((sel) => {
+      const card = document.querySelector('.receipt-card')!.getBoundingClientRect();
+      return [...document.querySelectorAll<HTMLElement>(sel)]
+        .filter((el) => {
+          // A legend row stretches the card's width; what must stay visible is its swatch and text.
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const r = range.getBoundingClientRect();
+          return r.left < card.right && card.left < r.right && r.top < card.bottom && card.top < r.bottom;
+        })
+        .map((el) => el.textContent?.trim() || el.dataset.dept);
+    }, targets);
+    expect(covered).toEqual([]);
   });
+}
 
-  test('a tap on a square opens its department as a bottom sheet', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('.city-card .sq[data-dept="prw"]').first().tap();
-    const tip = page.locator('.city-card [data-tip]');
-    await expect(tip).toHaveClass(/sheet/);
-    await expect(tip.locator('[data-panel="prw"]')).toBeVisible();
-    await expect(tip.getByRole('link', { name: 'Department details' }).filter({ visible: true })).toBeVisible();
-  });
+// #28, re-scoped: the static chart card opens the city overview; the receipt card on top of it still opens its own receipt.
+test('at 390px a tap on the homepage chart opens the Berkeley overview', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const page = await ctx.newPage();
+  await page.goto('/');
+  await page.locator('.receipt-card [data-source-chip="S1"]').tap();
+  await expect(page.locator('dialog[data-receipt-dialog]')).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/');
+  // Tap where the chart is drawn: the card's stretched link covers it, so that tap must follow the link.
+  const grid = (await page.locator('.city-card .grid').boundingBox())!;
+  await page.touchscreen.tap(grid.x + grid.width / 2, grid.y + grid.height / 3);
+  await expect(page).toHaveURL(/\/us\/ca\/berkeley\/$/);
+  await ctx.close();
+});
+
+test('the chart card is one Tab stop, named for the chart', async ({ page }) => {
+  await page.goto('/');
+  const link = page.getByRole('link', { name: 'Where every $100 goes' });
+  await expect(link).toHaveAttribute('href', '/us/ca/berkeley/');
+  await link.focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/us\/ca\/berkeley\/$/);
 });
