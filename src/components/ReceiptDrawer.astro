@@ -44,6 +44,7 @@ const data = {
 <script type="application/json" id="receipt-data" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
 
 <script>
+  import { openAt } from '../lib/open-at';
   import type { Receipt, SourceView } from '../lib/receipts';
 
   interface Data {
@@ -78,7 +79,7 @@ const data = {
       'li',
       {},
       h('span', { class: `mini mini--${s.type}` }, s.id),
-      h('a', { href: s.url, target: '_blank', rel: 'noopener' }, `${s.publisher}${s.date ? `, ${s.date}` : ''}: ${s.title}`),
+      h('a', { href: openAt(s, cites.find((c) => c.page)?.page).href, target: '_blank', rel: 'noopener' }, `${s.publisher}${s.date ? `, ${s.date}` : ''}: ${s.title}`),
       ...cites.flatMap((c) => [c.page ? ` (p. ${c.page})` : '', c.quote ? h('q', { class: 'quote quote--also' }, c.quote) : '']),
     );
   }
@@ -149,7 +150,7 @@ const data = {
       h(
         'p',
         { class: 'actions' },
-        h('a', { class: 'btn btn--primary', href: primary.url, target: '_blank', rel: 'noopener' }, primary.format === 'PDF' ? 'Open the PDF ↗' : 'Open the source ↗'),
+        (({ href, label }) => h('a', { class: 'btn btn--primary', href, target: '_blank', rel: 'noopener' }, label))(openAt(primary, r.page)),
         copy,
         r.csv ? h('a', { class: 'btn btn--ghost', href: r.csv, download: '' }, 'CSV') : null,
         copyStatus,
