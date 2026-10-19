@@ -4,20 +4,22 @@
  * from the first city's budget.json via headlines(); tests/dist checks each
  * one against an independent calculation.
  */
+import MiniWaffle from '../components/MiniWaffle.astro';
 import SourceChip from '../components/SourceChip.astro';
-import Waffle from '../components/Waffle.astro';
 import Base from '../layouts/Base.astro';
 import { budgetFor } from '../lib/budget';
 import { CITY_PAGES, cities } from '../lib/cities';
 import { familiesFor } from '../lib/families';
 import { shortMoney } from '../lib/format';
 import { headlines } from '../lib/headlines';
+import { formatValue, sourcesById } from '../lib/receipts';
 import { SITE } from '../lib/site';
 
 const city = cities[0];
 const budget = budgetFor(city)!;
 const families = familiesFor(city, budget);
 const h = headlines(budget, families);
+const s1 = sourcesById(budget).get(h.gap.ref.source)!;
 const pageHref = (slug: string) => `${city.path}${slug}/`;
 // The sales-tax question opens the Ballot page; a city without one falls back to The Gap, which also compares both outcomes.
 const ballot = CITY_PAGES.some((p) => (p.slug as string) === 'ballot') ? { slug: 'ballot', label: 'Ballot' } : { slug: 'gap', label: 'The Gap' };
@@ -65,6 +67,7 @@ const requestTemplate = `${SITE.repo}/issues/new`;
   dataCity={city}
   description={`Your city's budget, finally readable. Explore ${city.name}'s budget in minutes: where every $100 goes, why there's a gap, and who's being asked to cut. Every number links to the public document it came from.`}
   sections={[
+    { href: '#how', label: 'How it works' },
     { href: '#cities', label: 'Cities' },
     { href: '#promise', label: 'Our promise' },
     { href: `${city.path}sources/#downloads`, label: 'Data' },
@@ -72,34 +75,91 @@ const requestTemplate = `${SITE.repo}/issues/new`;
 >
   <section class="hero wrap">
     <div class="hero-copy">
-      <h1>{city.name}'s costs keep growing faster than its income.</h1>
+      <h1>Your city's budget, finally readable.</h1>
       <p class="lede">
-        This year that's a {shortMoney(Math.abs(h.gap.value))} gap <SourceChip city={city} figure={h.gap} />, closed with cuts, one-time money and,
-        if voters approve it, a sales tax.
+        {SITE.name} turns dense city budget documents into pages anyone can explore in a few minutes. Every number links back to the
+        document it came from.
       </p>
       <p class="ctas">
         <a class="btn btn--bay" href={city.path}>Explore {city.name}'s budget <span aria-hidden="true">→</span></a>
         <a class="btn btn--ghost" href="#request">Request your city</a>
       </p>
+      <p class="path">{SITE.domain} / {city.slug.country} / {city.slug.state} / {city.slug.city}</p>
     </div>
 
-    <div class="card city-card">
-      <h2 class="card-title">Where every $100 goes</h2>
-      <Waffle city={city} shares={h.shares} families={families} />
-      <ul class="legend">
-        {
-          families.list.map((f) => (
-            <li>
-              <span class="swatch" style={`background:${f.colors[0]}`} aria-hidden="true" />
-              {f.name}
-            </li>
-          ))
-        }
-      </ul>
+    <div class="hero-visual">
+      <div class="card city-card">
+        <p class="eyebrow">{city.name}, {city.stateCode} · FY2027</p>
+        <!-- The whole card opens the city's overview, where the chart can be tapped (#28). -->
+        <h2 class="card-title"><a class="card-link" href={city.path}>Where every $100 goes</a></h2>
+        <MiniWaffle shares={h.shares} families={families} cityName={city.name} />
+      </div>
+      <div class="card receipt-card">
+        <p class="eyebrow">Source receipt</p>
+        <p class="receipt-figure">{formatValue(h.gap.value)}</p>
+        <p class="receipt-label">FY2027 General Fund gap <SourceChip city={city} figure={h.gap} /></p>
+        <hr />
+        <p class="receipt-doc">{s1.title}</p>
+        <p class="receipt-meta">{s1.publisher} · {s1.date}</p>
+        <a class="btn btn--bay btn--small" href={s1.url} target="_blank" rel="noopener">Open the PDF <span aria-hidden="true">↗</span></a>
+      </div>
     </div>
   </section>
 
+  <section class="proof" aria-label="At a glance">
+    <div class="wrap proof-row">
+      <div>
+        <p class="stat num">{shortMoney(h.baseline.value)}</p>
+        <p class="stat-label">of {city.name} department spending, mapped <SourceChip city={city} figure={h.baseline} /></p>
+      </div>
+      <div>
+        <p class="stat num">{h.sourceCount}</p>
+        <p class="stat-label"><a href={`${city.path}sources/`}>public sources</a>, each one linked</p>
+      </div>
+      <div>
+        <p class="stat num">0</p>
+        <p class="stat-label">numbers without a receipt</p>
+      </div>
+      <div>
+        <p class="stat">No ads</p>
+        <p class="stat-label">and no position on how you vote</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="wrap section">
+    <p class="eyebrow">How it works</p>
+    <h2>From a 300-page PDF to a page you'll actually read. <SourceChip city={city} source="S7" /></h2>
+    <ol class="steps">
+      <li class="card">
+        <svg class="step-icon" width="30" height="38" viewBox="0 0 30 38" aria-hidden="true">
+          <rect x="1" y="1" width="28" height="36" rx="4" fill="none" stroke="var(--bay)" stroke-width="2"></rect>
+          <path d="M8 12h14M8 19h14M8 26h9" stroke="var(--bay)" stroke-width="2"></path>
+        </svg>
+        <h3>Start from the city's own documents</h3>
+        <p>Adopted budgets, mid-year reports and committee plans. City documents come first; news reports are for context and labeled that way.</p>
+      </li>
+      <li class="card">
+        <span class="step-icon chips-icon" aria-hidden="true"><span>S1</span><span>S2</span></span>
+        <h3>Keep the receipt</h3>
+        <p>Each figure carries a source chip. Tap it to see the document, its date, the exact table, and a link to the original.</p>
+      </li>
+      <li class="card">
+        <svg class="step-icon" width="30" height="30" viewBox="0 0 22 22" aria-hidden="true">
+          {
+            ['--family-people-1', '--family-people-1', '--family-people-1', '--family-people-2', '--family-people-2', '--family-people-3', '--family-people-3', '--family-people-4', '--red'].map((c, i) => (
+              <rect x={(i % 3) * 7.5} y={Math.floor(i / 3) * 7.5} width="6.5" height="6.5" rx="1.2" fill={`var(${c})`} />
+            ))
+          }
+        </svg>
+        <h3>Explore it your way</h3>
+        <p>Start with where every $100 goes, then follow your curiosity: revenue, the deficit, departments, the ballot.</p>
+      </li>
+    </ol>
+  </section>
+
   <section class="wrap section">
+    <p class="eyebrow">Built for the questions people actually ask</p>
     <h2>Ask {city.name}'s budget anything.</h2>
     <ul class="questions">
       {
@@ -118,6 +178,7 @@ const requestTemplate = `${SITE.repo}/issues/new`;
   </section>
 
   <section id="cities" class="wrap section">
+    <p class="eyebrow">Cities</p>
     <h2>Starting with {city.name}.</h2>
     <div class="cities">
       <a class="card city" href={city.path}>
@@ -147,16 +208,34 @@ const requestTemplate = `${SITE.repo}/issues/new`;
 
   <section id="promise" class="wrap section">
     <div class="promise">
-      <h2>Our promise</h2>
-      <p>
-        We're independent and nonpartisan, and we don't take positions on ballot measures. Every figure links to the public document it
-        came from. When we find a mistake, we fix it in public.
-      </p>
+      <div>
+        <h2>Our promise</h2>
+        <p>We're independent and nonpartisan. We don't take positions on ballot measures. When we find a mistake, we fix it in public.</p>
+      </div>
+      <ul>
+        {['Every figure links to a public document', 'Data and corrections published openly', 'Not affiliated with any government', 'No ads, no tracking for profit'].map((t) => (
+          <li>
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+              <circle cx="9" cy="9" r="9" fill="rgb(255 255 255 / 0.18)"></circle>
+              <path d="M5 9.2l2.6 2.6L13 6.4" fill="none" stroke="#fff" stroke-width="2"></path>
+            </svg>
+            {t}
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 </Base>
 
 <style>
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
   .btn {
     display: inline-flex;
     align-items: center;
@@ -200,17 +279,13 @@ const requestTemplate = `${SITE.repo}/issues/new`;
   /* Hero */
   .hero {
     display: grid;
-    gap: 2.5rem;
+    gap: 3rem;
     padding-block: clamp(2.5rem, 6vw, 4.5rem);
-  }
-  /* Grid items default to min-width: auto; the waffle must shrink with the column. */
-  .hero > * {
-    min-width: 0;
   }
   h1 {
     margin: 0;
-    font-size: clamp(2.25rem, 5.5vw, 3.75rem);
-    line-height: 1.1;
+    font-size: clamp(2.5rem, 6.5vw, 4.25rem);
+    line-height: 1.08;
   }
   .lede {
     max-width: 34rem;
@@ -225,43 +300,131 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     gap: 0.75rem;
     margin: 2rem 0 0;
   }
-  .city-card {
+  .path {
+    margin: 1.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+  .hero-visual {
+    position: relative;
     justify-self: center;
     width: 100%;
     max-width: 27rem;
+  }
+  .city-card {
+    position: relative;
     padding: 1.75rem;
+  }
+  .card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* Stretched over the card, so a tap anywhere on the chart follows the link. */
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .city-card:hover .card-link {
+    text-decoration: underline;
+  }
+  .card-link:focus-visible {
+    outline: none;
+  }
+  .city-card:has(.card-link:focus-visible) {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+  /* Until there's page margin to hang it in (1280px), the receipt card tucks over the city card's bottom padding, never the legend. */
+  @media (max-width: 79.99rem) {
+    .city-card {
+      padding-bottom: 5rem;
+    }
   }
   .card-title {
     margin: 0 0 1.25rem;
     font-size: 1.5rem;
   }
-  .legend {
-    display: grid;
-    gap: 0.375rem;
-    margin: 1.25rem 0 0;
-    padding: 0;
-    list-style: none;
+  .receipt-card {
+    position: relative;
+    width: min(18.75rem, 85%);
+    margin: -3.5rem 0 0 auto;
+    padding: 1.25rem 1.5rem 1.5rem;
+    border: 1px solid var(--rule);
+  }
+  .receipt-figure {
+    margin: 0;
+    color: var(--red);
+    font-weight: 800;
+    font-size: 1.625rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .receipt-label {
+    margin: 0.125rem 0 0;
+    color: var(--muted);
     font-size: 0.8125rem;
-    font-weight: 700;
   }
-  .legend li {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  .receipt-card hr {
+    margin: 1rem 0;
+    border: 0;
+    border-top: 1.5px dashed var(--rule);
   }
-  .swatch {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 2px;
+  .receipt-doc {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+  }
+  .receipt-meta {
+    margin: 0.25rem 0 0.875rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
   }
   @media (min-width: 64rem) {
     .hero {
       grid-template-columns: 1fr 26rem;
       align-items: start;
     }
-    .city-card {
+    .hero-visual {
       max-width: none;
     }
+  }
+  @media (min-width: 80rem) {
+    .receipt-card {
+      position: absolute;
+      /* Hang into the page margin as mocked, but never past the screen: at most the margin less 1rem. */
+      right: calc(-1 * min(5.5rem, max(var(--gutter), (100vw - var(--content-max)) / 2 + var(--gutter)) - 1rem));
+      bottom: -3.5rem;
+      margin: 0;
+    }
+  }
+
+  /* Proof strip */
+  .proof {
+    margin-top: 2rem;
+    background: #efeadf;
+  }
+  .proof-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.5rem 2rem;
+    padding-block: 2.5rem;
+  }
+  .stat {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    line-height: 1.1;
+  }
+  .stat-label {
+    margin: 0.375rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .stat-label a {
+    color: inherit;
   }
 
   /* Sections */
@@ -272,12 +435,51 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     margin: 0 0 2rem;
     font-size: clamp(1.75rem, 3.6vw, 2.375rem);
   }
+  .steps,
   .questions {
     display: grid;
     gap: 1.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+  .steps {
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    counter-reset: step;
+  }
+  .steps li {
+    padding: 1.75rem;
+    counter-increment: step;
+  }
+  .steps h3 {
+    margin: 1.5rem 0 0.75rem;
+    font-size: 1.25rem;
+  }
+  .steps h3::before {
+    content: counter(step) '. ';
+    color: var(--bay);
+  }
+  .steps p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+  .step-icon {
+    display: block;
+  }
+  .chips-icon {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .chips-icon span {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--bay);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 800;
+  }
+  .questions {
     grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   }
   .question {
@@ -420,6 +622,10 @@ const requestTemplate = `${SITE.repo}/issues/new`;
 
   /* Promise */
   .promise {
+    display: grid;
+    /* min(): an 18rem track is wider than the card's content box on a 320px phone. */
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: 1.5rem 3rem;
     padding: clamp(1.75rem, 4vw, 3rem);
     border-radius: 1.125rem;
     background: var(--bay);
@@ -430,9 +636,25 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     font-size: clamp(1.75rem, 3vw, 2.125rem);
   }
   .promise p {
-    max-width: 44rem;
     margin: 0.75rem 0 0;
     color: #d7e9e7;
     line-height: 1.6;
+  }
+  .promise ul {
+    display: grid;
+    gap: 0.875rem;
+    align-content: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 700;
+  }
+  .promise li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .promise svg {
+    flex: none;
   }
 </style>

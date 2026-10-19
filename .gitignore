@@ -7,5 +7,5 @@ node_modules/
 /test-results/
 /playwright-report/
 
-# Scratch scripts (screenshots, measurements) never belong in the repo.
+# Scratch scripts (screenshots, one-off checks): run, then delete; never commit.
 *.tmp.mjs

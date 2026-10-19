@@ -15,18 +15,12 @@ const millions = (n: number) => `$${(Math.abs(n) / 1e6).toFixed(1)}M`;
 describe('landing page numbers trace to the data', () => {
   const depts = b.departmentReductions.find((y) => y.year === 'FY2027')!.departments;
 
-  it('the headline and the gap in the subhead (#28)', () => {
-    const gap = b.deficitBridge.steps.find((s) => s.key === 'final-gap')!.fy2027;
-    expect(text).toContain("Berkeley's costs keep growing faster than its income.");
-    // The gap's chip sits right after it, so its label is in the text: "gap S1, closed".
-    expect(text).toContain(`This year that's a ${millions(gap)} gap S1, closed with cuts, one-time money and, if voters approve it, a sales tax.`);
+  it('department dollars mapped', () => {
+    expect(text).toContain(`${millions(depts.reduce((a, d) => a + d.baseline, 0))} of Berkeley department spending, mapped`);
   });
 
-  it('the cut sections stay cut: no stats strip, no How it works, no path line, no eyebrows (#28)', () => {
-    for (const gone of ['department spending, mapped', 'numbers without a receipt', 'How it works', 'Keep the receipt', 'wherethemoneywent.com / us', 'Free · Independent'])
-      expect(text).not.toContain(gone);
-    // The receipt drawer's own label is shared by every page; #32 handles it.
-    expect(html.replace(/<dialog[\s\S]*?<\/dialog>/g, '')).not.toContain('class="eyebrow"');
+  it('source count', () => {
+    expect(text).toMatch(new RegExp(`\\b${b.sources.length} public sources, each one linked`));
   });
 
   it('Police and Fire per $100, by largest remainder', () => {
@@ -41,6 +35,7 @@ describe('landing page numbers trace to the data', () => {
   it('the gap', () => {
     const gap = b.deficitBridge.steps.find((s) => s.key === 'final-gap')!.fy2027;
     expect(text).toContain(`A ${millions(gap)} gap after adjustments.`);
+    expect(text).toContain(`−$${Math.abs(gap).toLocaleString('en-US')}`);
   });
 
   it('positions cut with and without the sales tax', () => {
@@ -78,5 +73,22 @@ describe('landing page sharing and requests', () => {
   it('"Request your city" opens the request-a-city issue form', () => {
     expect(html).toMatch(/<form[^>]*action="https:\/\/github\.com\/JGailor\/public-budgets\/issues\/new"[^>]*method="get"/);
     expect(html).toContain('name="template" value="request-a-city.yml"');
+  });
+});
+
+// #28, re-scoped: main's homepage, minus one eyebrow, with the chart card linking to the city.
+describe('landing page, as re-scoped by Jeremy (#28)', () => {
+  it('drops the "Free · Independent · Every number sourced" eyebrow and keeps the rest of the hero', () => {
+    expect(text).not.toContain('Every number sourced');
+    expect(text).toContain("Your city's budget, finally readable.");
+    expect(text).toContain('numbers without a receipt');
+  });
+
+  it('the "Where every $100 goes" card links to the city overview, and its chart stays static', () => {
+    const card = html.match(/<div class="card city-card"[^>]*>([\s\S]*?)<div class="card receipt-card"/)![1];
+    expect(card).toMatch(/<a class="card-link"[^>]*href="\/us\/ca\/berkeley\/"[^>]*>Where every \$100 goes<\/a>/);
+    expect(card).not.toMatch(/<button/);
+    // Nothing on this page invites a tap on squares that can't be tapped (#33).
+    expect(text).not.toMatch(/Tap a square|Click a square/);
   });
 });
