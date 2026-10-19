@@ -57,6 +57,12 @@ Every figure on a page gets a chip that opens its receipt:
 - "Used on" is computed after the build from where each chip actually appears (`src/integrations/source-usage.ts` → `/{city}/data/source-usage.json`).
 - `/test/receipts/` exercises all of it for the browser tests; it isn't linked and isn't indexed.
 
+## Voice
+
+Describe what the City did in the City's terms. No adjectives on money ("propping up", "bloated", "slashing"): the City calls it stabilization, so we do too. Where a sentence names cuts, the revenue side is named in the same sentence or the next, as the City's own summary does ("ongoing cuts and new revenue"). Ballot copy describes both outcomes the same way and never argues for either.
+
+`tests/dist/neutral-voice.test.ts` fails the build if a loaded word from its denylist appears in any page's copy, accessible names or receipt text. It doesn't check quotations: a City document or news report is quoted as written. Add words to the list rather than exceptions to the test.
+
 ## The landing page
 
 `src/pages/index.astro` quotes the first city's headline figures, computed by `headlines()` in `src/lib/headlines.ts`; `tests/dist/landing.test.ts` recomputes each one independently from `budget.json`, and a unit test fails if any of them is typed into the page. Department families (for the waffle colors) are in `data/cities/{city}/families.json`, an editorial grouping that the build checks covers every department exactly once. The link-preview image is `public/og/wherethemoneywent.png`, made by `node scripts/og-image.ts`.

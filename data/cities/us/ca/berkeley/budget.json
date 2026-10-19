@@ -2412,12 +2412,17 @@
         ]
       },
       "final-gap": {
-        "text": "The gap left after every step: the number the City planned around. The City says it closed it with ongoing cuts of more than 10% of department budgets.",
+        "text": "The gap left after every step: the number the City planned around. The City says it closed it with ongoing cuts of more than 10% of department budgets. It says the underlying balance comes from lasting measures and new revenue.",
         "cites": [
           {
             "source": "S1",
             "page": 9,
             "quote": "The City closed the FY 27 and FY 28 structural deficits with more than 10 percent in ongoing reductions."
+          },
+          {
+            "source": "S1",
+            "page": 9,
+            "quote": "the underlying balance is achieved through durable, sustainable fiscal measures and new revenue."
           }
         ]
       }

@@ -28,7 +28,7 @@ describe('no eyebrows (#32)', () => {
   const facts: [string, RegExp][] = [
     [B, /<p class="sizes">\s*Berkeley's whole budget for fiscal year 2027 is/],
     [`${B}gap/`, /<h1>The \$29 million gap in FY2027, step by step<\/h1>/],
-    [`${B}gap/`, /<h2>The city plans to close it mostly with ongoing cuts of about 10%\.<\/h2>/],
+    [`${B}gap/`, /<h2>The city plans to close it with ongoing cuts, one-time money and, if voters approve it, new sales-tax revenue\.<\/h2>/],
     [`${B}revenue/`, /in General Fund revenue for FY2026/],
     [`${B}capital/`, /This page covers the program's FY2027-28 plan\./],
     [`${B}departments/`, /<h1>Who's being asked to cut in <span class="yr yr--fy2027"[^>]*>FY2027<\/span><span class="yr yr--fy2028"[^>]*>FY2028<\/span>, and by how much<\/h1>/],

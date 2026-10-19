@@ -18,7 +18,7 @@ describe('the waterfall', () => {
         'Initial estimate',
         'Revenue came in higher',
         '1947 Center St. debt service',
-        'Propping up parking funds',
+        'Support for parking funds',
         'Non-departmental costs',
         'Before one-time money',
         'One-time money',
@@ -51,7 +51,7 @@ describe('the waterfall', () => {
       'Initial estimate',
       'Revenue came in higher',
       '1947 Center St. debt service',
-      'Propping up parking funds',
+      'Support for parking funds',
       'Non-departmental costs',
     ]);
     const finalReceipt = figureReceipt(budget, city, final.figure, page);

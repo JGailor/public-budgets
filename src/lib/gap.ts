@@ -11,7 +11,8 @@ const LABELS: Record<string, string> = {
   'initial-estimate': 'Initial estimate',
   'revenue-projections': 'Revenue came in higher',
   'center-street-debt-service': '1947 Center St. debt service',
-  'parking-funds-stabilization': 'Propping up parking funds',
+  // The City's term is stabilization; "propping up" put an adjective on money (#34).
+  'parking-funds-stabilization': 'Support for parking funds',
   'non-departmental': 'Non-departmental costs',
   'before-one-time-resources': 'Before one-time money',
   'one-time-resources': 'One-time money',
