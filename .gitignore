@@ -6,3 +6,6 @@ node_modules/
 .DS_Store
 /test-results/
 /playwright-report/
+
+# Scratch scripts (screenshots, measurements) never belong in the repo.
+*.tmp.mjs
