@@ -204,15 +204,18 @@ test.describe('receipts on a phone', () => {
 test.describe('ballot outcomes on the overview (#23)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test('both outcome tiles, and their drawers, are colored the same way', async ({ page }) => {
+  // #31: card 3 says both counts in one sentence; the two figures look alike and open alike.
+  test('both outcome figures, and their drawers, are styled the same way', async ({ page }) => {
     await page.goto('/us/ca/berkeley/');
-    const tiles = page.locator('.tile--passes, .tile--fails');
-    await expect(tiles).toHaveCount(2);
-    const bg = await tiles.evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundColor));
-    expect(bg[0]).toBe(bg[1]);
+    const card = page.locator('.card', { has: page.getByRole('heading', { name: 'The sales-tax vote changes how deep the cuts go.' }) });
+    await expect(card.locator('.body')).toHaveText(/^\s*105 positions cut if Measure V passes, 138 if it fails\.\s*$/);
+    const figures = card.locator('.body button.sourced');
+    await expect(figures).toHaveCount(2);
+    const look = await figures.evaluateAll((els) => els.map((el) => { const s = getComputedStyle(el); return [s.color, s.fontWeight, s.textDecorationStyle, s.backgroundColor].join(); }));
+    expect(look[0]).toBe(look[1]);
 
-    const drawer = async (tile: string) => {
-      await page.locator(`${tile} [data-source-chip]`).first().click();
+    const drawer = async (i: number) => {
+      await figures.nth(i).click();
       const d = dialog(page);
       await expect(d).toBeVisible();
       const f = d.locator('.figure');
@@ -221,8 +224,8 @@ test.describe('ballot outcomes on the overview (#23)', () => {
       await expect(d).toBeHidden();
       return out;
     };
-    const passes = await drawer('.tile--passes');
-    const fails = await drawer('.tile--fails');
+    const passes = await drawer(0);
+    const fails = await drawer(1);
     expect(passes.cls).toBe('figure figure--neutral');
     expect(fails).toEqual(passes);
   });

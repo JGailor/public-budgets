@@ -215,7 +215,10 @@ const data = {
 
   const deepLink = new URLSearchParams(location.search).get('source')?.toUpperCase();
   if (deepLink && data.sourceReceipts[deepLink]) {
-    open(data.sourceReceipts[deepLink], document.querySelector<HTMLElement>(`[data-source-chip~="${deepLink}"]`));
+    const chip = document.querySelector<HTMLElement>(`[data-source-chip~="${deepLink}"]`);
+    // A trigger tucked in a closed Details (#31) can't take focus back when the drawer closes.
+    chip?.closest('details:not([open])')?.setAttribute('open', '');
+    open(data.sourceReceipts[deepLink], chip);
   }
 </script>
 

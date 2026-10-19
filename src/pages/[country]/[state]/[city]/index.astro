@@ -190,22 +190,11 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
 
       <li class="card">
         <p class="n n--ink">3</p>
-        <h2>You get a say in November.</h2>
+        <h2>The sales-tax vote changes how deep the cuts go.</h2>
         <p class="body">
-          Measure {o.ballot.salesTaxLetter} would add a <Sourced city={city} figure={o.ballot.salesTax}>{formatValue(o.ballot.salesTax.value, 'percent')}</Sourced>{' '}
-          sales tax. Measure {o.ballot.bondLetter} would let the City borrow <Sourced city={city} figure={o.ballot.bond}>{shortMoney(o.ballot.bond.value, 0)}</Sourced>{' '}
-          for repairs (a bond). The City's budget plan counts on the sales tax.
+          <Sourced city={city} figure={o.ballot.withTax}>{o.ballot.withTax.value}</Sourced> positions cut if Measure {o.ballot.salesTaxLetter} passes,{' '}
+          <Sourced city={city} figure={o.ballot.withoutTax}>{o.ballot.withoutTax.value}</Sourced> if it fails.
         </p>
-        <div class="tiles">
-          <div class="tile tile--passes">
-            <p class="tile-n num"><Sourced city={city} figure={o.ballot.withTax}>{o.ballot.withTax.value}</Sourced></p>
-            <p>positions cut if Measure {o.ballot.salesTaxLetter} passes</p>
-          </div>
-          <div class="tile tile--fails">
-            <p class="tile-n num"><Sourced city={city} figure={o.ballot.withoutTax}>{o.ballot.withoutTax.value}</Sourced></p>
-            <p>positions cut if Measure {o.ballot.salesTaxLetter} fails</p>
-          </div>
-        </div>
         <a class="more" href={`${city.path}${has('ballot') ? 'ballot' : 'gap'}/`}>Compare both outcomes <span aria-hidden="true">→</span></a>
       </li>
     </ol>
@@ -578,32 +567,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
   }
   .wf-label.one-time {
     color: #8a5f0b;
-  }
-  .tiles {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-  .tile {
-    padding: 0.875rem 1rem;
-    border-radius: 0.75rem;
-  }
-  .tile p {
-    margin: 0;
-    font-size: 0.8125rem;
-  }
-  .tile .tile-n {
-    font-weight: 800;
-    font-size: 1.75rem;
-  }
-  .tile :global(.chips) {
-    margin: 0.5rem 0 0;
-  }
-  /* Both outcomes look the same (#23): gold means one-time money and red means money short,
-     and neither is a ballot outcome. The Ballot page's scenario headers use the same pale teal. */
-  .tile--passes,
-  .tile--fails {
-    background: var(--bay-light);
   }
   .more {
     margin-top: auto;

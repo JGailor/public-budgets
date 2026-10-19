@@ -27,9 +27,10 @@ describe('ballot page (built)', () => {
     const wo = pos('without-sales-tax');
     expect([w.total, w.vacant, w.filled, fte('with-sales-tax')]).toEqual([105, 85, 20, '1,455']);
     expect([wo.total, wo.vacant, wo.filled, fte('without-sales-tax')]).toEqual([138, 100, 38, '1,422']);
-    expect(passes.text).toContain(`${w.total} positions eliminated ${w.vacant} vacant · ${w.filled} filled (layoffs)`);
+    // #31: the story's words: "105 positions cut, 20 people laid off".
+    expect(passes.text).toContain(`${w.total} positions cut ${w.vacant} vacant, ${w.filled} filled ${w.filled} people laid off`);
     expect(passes.text).toContain(`${fte('with-sales-tax')} FTE`);
-    expect(fails.text).toContain(`${wo.total} positions eliminated ${wo.vacant} vacant · ${wo.filled} filled (layoffs)`);
+    expect(fails.text).toContain(`${wo.total} positions cut ${wo.vacant} vacant, ${wo.filled} filled ${wo.filled} people laid off`);
     expect(fails.text).toContain(`${fte('without-sales-tax')} FTE`);
   });
 
@@ -64,13 +65,35 @@ describe('ballot page (built)', () => {
     }
   });
 
-  it('the nine-fire-positions caveat is on both cards, in the same words and place', () => {
+  it('the nine-fire-positions caveat is said once, under both cards, since it applies to both alike (#31)', () => {
     const caveat = 'At adoption, the Council was reported to have restored nine fire positions; the counts shown are from the April 16 plan.';
-    for (const c of cards) {
-      expect(c.text).toContain(caveat);
-      expect(c.text.indexOf(caveat)).toBeGreaterThan(c.text.indexOf('positions eliminated'));
-      expect(c.text.indexOf(caveat)).toBeLessThan(c.text.indexOf('People laid off'));
-    }
+    for (const c of cards) expect(c.text).not.toContain('nine fire positions');
+    const t = strip(html);
+    expect(t.split(caveat)).toHaveLength(2);
+    const after = html.slice(html.lastIndexOf('<li class="card scenario"'));
+    expect(strip(after.slice(after.indexOf('</ul>'), after.indexOf('The two measures')))).toContain(caveat);
+  });
+
+  it('leads with the outcomes: both cards come before the measures (#31)', () => {
+    expect(html.indexOf('class="card scenario"')).toBeLessThan(html.indexOf('class="card measure"'));
+    expect(html.indexOf('<h1')).toBeLessThan(html.indexOf('class="card scenario"'));
+  });
+
+  it("each measure is one heading and one line, and every mechanic sits behind its Details (#31)", () => {
+    const section = html.slice(html.indexOf('<section class="measures-section"'), html.indexOf('</section>', html.indexOf('<section class="measures-section"')));
+    const measures = section.split('<li class="card measure"').slice(1).map((m) => m.slice(m.indexOf('>') + 1));
+    expect(measures).toHaveLength(2);
+    const outside = measures.map((m) => strip(m.replace(/<details[\s\S]*<\/details>/, '')).trim());
+    const inside = measures.map((m) => strip(m.match(/<details[\s\S]*<\/details>/)![0]));
+    const d = b.documentFacts;
+    expect(outside[0]).toBe(`Measure ${d.salesTaxMeasure.letter} · Simple majority A 0.5% sales tax for any city purpose. The City estimates it would raise $9–10M a year.`);
+    expect(outside[1]).toBe(`Measure ${d.bondMeasure.letter} · Two-thirds vote A $300M bond for streets, buildings and parks. It doesn't change this year's gap.`);
+    for (const m of measures) expect(m).not.toMatch(/<details[^>]*\bopen\b/);
+    expect(inside[0]).toMatch(/^ ?Details on Measure V Official title: .* 10\.75%\. It would start April 1, 2027 .* Read Measure V Full text/);
+    expect(inside[1]).toMatch(/^ ?Details on Measure U Official title: .* \$22\.14 a year .* at least every three years\. .* \$2\.12B.* Read Measure U Full text/);
+    // Same parts in the same order on both cards: kicker, heading, line, Details (title, mechanics, documents).
+    const parts = (m: string) => [...m.matchAll(/<(p|h3|details|summary|nav)\b[^>]*class="([^"]*)"|<(h3|details|summary)>/g)].map((x) => (x[1] ?? x[3]) + (x[2] ? `.${x[2].split(' ')[0]}` : ''));
+    expect(parts(measures[0]).slice(0, 5)).toEqual(parts(measures[1]).slice(0, 5));
   });
 
   it('names the measures by letter, with the City Attorney and adoption figures', () => {

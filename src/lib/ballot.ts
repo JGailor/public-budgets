@@ -54,18 +54,18 @@ export function ballotFileFor(cityPath: string): BallotFile {
   return f;
 }
 
-/** Heading and per-outcome result marks, from the measures' status. `measure` is "Measure V", or "The sales tax" before it has a letter. */
-export function ballotState(file: BallotFile, measure = 'The sales tax') {
+/** Heading and per-outcome result marks, from the measures' status. `measure` is "Measure V", or "the sales tax" before it has a letter. */
+export function ballotState(file: BallotFile, measure = 'the sales tax') {
   const status = file.measures.salesTax.status;
   const result: Outcome | null = status === 'passed' ? 'passes' : status === 'failed' ? 'fails' : null;
   return {
     decided: result !== null,
     result,
     eyebrow: result ? 'Election results' : new Date(`${file.election}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
-    heading: result ? `${measure} ${status}. Here's what the city's plan says happens now.` : 'On your ballot, and what it changes',
+    heading: result ? `${measure.charAt(0).toUpperCase()}${measure.slice(1)} ${status}. Here's what the city's plan says happens now.` : `What changes if ${measure} passes or fails`,
     lede: result
       ? "The city's plan was built in two versions, one for each result. This is the one that now applies, with the other kept for comparison."
-      : "Two city measures affect the budget. We don't take a side. This page shows what the city's own plan says happens under each result.",
+      : "The City built its FY27-28 budget in two versions, one for each result. We don't take a side.",
     bond: file.measures.bond.status,
   };
 }
@@ -137,7 +137,6 @@ export function ballotPage(b: CityBudget, file: BallotFile, short: Record<string
         figure: { value: f.fy2027NetFte, label: `City workforce (FTE) after FY2027 cuts if the sales tax ${word}`, ref: f, format: 'number', tone: 'neutral' } satisfies Figure,
       },
       rows: file.rows.map((r) => ({ key: r.key, label: r.label, ...r[outcome] })),
-      caveat: file.countsCaveat,
     };
   };
   const scenarios = [scenario('passes'), scenario('fails')];
@@ -174,6 +173,8 @@ export function ballotPage(b: CityBudget, file: BallotFile, short: Record<string
       backlog: { value: b.citedFacts.backlog.low, label: 'Unfunded infrastructure and deferred maintenance, earlier City estimate (low end)', ref: b.citedFacts.backlog, tone: 'neutral' } satisfies Figure,
     },
     scenarios,
+    /** True of both outcomes' counts alike, so the page says it once, under both. */
+    countsCaveat: file.countsCaveat,
     /** Same scale for both pictograms: the larger layoff count, rounded up to a full row of 20. */
     pictogramSlots: Math.ceil(Math.max(...scenarios.map((s) => s.positions.filled)) / 20) * 20,
     softened: softened.map((d) => short[d.id] ?? d.name),
