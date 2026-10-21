@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "workbook": {
     "file": "source/Berkeley_Budget_FY25-FY28.xlsx",
-    "sha256": "81c2fbcb5574f3b555228ef4bb32981adf59a0e1a10c46071afc30d6d1b5c858"
+    "sha256": "944ea34b26979ee07bfdbe67a00d2ccf1ae1e9c6d48d591dedd6ed0526fb8f77"
   },
   "notes": {
     "coverage": "FY2025–FY2028",
@@ -1710,7 +1710,7 @@
     },
     {
       "term": "Enterprise Fund",
-      "definition": "A fund for a service expected to pay for itself through its own fees/charges (e.g., Marina berths, parking). When it can't, it leans on the General Fund.",
+      "definition": "A fund for a service expected to pay for itself through its own fees/charges (e.g., Marina berths, parking). When it can't, the General Fund covers the difference.",
       "table": "Glossary",
       "row": 14
     },
@@ -2412,12 +2412,17 @@
         ]
       },
       "final-gap": {
-        "text": "The gap left after every step: the number the City planned around. The City says it closed it with ongoing cuts of more than 10% of department budgets.",
+        "text": "The gap left after every step: the number the City planned around. The City says it closed it with ongoing cuts of more than 10% of department budgets. It says the underlying balance comes from lasting measures and new revenue.",
         "cites": [
           {
             "source": "S1",
             "page": 9,
             "quote": "The City closed the FY 27 and FY 28 structural deficits with more than 10 percent in ongoing reductions."
+          },
+          {
+            "source": "S1",
+            "page": 9,
+            "quote": "the underlying balance is achieved through durable, sustainable fiscal measures and new revenue."
           }
         ]
       }
