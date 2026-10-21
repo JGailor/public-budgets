@@ -75,3 +75,20 @@ describe('landing page sharing and requests', () => {
     expect(html).toContain('name="template" value="request-a-city.yml"');
   });
 });
+
+// #28, re-scoped: main's homepage, minus one eyebrow, with the chart card linking to the city.
+describe('landing page, as re-scoped by Jeremy (#28)', () => {
+  it('drops the "Free · Independent · Every number sourced" eyebrow and keeps the rest of the hero', () => {
+    expect(text).not.toContain('Every number sourced');
+    expect(text).toContain("Your city's budget, finally readable.");
+    expect(text).toContain('numbers without a receipt');
+  });
+
+  it('the "Where every $100 goes" card links to the city overview, and its chart stays static', () => {
+    const card = html.match(/<div class="card city-card"[^>]*>([\s\S]*?)<div class="card receipt-card"/)![1];
+    expect(card).toMatch(/<a class="card-link"[^>]*href="\/us\/ca\/berkeley\/"[^>]*>Where every \$100 goes<\/a>/);
+    expect(card).not.toMatch(/<button/);
+    // Nothing on this page invites a tap on squares that can't be tapped (#33).
+    expect(text).not.toMatch(/Tap a square|Click a square/);
+  });
+});

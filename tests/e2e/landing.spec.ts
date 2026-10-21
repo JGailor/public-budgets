@@ -79,3 +79,28 @@ for (const [width, targets] of [
     expect(covered).toEqual([]);
   });
 }
+
+// #28, re-scoped: the static chart card opens the city overview; the receipt card on top of it still opens its own receipt.
+test('at 390px a tap on the homepage chart opens the Berkeley overview', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const page = await ctx.newPage();
+  await page.goto('/');
+  await page.locator('.receipt-card [data-source-chip="S1"]').tap();
+  await expect(page.locator('dialog[data-receipt-dialog]')).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/');
+  // Tap where the chart is drawn: the card's stretched link covers it, so that tap must follow the link.
+  const grid = (await page.locator('.city-card .grid').boundingBox())!;
+  await page.touchscreen.tap(grid.x + grid.width / 2, grid.y + grid.height / 3);
+  await expect(page).toHaveURL(/\/us\/ca\/berkeley\/$/);
+  await ctx.close();
+});
+
+test('the chart card is one Tab stop, named for the chart', async ({ page }) => {
+  await page.goto('/');
+  const link = page.getByRole('link', { name: 'Where every $100 goes' });
+  await expect(link).toHaveAttribute('href', '/us/ca/berkeley/');
+  await link.focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/us\/ca\/berkeley\/$/);
+});

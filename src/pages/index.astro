@@ -75,7 +75,6 @@ const requestTemplate = `${SITE.repo}/issues/new`;
 >
   <section class="hero wrap">
     <div class="hero-copy">
-      <p class="eyebrow">Free · Independent · Every number sourced</p>
       <h1>Your city's budget, finally readable.</h1>
       <p class="lede">
         {SITE.name} turns dense city budget documents into pages anyone can explore in a few minutes. Every number links back to the
@@ -91,7 +90,8 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     <div class="hero-visual">
       <div class="card city-card">
         <p class="eyebrow">{city.name}, {city.stateCode} · FY2027</p>
-        <h2 class="card-title">Where every $100 goes</h2>
+        <!-- The whole card opens the city's overview, where the chart can be tapped (#28). -->
+        <h2 class="card-title"><a class="card-link" href={city.path}>Where every $100 goes</a></h2>
         <MiniWaffle shares={h.shares} families={families} cityName={city.name} />
       </div>
       <div class="card receipt-card">
@@ -313,7 +313,29 @@ const requestTemplate = `${SITE.repo}/issues/new`;
     max-width: 27rem;
   }
   .city-card {
+    position: relative;
     padding: 1.75rem;
+  }
+  .card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* Stretched over the card, so a tap anywhere on the chart follows the link. */
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .city-card:hover .card-link {
+    text-decoration: underline;
+  }
+  .card-link:focus-visible {
+    outline: none;
+  }
+  .city-card:has(.card-link:focus-visible) {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
   }
   /* Until there's page margin to hang it in (1280px), the receipt card tucks over the city card's bottom padding, never the legend. */
   @media (max-width: 79.99rem) {
