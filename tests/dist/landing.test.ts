@@ -49,8 +49,10 @@ describe('landing page numbers trace to the data', () => {
     expect(text).toContain(`${millions(cut.reduce((a, d) => a + d.reduction, 0))} across ${cut.length} departments.`);
   });
 
-  it('every one of those figures has a source chip', () => {
-    expect((html.match(/data-source-chip=/g) ?? []).length).toBeGreaterThanOrEqual(7);
+  it('every one of those figures opens its receipt', () => {
+    const figures = [...html.matchAll(/<button type="button" class="sourced[^"]*"[^>]*data-receipt[^>]*>([^<]*)</g)].map((m) => m[1].trim());
+    // The floating receipt card's gap, the mapped baseline, then the four answers: Police and Fire per $100, the gap, positions, cuts.
+    expect(figures).toEqual(['−$29,249,339', '$283.8M', '$57', '$29.2M', '105', '$29.3M']);
   });
 });
 

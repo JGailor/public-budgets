@@ -9,7 +9,8 @@ import type { StepNote } from '../data/types';
 import type { City } from '../lib/cities';
 import SourceChip from './SourceChip.astro';
 
-type Props = { city: City; id: string; label: string; note: StepNote; part: 'button' | 'panel' };
+/** Without a `note`, the panel shows its slot instead: prose with its own figures and receipts (#33). */
+type Props = { city: City; id: string; label: string; note?: StepNote; part: 'button' | 'panel' };
 
 const { city, id, label, note, part } = Astro.props;
 ---
@@ -26,10 +27,14 @@ const { city, id, label, note, part } = Astro.props;
     </button>
   ) : (
     <div class="info-panel" id={id} hidden data-info-panel>
-      <p>
-        {note.text}
-        <SourceChip city={city} source={note.cites[0].source} at={note.cites[0]} also={note.cites.slice(1)} />
-      </p>
+      {note ? (
+        <p>
+          {note.text}
+          <SourceChip city={city} source={note.cites[0].source} at={note.cites[0]} also={note.cites.slice(1)} />
+        </p>
+      ) : (
+        <slot />
+      )}
     </div>
   )
 }

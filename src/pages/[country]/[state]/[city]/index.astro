@@ -39,25 +39,10 @@ const wf = (() => {
     return { ...w, y: 14 + Math.min(-from, -to) * scale, h: Math.max(Math.abs(to - from) * scale, 3) };
   });
 })();
-
-// Compounding chart geometry.
-const series = o.growth.series;
-const top = Math.ceil(series.at(-1)!.spending / 50) * 50;
-const X = (year: number) => 40 + (year / (series.length - 1)) * 470;
-const Y = (v: number) => 230 - ((v - 100) / (top - 100)) * 200;
-const line = (k: 'spending' | 'revenue') => series.map((p, i) => `${i ? 'L' : 'M'}${X(p.year).toFixed(1)} ${Y(p[k]).toFixed(1)}`).join(' ');
-const gapArea = `${line('spending')} ${[...series].reverse().map((p) => `L${X(p.year).toFixed(1)} ${Y(p.revenue).toFixed(1)}`).join(' ')} Z`;
-const last = series.at(-1)!;
-const ticks = [100, 150, 200, 250, 300].filter((v) => v <= top);
-const xTicks = [0, Math.floor((series.length - 1) / 2), series.length - 1];
-const labelYear = Math.round((series.length - 1) * 0.8);
-const gapLabelY = (Y(series[labelYear].spending) + Y(series[labelYear].revenue)) / 2 + 4;
 const rate = (r: number) => `${(r * 100).toLocaleString('en-US')}%`;
 const g = o.growth.cited;
 const numberWords: Record<number, string> = { 10: 'ten' };
-const pointsWords: Record<number, string> = { 1.5: 'One and a half' };
-const diff = Math.round((g.spendingRate - g.revenueRate) * 1000) / 10;
-const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
+
 ---
 
 <Base title={`${city.name}, ${city.stateCode}`} city={city} description={`Where every $100 of ${city.name}'s budget goes, and why there's a gap. Every number links to the public document it came from.`}>
@@ -65,14 +50,20 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     <div class="hero-copy">
       <h1>Where every $100 of {city.name}'s budget goes.</h1>
       <p class="lede">
-        {city.name}'s whole budget for fiscal year 2027 is <Sourced city={city} figure={o.size.allFunds}>{shortMoney(o.size.allFunds.value)}</Sourced>. Most of it
-        is set aside for specific uses, like sewers, parking or grants. The <Sourced city={city} figure={o.size.generalFund}
-          >{shortMoney(o.size.generalFund.value)}</Sourced
-        >{' '}
-        <Term city={city} name="General Fund (GF)">General Fund</Term> is the part the Council can spend on anything. This chart shows the{' '}
-        <Sourced city={city} figure={o.baseline}>{shortMoney(o.baseline.value)}</Sourced> of it planned for departments, before cuts. Each square is one dollar
-        out of every hundred. <span class="hover-hint">Hover a square to see the department.</span><span class="tap-hint">Tap a square.</span>
+        Each square is $1 of every $100 the City plans to spend on departments this year.
+        <StepInfo city={city} id="lede-sizes" label="the City plans to spend on departments" part="button" />
       </p>
+      <!-- #33: the three sizes, a tap away. Each keeps its receipt, and no difference between them is computed. -->
+      <StepInfo city={city} id="lede-sizes" label="the City plans to spend on departments" part="panel">
+        <p class="sizes">
+          {city.name}'s whole budget for fiscal year 2027 is <Sourced city={city} figure={o.size.allFunds}>{shortMoney(o.size.allFunds.value)}</Sourced>. Most
+          of it is set aside for specific uses, like sewers, parking or grants. The <Sourced city={city} figure={o.size.generalFund}
+            >{shortMoney(o.size.generalFund.value)}</Sourced
+          >{' '}
+          <Term city={city} name="General Fund (GF)">General Fund</Term> is the part the Council can spend on anything. The chart shows the{' '}
+          <Sourced city={city} figure={o.baseline}>{shortMoney(o.baseline.value)}</Sourced> of it planned for departments, before cuts.
+        </p>
+      </StepInfo>
       <!-- Phones: the tour sits above the waffle, which fills a screen (#24). Wide screens show the copy in .hero-more. -->
       <p class="ctas ctas--narrow">
         <a class="btn btn--ink" href="#three-things">Start the 3-minute tour <span aria-hidden="true">→</span></a>
@@ -198,59 +189,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     </ol>
   </section>
 
-  <section class="wrap section compounded">
-    <div>
-      <h2>Small differences, compounded.</h2>
-      <p class="body">
-        City staff say spending grew about <Sourced city={city} figure={o.growth.figure}>{rate(g.spendingRate)}</Sourced> a year over {numberWords[g.years] ?? g.years} years while revenue
-        grew about {rate(g.revenueRate)}. {pointsText} points doesn't sound like much. Compounded over a decade, it adds up to a <Term city={city} name="Structural deficit">structural deficit</Term>.
-      </p>
-      <p class="illustration-note">
-        Illustration: lines show the cited average rates applied to 100, not actual yearly figures. Year-by-year spending for FY22–FY25 isn't in the
-        sources.
-      </p>
-    </div>
-    <svg class="growth" viewBox="0 0 640 270" role="img" aria-label={`Illustration: starting from 100, spending growing ${rate(o.growth.cited.spendingRate)} a year reaches ${Math.round(last.spending)} after ${last.year} years; revenue growing ${rate(o.growth.cited.revenueRate)} reaches ${Math.round(last.revenue)}.`}>
-      {
-        ticks.map((v) => (
-          <g>
-            <line x1="40" x2="510" y1={Y(v)} y2={Y(v)} stroke="var(--rule)" />
-            <text x="32" y={Y(v) + 4} text-anchor="end" class="axis">{v}</text>
-          </g>
-        ))
-      }
-      <path d={gapArea} fill="var(--red-light)" opacity="0.8"></path>
-      <path d={line('revenue')} fill="none" stroke="var(--bay)" stroke-width="3"></path>
-      <path d={line('spending')} fill="none" stroke="var(--red)" stroke-width="3"></path>
-      <text x={X(last.year) + 8} y={Y(last.spending) + 4} class="end end--spending">Spending {Math.round(last.spending)}</text>
-      <text x={X(last.year) + 8} y={Y(last.revenue) + 4} class="end end--revenue">Revenue {Math.round(last.revenue)}</text>
-      <text x={X(labelYear)} y={gapLabelY} class="gap-label" text-anchor="middle">the gap</text>
-      {
-        xTicks.map((y) => (
-          <text x={X(y)} y="256" text-anchor="middle" class="axis">
-            Year {y}
-          </text>
-        ))
-      }
-    </svg>
-  </section>
-
-  <section class="wrap section">
-    <div class="trust">
-      <div>
-        <h2>Don't take our word for it.</h2>
-        <p>
-          Tap any number to see the exact city document, the date, and the table it came from, with a link to the original.
-        </p>
-      </div>
-      <div>
-        <p class="counts">
-          {o.sourceIds.length} sources: {o.sourceCounts.city} city documents, {o.sourceCounts.news} news reports
-        </p>
-        <a class="btn btn--light" href={`${city.path}sources/`}>Browse all sources</a>
-      </div>
-    </div>
-  </section>
 </Base>
 
 <style>
@@ -278,10 +216,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     border: 1px solid var(--rule);
     background: var(--card);
     color: var(--ink);
-  }
-  .btn--light {
-    background: #fff;
-    color: var(--bay);
   }
 
   /* Hero */
@@ -318,16 +252,12 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     font-size: 1.125rem;
     line-height: 1.6;
   }
-  .tap-hint {
-    display: none;
+  .hero-copy :global(#lede-sizes:not([hidden])) {
+    max-width: 32rem;
+    margin-top: 0.75rem;
   }
-  @media (hover: none) {
-    .hover-hint {
-      display: none;
-    }
-    .tap-hint {
-      display: inline;
-    }
+  .sizes {
+    margin: 0;
   }
   .stats {
     display: grid;
@@ -563,78 +493,5 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     font-weight: 800;
     font-size: 0.9375rem;
     text-decoration: none;
-  }
-
-  /* Small differences, compounded */
-  .compounded {
-    display: grid;
-    gap: 2rem;
-  }
-  .compounded h2 {
-    margin: 0 0 1rem;
-    font-size: clamp(1.75rem, 3.5vw, 2.375rem);
-  }
-  .illustration-note {
-    margin: 1.5rem 0 0;
-    padding: 0.875rem 1rem;
-    border-radius: 0.5rem;
-    background: var(--gold-light);
-    color: #5c4210;
-    font-size: 0.875rem;
-  }
-  .growth {
-    width: 100%;
-    overflow: visible;
-  }
-  .axis {
-    font: 600 11px var(--font-sans);
-    fill: var(--muted);
-  }
-  .end {
-    font: 800 13px var(--font-sans);
-  }
-  .end--spending {
-    fill: var(--red);
-  }
-  .end--revenue {
-    fill: var(--bay);
-  }
-  .gap-label {
-    font: italic 14px var(--font-serif);
-    fill: var(--red);
-  }
-  @media (min-width: 64rem) {
-    .compounded {
-      grid-template-columns: 1fr 1.2fr;
-      align-items: center;
-    }
-  }
-
-  /* Trust block */
-  .trust {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-    gap: 1.5rem 3rem;
-    align-items: center;
-    padding: clamp(1.75rem, 4vw, 2.75rem);
-    border-radius: 1.125rem;
-    background: var(--bay);
-    color: #fff;
-  }
-  .trust h2 {
-    margin: 0;
-    font-size: clamp(1.75rem, 3vw, 2.125rem);
-  }
-  .trust p {
-    margin: 0.75rem 0 0;
-    color: #d7e9e7;
-    line-height: 1.6;
-  }
-  .counts {
-    font-weight: 700;
-    font-size: 0.875rem;
-  }
-  .trust .btn {
-    margin-top: 1rem;
   }
 </style>

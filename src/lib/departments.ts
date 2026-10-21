@@ -8,14 +8,33 @@ import type { Families } from './families.ts';
 import type { Figure } from './receipts.ts';
 import { per100 } from './waffle.ts';
 
-const displayFiles = import.meta.glob<{ shortNames: Record<string, string> }>('/data/cities/*/*/*/departments.json', { eager: true, import: 'default' });
+const displayFiles = import.meta.glob<{ shortNames: Record<string, string>; fullNames?: Record<string, string> }>('/data/cities/*/*/*/departments.json', {
+  eager: true,
+  import: 'default',
+});
 
-/** Short display names (e.g. "Police Accountability"); every key must be a department in the budget. */
-export function shortNames(cityPath: string, b: CityBudget): Record<string, string> {
-  const names = displayFiles[`/data/cities${cityPath}departments.json`]?.shortNames ?? {};
+function names(cityPath: string, b: CityBudget, key: 'shortNames' | 'fullNames'): Record<string, string> {
+  const names = displayFiles[`/data/cities${cityPath}departments.json`]?.[key] ?? {};
   const ids = new Set(b.departmentReductions[0].departments.map((d) => d.id));
   for (const id of Object.keys(names)) if (!ids.has(id)) throw new Error(`${cityPath}departments.json: "${id}" isn't a department`);
   return names;
+}
+
+/** Short display names (e.g. "Police Accountability"); every key must be a department in the budget. */
+export function shortNames(cityPath: string, b: CityBudget): Record<string, string> {
+  return names(cityPath, b, 'shortNames');
+}
+
+/**
+ * Every department's name spelled out (#33): "Health, Housing & Community Services", not the budget's
+ * "Health, Housing & Community Svcs (HHCS)". Throws if a name would still carry an abbreviation.
+ */
+export function fullNames(cityPath: string, b: CityBudget): Record<string, string> {
+  const spelled = names(cityPath, b, 'fullNames');
+  const out = Object.fromEntries(b.departmentReductions[0].departments.map((d) => [d.id, spelled[d.id] ?? d.name]));
+  for (const [id, n] of Object.entries(out))
+    if (/\(|\b(Dir|Svcs|Rec|Dept)\.?\b/.test(n)) throw new Error(`${cityPath}departments.json: "${id}" needs a fullNames entry; "${n}" is abbreviated`);
+  return out;
 }
 
 export const YEARS = ['fy2027', 'fy2028'] as const;

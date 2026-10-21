@@ -37,7 +37,7 @@ describe('no eyebrows (#32)', () => {
   // Each fact an eyebrow carried, now in a heading or a first sentence.
   const B = '/us/ca/berkeley/';
   const facts: [string, RegExp][] = [
-    [B, /<p class="lede">\s*Berkeley's whole budget for fiscal year 2027 is/],
+    [B, /<p class="sizes">\s*Berkeley's whole budget for fiscal year 2027 is/],
     [`${B}gap/`, /<h1>The \$29 million gap in FY2027, step by step<\/h1>/],
     [`${B}gap/`, /<h2>The city plans to close it mostly with ongoing cuts of about 10%\.<\/h2>/],
     [`${B}revenue/`, /in General Fund revenue for FY2026/],
