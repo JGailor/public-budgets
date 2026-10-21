@@ -63,10 +63,9 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
 <Base title={`${city.name}, ${city.stateCode}`} city={city} description={`Where every $100 of ${city.name}'s budget goes, and why there's a gap. Every number links to the public document it came from.`}>
   <section class="hero wrap">
     <div class="hero-copy">
-      <p class="eyebrow">{city.government} · General Fund · Fiscal Year 2027</p>
       <h1>Where every $100 of {city.name}'s budget goes.</h1>
       <p class="lede">
-        {city.name}'s whole budget this year is <Sourced city={city} figure={o.size.allFunds}>{shortMoney(o.size.allFunds.value)}</Sourced>. Most of it
+        {city.name}'s whole budget for fiscal year 2027 is <Sourced city={city} figure={o.size.allFunds}>{shortMoney(o.size.allFunds.value)}</Sourced>. Most of it
         is set aside for specific uses, like sewers, parking or grants. The <Sourced city={city} figure={o.size.generalFund}
           >{shortMoney(o.size.generalFund.value)}</Sourced
         >{' '}
@@ -124,7 +123,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
   </section>
 
   <section id="three-things" class="wrap section">
-    <p class="eyebrow">Three things to know</p>
     <ol class="things">
       <li class="card">
         <p class="n n--bay">1</p>
@@ -202,7 +200,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
 
   <section class="wrap section compounded">
     <div>
-      <p class="eyebrow">Why the gap keeps coming back</p>
       <h2>Small differences, compounded.</h2>
       <p class="body">
         City staff say spending grew about <Sourced city={city} figure={o.growth.figure}>{rate(g.spendingRate)}</Sourced> a year over {numberWords[g.years] ?? g.years} years while revenue
@@ -257,14 +254,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
 </Base>
 
 <style>
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
   .card {
     background: var(--card);
     border-radius: 0.875rem;

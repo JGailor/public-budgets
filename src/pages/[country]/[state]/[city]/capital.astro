@@ -33,11 +33,10 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
 <Base title={`Capital · ${city.name}`} city={city} description={`${city.name}'s ${shortMoney(c.total.value)} two-year capital program, where its money comes from, and the repair backlog it's up against.`}>
   <div class="cap-page wrap">
     <section class="intro">
-      <p class="eyebrow">Capital program · FY2027-28</p>
       <h1>Fixing what the city owns</h1>
       <p class="lede">
         Streets, sewers, parks and buildings are paid for from a separate capital program, mostly with restricted money that can't be moved to cover
-        the operating gap.
+        the operating gap. This page covers the program's FY2027-28 plan.
       </p>
     </section>
 
@@ -111,14 +110,6 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
 </Base>
 
 <style>
-  .eyebrow {
-    margin: 0 0 0.75rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
   .intro {
     padding-block: clamp(2rem, 5vw, 3.5rem) 1.5rem;
   }

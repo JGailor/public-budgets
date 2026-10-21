@@ -54,6 +54,8 @@ export function ballotFileFor(cityPath: string): BallotFile {
   return f;
 }
 
+const longDate = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+
 /** Heading and per-outcome result marks, from the measures' status. `measure` is "Measure V", or "the sales tax" before it has a letter. */
 export function ballotState(file: BallotFile, measure = 'the sales tax') {
   const status = file.measures.salesTax.status;
@@ -61,11 +63,10 @@ export function ballotState(file: BallotFile, measure = 'the sales tax') {
   return {
     decided: result !== null,
     result,
-    eyebrow: result ? 'Election results' : new Date(`${file.election}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
     heading: result ? `${measure.charAt(0).toUpperCase()}${measure.slice(1)} ${status}. Here's what the city's plan says happens now.` : `What changes if ${measure} passes or fails`,
     lede: result
       ? "The city's plan was built in two versions, one for each result. This is the one that now applies, with the other kept for comparison."
-      : "The City built its FY27-28 budget in two versions, one for each result. We don't take a side.",
+      : `The election is ${longDate(file.election)}. The City built its FY27-28 budget in two versions, one for each result. We don't take a side.`,
     bond: file.measures.bond.status,
   };
 }

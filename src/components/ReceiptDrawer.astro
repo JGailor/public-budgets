@@ -31,7 +31,6 @@ const data = {
   <div class="receipt-body">
     <div class="grabber" aria-hidden="true"></div>
     <div class="top">
-      <p class="eyebrow" id="receipt-heading">Source receipt</p>
       <button type="button" class="close" data-close aria-label="Close receipt">
         <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
           <path d="M4 4l12 12M16 4 4 16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
@@ -117,7 +116,8 @@ const data = {
         h('span', { class: `badge badge--${primary.type}` }, primary.badge),
         h('span', { class: 'badge badge--publisher' }, primary.publisher),
       ),
-      h('h2', { class: 'doc-title' }, primary.title),
+      // The dialog is named by the document it shows (#32: no "Source receipt" eyebrow).
+      h('h2', { class: 'doc-title', id: 'receipt-heading' }, primary.title),
       h('p', { class: 'doc-meta' }, [primary.committee, primary.date].filter(Boolean).join(' · ')),
       h(
         'dl',
@@ -271,16 +271,8 @@ const data = {
   .top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: 0.75rem;
-  }
-  .eyebrow {
-    margin: 0;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
   }
   .close {
     display: grid;

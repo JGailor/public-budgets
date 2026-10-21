@@ -49,7 +49,7 @@ test('the mechanics sit behind Details, closed until asked', async ({ page }) =>
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(PAGE);
   for (const [letter, hidden] of [['V', 'April 1, 2027'], ['U', '$22.14']]) {
-    const details = page.locator('.measure', { hasText: `Measure ${letter} ·` }).locator('details');
+    const details = page.locator('.measure', { hasText: `Measure ${letter}:` }).locator('details');
     await expect(details.getByText(hidden)).toBeHidden();
     await expect(details.getByRole('navigation')).toBeHidden();
     await details.locator('summary').click();

@@ -86,12 +86,12 @@ describe('ballot page (built)', () => {
     const outside = measures.map((m) => strip(m.replace(/<details[\s\S]*<\/details>/, '')).trim());
     const inside = measures.map((m) => strip(m.match(/<details[\s\S]*<\/details>/)![0]));
     const d = b.documentFacts;
-    expect(outside[0]).toBe(`Measure ${d.salesTaxMeasure.letter} · Simple majority A 0.5% sales tax for any city purpose. The City estimates it would raise $9–10M a year.`);
-    expect(outside[1]).toBe(`Measure ${d.bondMeasure.letter} · Two-thirds vote A $300M bond for streets, buildings and parks. It doesn't change this year's gap.`);
+    expect(outside[0]).toBe(`Measure ${d.salesTaxMeasure.letter}: a 0.5% sales tax for any city purpose. It needs a simple majority to pass. The City estimates it would raise $9–10M a year.`);
+    expect(outside[1]).toBe(`Measure ${d.bondMeasure.letter}: a $300M bond for streets, buildings and parks. It needs a two-thirds vote to pass. It doesn't change this year's gap.`);
     for (const m of measures) expect(m).not.toMatch(/<details[^>]*\bopen\b/);
     expect(inside[0]).toMatch(/^ ?Details on Measure V Official title: .* 10\.75%\. It would start April 1, 2027 .* Read Measure V Full text/);
     expect(inside[1]).toMatch(/^ ?Details on Measure U Official title: .* \$22\.14 a year .* at least every three years\. .* \$2\.12B.* Read Measure U Full text/);
-    // Same parts in the same order on both cards: kicker, heading, line, Details (title, mechanics, documents).
+    // Same parts in the same order on both cards: heading, line, Details (title, mechanics, documents).
     const parts = (m: string) => [...m.matchAll(/<(p|h3|details|summary|nav)\b[^>]*class="([^"]*)"|<(h3|details|summary)>/g)].map((x) => (x[1] ?? x[3]) + (x[2] ? `.${x[2].split(' ')[0]}` : ''));
     expect(parts(measures[0]).slice(0, 5)).toEqual(parts(measures[1]).slice(0, 5));
   });
@@ -99,15 +99,17 @@ describe('ballot page (built)', () => {
   it('names the measures by letter, with the City Attorney and adoption figures', () => {
     const t = strip(html);
     const d = b.documentFacts;
-    expect(t).toContain(`Measure ${d.salesTaxMeasure.letter} · Simple majority`);
-    expect(t).toContain(`Measure ${d.bondMeasure.letter} · Two-thirds vote`);
+    expect(t).toContain(`Measure ${d.salesTaxMeasure.letter}: a 0.5% sales tax for any city purpose. It needs a simple majority to pass.`);
+    expect(t).toContain(`Measure ${d.bondMeasure.letter}: a $300M bond for streets, buildings and parks. It needs a two-thirds vote to pass.`);
     expect(t).toContain('The City estimates it would raise $9–10M a year');
     expect(t).toContain('It would start April 1, 2027 and last until ended by the voters.');
     expect(t).toContain(`about $${d.bondCost.perHundredK.toFixed(2)} a year per $100,000 of assessed value on average over ${d.bondCost.years} years`);
     expect(t).toContain(`Its highest rate would be about $${d.bondPeak.perHundredK}, from ${d.bondPeak.from}.`);
     expect(t).toContain('at least every three years');
     expect(t).toContain(`unfunded capital and maintenance need at $${+(d.capitalNeed.amount / 1e9).toFixed(2)}B`);
-    expect(t).toContain(`If Measure ${d.salesTaxMeasure.letter}, the sales tax…`);
+    expect(t).toContain('The election is November 3, 2026.');
+    // #32: real headings, not "If Measure V, the sales tax… / …passes / …fails".
+    expect(cards.map((c) => c.html.match(/<h2 class="scenario-h"[^>]*>([^<]*)/)![1].trim())).toEqual([`If Measure ${d.salesTaxMeasure.letter} passes`, `If Measure ${d.salesTaxMeasure.letter} fails`]);
   });
 
   it('each measure card shows its official title and links its City documents, in the same form', () => {
