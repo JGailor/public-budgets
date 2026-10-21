@@ -27,10 +27,8 @@ const { city, id, label, note, part } = Astro.props;
   ) : (
     <div class="info-panel" id={id} hidden data-info-panel>
       <p>
-        {note.text}{' '}
-        {note.cites.map((c) => (
-          <SourceChip city={city} source={c.source} at={c} />
-        ))}
+        {note.text}
+        <SourceChip city={city} source={note.cites[0].source} at={note.cites[0]} also={note.cites.slice(1)} />
       </p>
     </div>
   )

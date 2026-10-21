@@ -29,7 +29,7 @@ for (const width of [390, 1440]) {
 
     test('an open receipt', async ({ page }) => {
       await page.goto('/test/receipts/');
-      await page.locator('[data-figure="liability"] [data-source-chip="S17"]').click();
+      await page.locator('[data-figure="liability"] [data-source-chip]').click();
       await expect(page.locator('dialog[data-receipt-dialog]')).toBeVisible();
       expect(await violations(page)).toEqual([]);
     });

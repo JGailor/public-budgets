@@ -8,6 +8,7 @@
  */
 import { basename } from 'node:path';
 import SourceChip from '../../../../components/SourceChip.astro';
+import Sourced from '../../../../components/Sourced.astro';
 import Base from '../../../../layouts/Base.astro';
 import { csvTables } from '../../../../data/csv';
 import { budgetFor } from '../../../../lib/budget';
@@ -122,47 +123,61 @@ const humanize = (name: string) =>
         <ul class="gaps">
           <li class="gap card">
             <h3>Two different FY2020 spending figures</h3>
-            <p>The FY20-21 adopted budget says $191.2M; city staff cite ~$236M from a later actuals baseline. We show both and say which is which.</p>
-            <p class="chips-row"><SourceChip city={city} source="S7" /><SourceChip city={city} source="S11" /></p>
+            <p>
+              The FY20-21 adopted budget says <Sourced city={city} source="S7">$191.2M</Sourced>; city staff cite <Sourced city={city} source="S11">~$236M</Sourced>{' '}
+              from a later actuals baseline. We show both and say which is which.
+            </p>
           </li>
           <li class="gap card">
             <h3>No year-by-year spending for FY22-FY25</h3>
-            <p>The gathered sources don't publish these years separately. Charts leave a visible gap rather than drawing a line through it.</p>
-            <p class="chips-row"><SourceChip city={city} source="S12" /></p>
+            <p>
+              The gathered sources don't publish these years separately. Charts leave a visible gap rather than drawing a line through it.<SourceChip
+                city={city}
+                source="S12"
+              />
+            </p>
           </li>
           <li class="gap card">
             <h3>Revenue and departments are different years</h3>
-            <p>Revenue is FY2026 adopted; department figures are the FY2027 baseline. No clean FY25-26 department table was published.</p>
-            <p class="chips-row"><SourceChip city={city} source="S1" /><SourceChip city={city} source="S2" /></p>
+            <p>
+              Revenue is FY2026 adopted; department figures are the FY2027 baseline. No clean FY25-26 department table was published.<SourceChip
+                city={city}
+                source="S1"
+                also={[{ source: 'S2' }]}
+              />
+            </p>
           </li>
           <li class="gap card" data-gap="liabilities">
             <h3>Unfunded liabilities aren't comparable</h3>
             <p>
               {`${shortMoney(liability('FY2012').amount, 0)} (${fy('FY2012')}), ${shortMoney(liability('FY2021').amount, 0)} (${fy('FY2021')}), ~${shortMoney(liability('Recent').amount, 0)} (2026)`}{' '}
-              use different assumptions. Treat the trend as directional.
+              use different assumptions. Treat the trend as directional.<SourceChip city={city} source="S8" also={[{ source: 'S12' }, { source: 'S17' }]} />
             </p>
-            <p class="chips-row"><SourceChip city={city} source="S8" /><SourceChip city={city} source="S12" /><SourceChip city={city} source="S17" /></p>
           </li>
           <li class="gap card" data-gap="adoption">
             <h3>Adopted with amendments not yet in City records</h3>
             <p>
               The Council adopted the budget on {adoptedOn} "as amended by subsequent Council action". A Council supplemental proposed restoring nine fire positions, and reporting says the Council funded
-              them. Until the minutes are posted, position and workforce counts are from the April 16 plan.
+              them. Until the minutes are posted, position and workforce counts are from the April 16 plan.<SourceChip
+                city={city}
+                source={adoption.source}
+                at={adoption}
+                also={[{ source: 'S23' }, { source: 'S24' }]}
+              />
             </p>
-            <p class="chips-row"><SourceChip city={city} source={adoption.source} at={adoption} /><SourceChip city={city} source="S23" /><SourceChip city={city} source="S24" /></p>
           </li>
           <li class="gap card" data-gap="capital-total">
             <h3>Two capital program totals</h3>
             <p>
-              The May proposal's presentation lists {shortMoney(workbookProgram.total)} for FY27-28; the adoption report's table by funding source
-              totals {shortMoney(program.total.total)}, with a few more funds and revised amounts. The Capital page uses the adoption report.
+              The May proposal's presentation lists <Sourced city={city} source={workbookProgram.source}>{shortMoney(workbookProgram.total)}</Sourced> for
+              FY27-28; the adoption report's table by funding source totals <Sourced city={city} source={program.source} at={program}
+                >{shortMoney(program.total.total)}</Sourced
+              >, with a few more funds and revised amounts. The Capital page uses the adoption report.
             </p>
-            <p class="chips-row"><SourceChip city={city} source={workbookProgram.source} /><SourceChip city={city} source={program.source} at={program} /></p>
           </li>
           <li class="gap card" data-gap="it-allocation">
             <h3>Department totals differ by {shortMoney(itAllocation.baseline)}</h3>
-            <p>The comparison table leaves out the {itAllocation.name}. Totals reconcile once it's added back.</p>
-            <p class="chips-row"><SourceChip city={city} source="S1" /></p>
+            <p>The comparison table leaves out the {itAllocation.name}. Totals reconcile once it's added back.<SourceChip city={city} source="S1" /></p>
           </li>
         </ul>
 
@@ -416,13 +431,6 @@ const humanize = (name: string) =>
     margin: 0.5rem 0 0;
     color: var(--muted);
     font-size: 0.875rem;
-  }
-  .chips-row {
-    display: flex;
-    gap: 0.25rem;
-  }
-  .chips-row :global(.chips) {
-    margin: 0;
   }
   .methods {
     margin-top: 1rem;

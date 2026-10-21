@@ -34,9 +34,9 @@ test.describe('the Gap page', () => {
     await expect(page.locator('[data-year="fy2027"] .step--final .bar')).toHaveCSS('outline-style', 'solid');
   });
 
-  test('a step chip opens its receipt, with how a subtotal is built', async ({ page }) => {
+  test("a step's value opens its receipt, with how a subtotal is built (#29)", async ({ page }) => {
     await page.goto(PAGE);
-    await page.locator('[data-year="fy2027"] .step--subtotal .chip-cell [data-source-chip]').click();
+    await page.locator('[data-year="fy2027"] .step--subtotal .value').getByRole('button', { name: /^−\$31\.3M, source: / }).click();
     const d = page.locator('dialog[data-receipt-dialog]');
     await expect(d.locator('.figure')).toHaveText('−$31,349,339');
     await expect(d.locator('.facts')).toContainText('Deficit Bridge FY27-28, row 11');

@@ -9,7 +9,7 @@
  * The grid is one Tab stop; arrow keys move square by square.
  * "Show as a table" is the text alternative.
  */
-import SourceChip from './SourceChip.astro';
+import Sourced from './Sourced.astro';
 import type { DepartmentReduction } from '../data/types';
 import type { City } from '../lib/cities';
 import type { Families } from '../lib/families';
@@ -62,8 +62,9 @@ const byId = new Map(shares.map((s) => [s.item.id, s]));
             <span class="num">{per100Label(s)}</span> <span class="of">of every $100</span>
           </p>
           <p class="panel-meta">
-            {shortMoney(s.item.baseline)} FY27 baseline · {shortMoney(s.item.reduction)} proposed cut
-            <SourceChip city={city} figure={{ value: s.item.baseline, label: `${s.item.name} General Fund baseline, FY2027`, ref: s.item }} />
+            <Sourced city={city} figure={{ value: s.item.baseline, label: `${s.item.name} General Fund baseline, FY2027`, ref: s.item }}>
+              {shortMoney(s.item.baseline)}
+            </Sourced> FY27 baseline · {shortMoney(s.item.reduction)} proposed cut
           </p>
           <a class="panel-link" href={`${city.path}departments/#${s.item.id}`}>
             Department details <span aria-hidden="true">→</span>

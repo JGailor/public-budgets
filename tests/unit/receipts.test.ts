@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CityBudget } from '../../src/data/types';
 import { buildUsage, fillPlaceholders } from '../../src/integrations/source-usage';
+import { sourceList } from '../../src/lib/receipt-target';
 import { budgetFor } from '../../src/lib/budget';
 import { cities } from '../../src/lib/cities';
 import { figureReceipt, formatValue, longDate, sourceReceipt, sourcesById, type Figure } from '../../src/lib/receipts';
@@ -31,9 +32,9 @@ describe('formatting', () => {
 describe('sources', () => {
   const views = sourcesById(budget);
 
-  it('names a chip after its document', () => {
+  it('describes a document for the drawer', () => {
     expect(views.get('S1')).toMatchObject({
-      name: 'S1 — Source 1: FY27-FY28 Budget Balancing Plan',
+      title: 'FY27-FY28 Budget Balancing Plan',
       badge: 'Primary source',
       committee: 'Budget & Finance Committee',
       date: 'April 16, 2026',
@@ -116,6 +117,29 @@ describe('figure receipts', () => {
   it('gives a whole-document receipt for a deep link', () => {
     expect(sourceReceipt(budget, 'S2', page)).toMatchObject({ kind: 'source', sources: ['S2'] });
   });
+
+  // #29: one trigger per statement, so a statement resting on several cites carries them all.
+  it('keeps every other cite of a statement, with its page and sentence', () => {
+    const r = sourceReceipt(budget, 'S1', page, { page: 7, quote: 'A' }, [
+      { source: 'S1', page: 9, quote: 'B' },
+      { source: 'S20', page: 55 },
+      { source: 'S1', page: 7, quote: 'A' }, // the primary again: dropped
+    ]);
+    expect(r.sources).toEqual(['S1', 'S20']);
+    expect(r.also).toEqual([
+      { source: 'S1', page: 9, quote: 'B' },
+      { source: 'S20', page: 55 },
+    ]);
+    expect(r.citation).toMatch(/\(p\. 7\)\.\n"A"\nAlso: .*\(p\. 9\)\.\n"B"\nAlso: .*\(p\. 55\)\./);
+    expect(() => sourceReceipt(budget, 'S1', page, {}, [{ source: 'S99' as never }])).toThrow(/unknown source S99/);
+    expect(sourceReceipt(budget, 'S1', page)).not.toHaveProperty('also');
+  });
+
+  it('lists document names the way a sentence would', () => {
+    expect(sourceList(['A'])).toBe('A');
+    expect(sourceList(['A', 'B'])).toBe('A and B');
+    expect(sourceList(['A', 'B', 'C'])).toBe('A, B and C');
+  });
 });
 
 describe('"Used on" index', () => {
@@ -128,7 +152,8 @@ describe('"Used on" index', () => {
     const sources = (budget as CityBudget).sources.map((s) => ({ id: s.id }));
     write('us/ca/berkeley/data/budget.json', JSON.stringify({ sources }));
     write('us/ca/berkeley/index.html', '<button data-source-chip="S1">S1</button>');
-    write('us/ca/berkeley/gap/index.html', '<button data-source-chip="S1"></button><button data-source-chip="S1"></button><button data-source-chip="S15"></button>');
+    // A trigger naming several sources counts for each of them (#29).
+    write('us/ca/berkeley/gap/index.html', '<button data-source-chip="S1"></button><button data-source-chip="S1 S15"></button>');
     write('us/ca/berkeley/sources/index.html', 'no chips here');
     write('test/receipts/index.html', '<button data-source-chip="S2"></button>'); // outside the city: ignored
 

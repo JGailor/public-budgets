@@ -5,7 +5,7 @@
  * src/lib/capital.ts; the treemap is laid out at build time, once for a wide
  * box and once for a tall (phone) one, and CSS picks the layout.
  */
-import SourceChip from '../../../../components/SourceChip.astro';
+import Sourced from '../../../../components/Sourced.astro';
 import Base from '../../../../layouts/Base.astro';
 import { budgetFor } from '../../../../lib/budget';
 import { capitalGroupsFor, capitalPage, type Block } from '../../../../lib/capital';
@@ -37,7 +37,7 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
       <h1>Fixing what the city owns</h1>
       <p class="lede">
         Streets, sewers, parks and buildings are paid for from a separate capital program, mostly with restricted money that can't be moved to cover
-        the operating gap. <SourceChip city={city} figure={c.total.figure} />
+        the operating gap.
       </p>
     </section>
 
@@ -46,7 +46,7 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
       <div class="scale">
         <div class="scale-row">
           <span class="bar bar--program" style={`width:${pct(c.scale.program)}`}></span>
-          <span class="scale-label program-label">{shortMoney(c.total.value)} planned FY27-28 <SourceChip city={city} figure={c.total.figure} /></span>
+          <span class="scale-label program-label"><Sourced city={city} figure={c.total.figure}>{shortMoney(c.total.value)}</Sourced> planned FY27-28</span>
         </div>
         <div class="scale-row">
           <span class="bar bar--need" style={`width:${pct(c.scale.need)}`}>
@@ -54,10 +54,10 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
           </span>
         </div>
         <p class="scale-key">
-          The City's FY2027–31 capital plan puts the need at {billion(c.need.value)} <SourceChip city={city} figure={c.need.figure} />, and expects it to grow
-          about {Math.round(c.need.growth * 100)}% a year. <SourceChip city={city} source={c.need.growthCite.source} at={c.need.growthCite} /> An earlier City
-          estimate was {billions(bl.low, bl.high)}, counting {bl.sidewalkMiles} miles of sidewalk, {bl.parks} parks and {bl.buildings} buildings.
-          <SourceChip city={city} figure={c.backlog.figure} />
+          The City's FY2027–31 capital plan puts the need at <Sourced city={city} figure={c.need.figure}>{billion(c.need.value)}</Sourced>, and expects it to
+          grow about <Sourced city={city} source={c.need.growthCite.source} at={c.need.growthCite}>{Math.round(c.need.growth * 100)}%</Sourced> a year. An earlier
+          City estimate was <Sourced city={city} figure={c.backlog.figure}>{billions(bl.low, bl.high)}</Sourced>, counting {bl.sidewalkMiles} miles of
+          sidewalk, {bl.parks} parks and {bl.buildings} buildings.
         </p>
       </div>
     </section>
@@ -102,8 +102,8 @@ const parts = (b: Block) => (b.lines.length > 1 ? b.lines.map((l) => `${l.name.r
       <p class="gf-note">
         <span class="sw" style={`background:${c.generalFund.color}`} aria-hidden="true"></span>
         <span>
-          Only the red block comes from the General Fund ({shortMoney(c.generalFund.value)}), the same money facing the {shortMoney(c.gap.value, 0)} gap.
-          <SourceChip city={city} figure={c.generalFund.figure} />
+          Only the red block comes from the General Fund (<Sourced city={city} figure={c.generalFund.figure}>{shortMoney(c.generalFund.value)}</Sourced>), the
+          same money facing the {shortMoney(c.gap.value, 0)} gap.
         </span>
       </p>
     </section>

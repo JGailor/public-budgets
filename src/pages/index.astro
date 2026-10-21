@@ -6,6 +6,7 @@
  */
 import MiniWaffle from '../components/MiniWaffle.astro';
 import SourceChip from '../components/SourceChip.astro';
+import Sourced from '../components/Sourced.astro';
 import Base from '../layouts/Base.astro';
 import { budgetFor } from '../lib/budget';
 import { CITY_PAGES, cities } from '../lib/cities';
@@ -27,7 +28,8 @@ const ballot = CITY_PAGES.some((p) => (p.slug as string) === 'ballot') ? { slug:
 const questions = [
   {
     q: 'Where does the money go?',
-    a: `Police and Fire are $${h.safetyPer100} of every $100.`,
+    // [before, the figure, after]: the figure is its own receipt (#29).
+    a: ['Police and Fire are ', `$${h.safetyPer100}`, ' of every $100.'],
     figure: h.safety,
     href: city.path,
     page: 'Overview',
@@ -35,7 +37,7 @@ const questions = [
   },
   {
     q: 'Why is there a deficit?',
-    a: `A ${shortMoney(Math.abs(h.gap.value))} gap after adjustments.`,
+    a: ['A ', shortMoney(Math.abs(h.gap.value)), ' gap after adjustments.'],
     figure: h.gap,
     href: pageHref('gap'),
     page: 'The Gap',
@@ -43,7 +45,7 @@ const questions = [
   },
   {
     q: `What if Measure ${budget.documentFacts.salesTaxMeasure.letter}, the sales tax, passes?`,
-    a: `${h.positionsWithTax.value} positions cut instead of ${h.positionsWithoutTax}.`,
+    a: ['', `${h.positionsWithTax.value}`, ` positions cut instead of ${h.positionsWithoutTax}.`],
     figure: h.positionsWithTax,
     href: pageHref(ballot.slug),
     page: ballot.label,
@@ -52,7 +54,7 @@ const questions = [
   },
   {
     q: "Who's cutting what?",
-    a: `${shortMoney(h.cuts.value)} across ${h.departmentsCut} departments.`,
+    a: ['', shortMoney(h.cuts.value), ` across ${h.departmentsCut} departments.`],
     figure: h.cuts,
     href: pageHref('departments'),
     page: 'Departments',
@@ -96,8 +98,8 @@ const requestTemplate = `${SITE.repo}/issues/new`;
       </div>
       <div class="card receipt-card">
         <p class="eyebrow">Source receipt</p>
-        <p class="receipt-figure">{formatValue(h.gap.value)}</p>
-        <p class="receipt-label">FY2027 General Fund gap <SourceChip city={city} figure={h.gap} /></p>
+        <p class="receipt-figure"><Sourced city={city} figure={h.gap}>{formatValue(h.gap.value)}</Sourced></p>
+        <p class="receipt-label">FY2027 General Fund gap</p>
         <hr />
         <p class="receipt-doc">{s1.title}</p>
         <p class="receipt-meta">{s1.publisher} · {s1.date}</p>
@@ -109,8 +111,8 @@ const requestTemplate = `${SITE.repo}/issues/new`;
   <section class="proof" aria-label="At a glance">
     <div class="wrap proof-row">
       <div>
-        <p class="stat num">{shortMoney(h.baseline.value)}</p>
-        <p class="stat-label">of {city.name} department spending, mapped <SourceChip city={city} figure={h.baseline} /></p>
+        <p class="stat num"><Sourced city={city} figure={h.baseline}>{shortMoney(h.baseline.value)}</Sourced></p>
+        <p class="stat-label">of {city.name} department spending, mapped</p>
       </div>
       <div>
         <p class="stat num">{h.sourceCount}</p>
@@ -166,8 +168,9 @@ const requestTemplate = `${SITE.repo}/issues/new`;
         questions.map((x) => (
           <li class={`card question question--${x.tone}`}>
             <h3>{x.q}</h3>
-            <p class="answer">{x.a}</p>
-            <SourceChip city={city} figure={x.figure} />
+            <p class="answer">
+              {x.a[0]}<Sourced city={city} figure={x.figure}>{x.a[1]}</Sourced>{x.a[2]}
+            </p>
             <a class="open" href={x.href}>
               Open {x.page} <span aria-hidden="true">→</span>
             </a>

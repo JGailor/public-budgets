@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CityBudget } from '../../src/data/types';
+import { unwrapFigures } from './figures';
 
 const root = join(import.meta.dirname, '../..');
 const b: CityBudget = JSON.parse(readFileSync(join(root, 'data/cities/us/ca/berkeley/budget.json'), 'utf8'));
@@ -13,7 +14,7 @@ describe('departments page (built)', () => {
   const police = b.departmentReductions[0].departments.find((d) => d.id === 'police')!;
   const panel = html.slice(html.indexOf('id="police"'), html.indexOf('</section>', html.indexOf('id="police"')));
   const fy27 = panel.slice(panel.indexOf('yr--fy2027'), panel.indexOf('yr--fy2028'));
-  const text = fy27.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  const text = unwrapFigures(fy27).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
 
   it('FY27 Police, tax passes: baseline, cut, softened, net', () => {
     expect(text).toContain(`FY27 baseline ${m(police.baseline)}`);
@@ -30,6 +31,6 @@ describe('departments page (built)', () => {
     const depts = b.departmentReductions[0].departments;
     const rows = [...html.matchAll(/<li class="row" data-dept="([^"]+)"/g)].map((x) => x[1]);
     expect(rows.sort()).toEqual(depts.map((d) => d.id).filter((id) => id !== 'it-cost-allocation-plan').sort());
-    expect(html.replace(/<[^>]+>/g, ' ')).toMatch(/Not shown: IT Cost Allocation Plan \(\$600K baseline, cut entirely\)/);
+    expect(unwrapFigures(html).replace(/<[^>]+>/g, ' ')).toMatch(/Not shown: IT Cost Allocation Plan \(\$600K baseline, cut entirely\)/);
   });
 });

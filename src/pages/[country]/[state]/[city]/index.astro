@@ -4,7 +4,7 @@
  * Every number comes from overview() in src/lib/overview.ts; tests/dist
  * recomputes the story's checks from budget.json.
  */
-import SourceChip from '../../../../components/SourceChip.astro';
+import Sourced from '../../../../components/Sourced.astro';
 import StepInfo from '../../../../components/StepInfo.astro';
 import Term from '../../../../components/Term.astro';
 import Waffle from '../../../../components/Waffle.astro';
@@ -66,11 +66,13 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
       <p class="eyebrow">{city.government} · General Fund · Fiscal Year 2027</p>
       <h1>Where every $100 of {city.name}'s budget goes.</h1>
       <p class="lede">
-        {city.name}'s whole budget this year is {shortMoney(o.size.allFunds.value)} <SourceChip city={city} figure={o.size.allFunds} />. Most of it is set aside
-        for specific uses, like sewers, parking or grants. The {shortMoney(o.size.generalFund.value)} <Term city={city} name="General Fund (GF)">General Fund</Term>
-        <SourceChip city={city} figure={o.size.generalFund} /> is the part the Council can spend on anything. This chart
-        shows the {shortMoney(o.baseline.value)} of it planned for departments, before cuts <SourceChip city={city} figure={o.baseline} />. Each square is one dollar out
-        of every hundred. <span class="hover-hint">Hover a square to see the department.</span><span class="tap-hint">Tap a square.</span>
+        {city.name}'s whole budget this year is <Sourced city={city} figure={o.size.allFunds}>{shortMoney(o.size.allFunds.value)}</Sourced>. Most of it
+        is set aside for specific uses, like sewers, parking or grants. The <Sourced city={city} figure={o.size.generalFund}
+          >{shortMoney(o.size.generalFund.value)}</Sourced
+        >{' '}
+        <Term city={city} name="General Fund (GF)">General Fund</Term> is the part the Council can spend on anything. This chart shows the{' '}
+        <Sourced city={city} figure={o.baseline}>{shortMoney(o.baseline.value)}</Sourced> of it planned for departments, before cuts. Each square is one dollar
+        out of every hundred. <span class="hover-hint">Hover a square to see the department.</span><span class="tap-hint">Tap a square.</span>
       </p>
       <!-- Phones: the tour sits above the waffle, which fills a screen (#24). Wide screens show the copy in .hero-more. -->
       <p class="ctas ctas--narrow">
@@ -102,18 +104,15 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
       <dl class="stats">
         <div>
           <dt>department baseline, FY27</dt>
-          <dd class="num">{shortMoney(o.baseline.value)}</dd>
-          <dd><SourceChip city={city} figure={o.baseline} /></dd>
+          <dd class="num"><Sourced city={city} figure={o.baseline}>{shortMoney(o.baseline.value)}</Sourced></dd>
         </div>
         <div>
           <dt>staff positions (FTE), FY27</dt>
-          <dd class="num">{fte}</dd>
-          <dd><SourceChip city={city} figure={o.fte} /></dd>
+          <dd class="num"><Sourced city={city} figure={o.fte}>{fte}</Sourced></dd>
         </div>
         <div>
           <dt>gap the city must close</dt>
-          <dd class="num short">{shortMoney(Math.abs(o.gap.value))}</dd>
-          <dd><SourceChip city={city} figure={o.gap} /></dd>
+          <dd class="num short"><Sourced city={city} figure={o.gap}>{shortMoney(Math.abs(o.gap.value))}</Sourced></dd>
         </div>
       </dl>
 
@@ -139,9 +138,8 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
         </div>
         <p class="mix-labels">
           <span class="bay">{o.revenue.property.name} {pct(o.revenue.property.share)}</span>
-          <span>{shortMoney(o.revenue.total.value)} total, FY26</span>
+          <span><Sourced city={city} figure={o.revenue.total}>{shortMoney(o.revenue.total.value)}</Sourced> total, FY26</span>
         </p>
-        <SourceChip city={city} figure={o.revenue.total} />
         {has('revenue') && <a class="more" href={`${city.path}revenue/`}>Explore revenue <span aria-hidden="true">→</span></a>}
       </li>
 
@@ -149,19 +147,28 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
         <p class="n n--red">2</p>
         <h2>Costs are growing faster than income.</h2>
         <p class="body">
-          For {numberWords[g.years] ?? g.years} years, the City's costs grew about {rate(g.spendingRate)} a year and its
-          income about {rate(g.revenueRate)}. So it starts each year short.
+          For {numberWords[g.years] ?? g.years} years, the City's costs grew about <Sourced city={city} figure={o.growth.figure}>{rate(g.spendingRate)}</Sourced>{' '}
+          a year and its income about {rate(g.revenueRate)}. So it starts each year short.
         </p>
+        <!-- Each bar's value is its own receipt (#29), so the values are HTML buttons over the SVG's top margin. -->
+        <ul class="wf-values" style={`--n:${wf.length}`} role="list">
+          {
+            wf.map((w) => (
+              <li class:list={['wf-label', w.kind]}>
+                <Sourced city={city} figure={w.figure}>
+                  {w.value > 0 ? '+' : ''}
+                  {shortMoney(w.value)}
+                </Sourced>
+              </li>
+            ))
+          }
+        </ul>
         <svg class="mini-wf" viewBox={`0 0 ${o.waterfall.length * 62} 110`} role="img" aria-label={`FY2027 deficit bridge: ${o.waterfall.map((w) => `${w.label} ${formatValue(w.value)}`).join(', ')}.`}>
           <line x1="0" y1="14" x2={o.waterfall.length * 62} y2="14" stroke="var(--muted)" stroke-width="1"></line>
           {
             wf.map((w, i) => (
               <g>
                 <rect x={i * 62 + 8} y={w.y} width="46" height={w.h} rx="2" class={`wf-bar wf-bar--${w.kind}`} />
-                <text x={i * 62 + 31} y="10" text-anchor="middle" class:list={['wf-label', w.kind]}>
-                  {w.value > 0 ? '+' : ''}
-                  {shortMoney(w.value)}
-                </text>
               </g>
             ))
           }
@@ -178,10 +185,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
           }
         </ul>
         <div class="wf-notes">{wf.map((w) => <StepInfo city={city} id={`note-overview-${w.key}`} label={w.short} note={w.note} part="panel" />)}</div>
-        <p class="chips-row">
-          {wf.map((w) => <SourceChip city={city} figure={w.figure} />)}
-          <SourceChip city={city} figure={o.growth.figure} />
-        </p>
         <a class="more" href={`${city.path}gap/`}>See the gap step by step <span aria-hidden="true">→</span></a>
       </li>
 
@@ -189,20 +192,18 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
         <p class="n n--ink">3</p>
         <h2>You get a say in November.</h2>
         <p class="body">
-          Measure {o.ballot.salesTaxLetter} would add a {formatValue(o.ballot.salesTax.value, 'percent')} sales tax <SourceChip city={city} figure={o.ballot.salesTax} />.
-          Measure {o.ballot.bondLetter} would let the City borrow {shortMoney(o.ballot.bond.value, 0)} for repairs (a bond) <SourceChip city={city} figure={o.ballot.bond} />. The City's
-          budget plan counts on the sales tax.
+          Measure {o.ballot.salesTaxLetter} would add a <Sourced city={city} figure={o.ballot.salesTax}>{formatValue(o.ballot.salesTax.value, 'percent')}</Sourced>{' '}
+          sales tax. Measure {o.ballot.bondLetter} would let the City borrow <Sourced city={city} figure={o.ballot.bond}>{shortMoney(o.ballot.bond.value, 0)}</Sourced>{' '}
+          for repairs (a bond). The City's budget plan counts on the sales tax.
         </p>
         <div class="tiles">
           <div class="tile tile--passes">
-            <p class="tile-n num">{o.ballot.withTax.value}</p>
+            <p class="tile-n num"><Sourced city={city} figure={o.ballot.withTax}>{o.ballot.withTax.value}</Sourced></p>
             <p>positions cut if Measure {o.ballot.salesTaxLetter} passes</p>
-            <SourceChip city={city} figure={o.ballot.withTax} />
           </div>
           <div class="tile tile--fails">
-            <p class="tile-n num">{o.ballot.withoutTax.value}</p>
+            <p class="tile-n num"><Sourced city={city} figure={o.ballot.withoutTax}>{o.ballot.withoutTax.value}</Sourced></p>
             <p>positions cut if Measure {o.ballot.salesTaxLetter} fails</p>
-            <SourceChip city={city} figure={o.ballot.withoutTax} />
           </div>
         </div>
         <a class="more" href={`${city.path}${has('ballot') ? 'ballot' : 'gap'}/`}>Compare both outcomes <span aria-hidden="true">→</span></a>
@@ -215,9 +216,8 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
       <p class="eyebrow">Why the gap keeps coming back</p>
       <h2>Small differences, compounded.</h2>
       <p class="body">
-        City staff say spending grew about {rate(g.spendingRate)} a year over {numberWords[g.years] ?? g.years} years while revenue
+        City staff say spending grew about <Sourced city={city} figure={o.growth.figure}>{rate(g.spendingRate)}</Sourced> a year over {numberWords[g.years] ?? g.years} years while revenue
         grew about {rate(g.revenueRate)}. {pointsText} points doesn't sound like much. Compounded over a decade, it adds up to a <Term city={city} name="Structural deficit">structural deficit</Term>.
-        <SourceChip city={city} figure={o.growth.figure} />
       </p>
       <p class="illustration-note">
         Illustration: lines show the cited average rates applied to 100, not actual yearly figures. Year-by-year spending for FY22–FY25 isn't in the
@@ -254,11 +254,10 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
       <div>
         <h2>Don't take our word for it.</h2>
         <p>
-          Every number has a source chip. Click one to see the exact city document, the date, and the table it came from, with a link to the original.
+          Tap any number to see the exact city document, the date, and the table it came from, with a link to the original.
         </p>
       </div>
       <div>
-        <p class="chips-row">{o.sourceIds.slice(0, 6).map((id) => <SourceChip city={city} source={id} />)}</p>
         <p class="counts">
           {o.sourceIds.length} sources: {o.sourceCounts.city} city documents, {o.sourceCounts.news} news reports
         </p>
@@ -561,24 +560,24 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
   .wf-notes :global(.info-panel:not([hidden])) {
     margin-top: 0.5rem;
   }
+  .wf-values {
+    display: grid;
+    grid-template-columns: repeat(var(--n), 1fr);
+    margin: 0 0 -0.75rem;
+    padding: 0;
+    list-style: none;
+    position: relative;
+  }
   .wf-label {
-    font: 800 10px var(--font-sans);
-    fill: var(--red);
+    font: 800 0.6875rem/1.2 var(--font-sans);
+    color: var(--red-text);
+    text-align: center;
   }
   .wf-label.up {
-    fill: var(--bay);
+    color: var(--bay);
   }
   .wf-label.one-time {
-    fill: #8a5f0b;
-  }
-  .chips-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    margin: 0;
-  }
-  .chips-row :global(.chips) {
-    margin-inline-start: 0;
+    color: #8a5f0b;
   }
   .tiles {
     display: grid;
@@ -678,10 +677,6 @@ const pointsText = pointsWords[diff] ?? `${diff.toLocaleString('en-US')}`;
     margin: 0.75rem 0 0;
     color: #d7e9e7;
     line-height: 1.6;
-  }
-  .trust .chips-row :global(.chip--city) {
-    background: #fff;
-    color: var(--bay);
   }
   .counts {
     font-weight: 700;
