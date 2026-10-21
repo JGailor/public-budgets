@@ -1,5 +1,5 @@
 /**
- * Revenue groups for the mix bar (Property tax, Transfers in, …), from
+ * Revenue groups for the Revenue page $100 chart and the overview mix bar (Property tax, Transfers in, …), from
  * data/cities/{city}/revenue-groups.json. Loading checks that every revenue
  * line item is in exactly one group, so the groups always add up to the total.
  */

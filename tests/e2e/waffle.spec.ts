@@ -8,7 +8,7 @@ test.describe('the $100 waffle (desktop)', () => {
 
   test('hovering a square highlights its department and shows the tooltip', async ({ page }) => {
     await page.goto(PAGE);
-    await page.locator('.sq[data-dept="police"]').first().hover();
+    await page.locator('.sq[data-item="police"]').first().hover();
     const tip = page.locator('[data-tip]');
     await expect(tip).toBeVisible();
     // #33: whole dollars, one per square; the baseline and cut are a tap away on the Departments page.
@@ -40,7 +40,7 @@ test.describe('the $100 waffle (desktop)', () => {
     await page.keyboard.press('ArrowRight');
     for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown');
     await expect(page.locator('.sq:focus')).toHaveAttribute('data-index', '37');
-    await expect(page.locator('.sq:focus')).toHaveAttribute('data-dept', 'fire');
+    await expect(page.locator('.sq:focus')).toHaveAttribute('data-item', 'fire');
     await expect(page.locator('[data-panel="fire"]')).toBeVisible();
     expect(await page.locator('.sq[tabindex="0"]').count()).toBe(1);
     // Tab leaves the grid in one step.
@@ -50,16 +50,16 @@ test.describe('the $100 waffle (desktop)', () => {
 
   test('Enter pins the tooltip, which links to Department details; Esc unpins', async ({ page }) => {
     await page.goto(PAGE);
-    await page.locator('.sq[data-dept="fire"]').first().focus();
+    await page.locator('.sq[data-item="fire"]').first().focus();
     await page.keyboard.press('Enter');
     const tip = page.locator('[data-tip]');
     await expect(tip).toHaveClass(/pinned/);
-    const squares = await page.locator('.sq[data-dept="fire"]').count();
+    const squares = await page.locator('.sq[data-item="fire"]').count();
     await expect(tip.locator('[data-panel="fire"] .panel-figure')).toHaveText(`$${squares} of every $100`);
     await expect(tip.locator('[data-panel="fire"]').getByRole('link', { name: 'Department details' })).toHaveAttribute('href', `${PAGE}departments/#fire`);
     // Park the mouse away from the grid, as a person would before reaching for the keyboard.
     await page.mouse.move(5, 5);
-    await page.locator('.sq[data-dept="fire"]').first().focus();
+    await page.locator('.sq[data-item="fire"]').first().focus();
     await page.keyboard.press('Escape');
     await expect(tip).toBeHidden();
   });
@@ -77,13 +77,13 @@ test.describe('the $100 waffle (phone)', () => {
 
   test('a tap opens a bottom sheet with a link to department details', async ({ page }) => {
     await page.goto(PAGE);
-    await page.locator('.sq[data-dept="hhcs"]').first().tap();
+    await page.locator('.sq[data-item="hhcs"]').first().tap();
     const tip = page.locator('[data-tip]');
     await expect(tip).toHaveClass(/sheet/);
     const box = (await tip.boundingBox())!;
     expect(box.x).toBe(0);
     expect(Math.round(box.width)).toBe(await page.evaluate(() => document.documentElement.clientWidth));
-    await expect(tip.locator('[data-panel="hhcs"]')).toContainText(`Health, Housing & Community Services$${await page.locator('.sq[data-dept="hhcs"]').count()} of every $100`);
+    await expect(tip.locator('[data-panel="hhcs"]')).toContainText(`Health, Housing & Community Services$${await page.locator('.sq[data-item="hhcs"]').count()} of every $100`);
     await expect(tip.getByRole('link', { name: 'Department details' })).toHaveAttribute('href', '/us/ca/berkeley/departments/#hhcs');
     await tip.getByRole('button', { name: 'Close' }).tap();
     await expect(tip).toBeHidden();

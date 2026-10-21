@@ -12,11 +12,41 @@ const text = unwrapFigures(html).replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'")
 const line = (n: string) => b.revenue.lines.find((l) => l.name === n)!;
 
 describe('revenue page (built)', () => {
-  it('property tax groups to 33%', () => {
+  // #35: the chart is the first thing on the page, 100 squares, each group's count its rounded share.
+  const squares = [...html.matchAll(/class="sq" data-item="([^"]+)"/g)].map((m) => m[1]);
+  const share = (g: (typeof groups)[number]) => g.lines.reduce((a, n) => a + line(n).fy2026Adopted, 0) / b.revenue.total.fy2026Adopted;
+
+  it('the $100 chart has 100 squares, each group as many as its rounded share', () => {
+    expect(squares).toHaveLength(100);
+    for (const g of groups) expect(squares.filter((id) => id === g.id), g.name).toHaveLength(Math.round(share(g) * 100));
+    // Every group is drawn: the smallest (hotel, about $2.53) still gets squares.
+    expect(new Set(squares)).toEqual(new Set(groups.map((g) => g.id)));
+  });
+
+  it('property tax is $33 of every $100, in the chart and its list', () => {
     const g = groups.find((x) => x.id === 'property-tax')!;
-    const share = g.lines.reduce((a, n) => a + line(n).fy2026Adopted, 0) / b.revenue.total.fy2026Adopted;
-    expect(Math.round(share * 100)).toBe(33);
-    expect(text).toMatch(new RegExp(`Property tax ${Math.round(share * 100)}%`));
+    expect(Math.round(share(g) * 100)).toBe(33);
+    expect(html).toContain('aria-label="Property tax: $33 of every $100"');
+    expect(text).toMatch(/Property tax \$33 /);
+  });
+
+  it('the chart comes before anything else on the page after the lede', () => {
+    const main = html.slice(html.indexOf('<h1'));
+    const chart = main.indexOf('data-waffle');
+    expect(chart).toBeGreaterThan(0);
+    for (const later of ['class="lines-section"', 'class="insights', '<h2 id="lines-title"']) {
+      const at = main.indexOf(later);
+      if (at >= 0) expect(at, later).toBeGreaterThan(chart);
+    }
+    expect(main.slice(0, chart)).not.toMatch(/<h2(?![^>]*visually-hidden)/);
+  });
+
+  it("each group's line items are listed under it", () => {
+    for (const g of groups) {
+      const li = html.match(new RegExp(`<li id="rev-${g.id}"[^>]*>[\\s\\S]*?</details>`))?.[0];
+      expect(li, g.id).toBeTruthy();
+      if (g.lines.length > 1) for (const n of g.lines) expect(li!.replace(/&amp;/g, '&')).toContain(n);
+    }
   });
 
   it('Business License Tax 10% received; Transfers +797%', () => {

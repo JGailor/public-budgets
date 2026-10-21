@@ -11,6 +11,7 @@ import Waffle from '../../../../components/Waffle.astro';
 import Base from '../../../../layouts/Base.astro';
 import { budgetFor } from '../../../../lib/budget';
 import { CITY_PAGES, cityStaticPaths, type City } from '../../../../lib/cities';
+import { departmentItems } from '../../../../lib/departments';
 import { familiesFor } from '../../../../lib/families';
 import { shortMoney } from '../../../../lib/format';
 import { overview } from '../../../../lib/overview';
@@ -72,7 +73,12 @@ const numberWords: Record<number, string> = { 10: 'ten' };
     </div>
 
     <div class="hero-waffle">
-      <Waffle city={city} shares={o.shares} families={families} />
+      <Waffle
+        items={departmentItems(city.path, budget, o.shares, families)}
+        label={`${city.name}'s FY2027 department baseline`}
+        noun="department"
+        table={{ caption: 'FY2027 General Fund department baseline, per $100', name: 'Department', value: 'FY2027 baseline' }}
+      />
       <ul class="legend">
         {
           o.familyTotals.map((f) => (
@@ -129,7 +135,7 @@ const numberWords: Record<number, string> = { 10: 'ten' };
           <span class="bay">{o.revenue.property.name} {pct(o.revenue.property.share)}</span>
           <span><Sourced city={city} figure={o.revenue.total}>{shortMoney(o.revenue.total.value)}</Sourced> total, FY26</span>
         </p>
-        {has('revenue') && <a class="more" href={`${city.path}revenue/`}>Explore revenue <span aria-hidden="true">→</span></a>}
+        {has('revenue') && <a class="more" href={`${city.path}revenue/`}>See where every $100 comes from <span aria-hidden="true">→</span></a>}
       </li>
 
       <li class="card">

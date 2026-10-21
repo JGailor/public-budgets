@@ -33,24 +33,42 @@ test.describe('revenue page', () => {
     expect(az).toEqual([...az].sort((a, b) => a.localeCompare(b)));
   });
 
-  test('a mix block lists its line items on focus', async ({ page }) => {
+  test('the $100 chart is first; a tap at 390px highlights a group and shows its dollars, with line items a tap away (#35)', async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const page = await ctx.newPage();
     await page.goto(PAGE);
-    const block = page.getByRole('button', { name: /^Property tax: 33%/ });
-    await block.focus();
-    const tip = block.getByRole('tooltip');
-    await expect(tip).toBeVisible();
-    for (const name of ['Secured Property Tax', 'Supplemental Taxes', 'Unsecured Property Taxes']) await expect(tip).toContainText(name);
-    const box = (await tip.boundingBox())!;
-    expect(box.x + box.width).toBeLessThanOrEqual(1440);
+    const grid = page.getByRole('group', { name: /FY2026 General Fund revenue: one square per dollar/ });
+    await expect(grid.locator('.sq')).toHaveCount(100);
+    expect((await grid.boundingBox())!.y).toBeLessThan(844);
+    await page.locator('.sq[data-item="property-tax"]').first().tap();
+    const sheet = page.locator('[data-tip]');
+    await expect(sheet.locator('[data-panel="property-tax"]')).toBeVisible();
+    await expect(sheet.locator('[data-panel="property-tax"]')).toContainText('Property tax$33 of every $100');
+    await expect(page.locator('.sq.dim')).toHaveCount(100 - 33);
+    await sheet.getByRole('link', { name: 'Line items' }).tap();
+    const group = page.locator('#rev-property-tax details');
+    await expect(group).toHaveAttribute('open', '');
+    for (const name of ['Secured Property Tax', 'Supplemental Taxes', 'Unsecured Property Taxes']) await expect(group).toContainText(name);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
+    await ctx.close();
   });
 
-  test('the last block\'s tooltip stays on screen', async ({ page }) => {
+  test('the chart works by keyboard at 390px: Tab in, arrows move, Enter pins, Escape closes (#35)', async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
     await page.goto(PAGE);
-    const last = page.locator('.block').last();
-    await last.focus();
-    const box = (await last.getByRole('tooltip').boundingBox())!;
-    expect(box.x).toBeGreaterThanOrEqual(0);
-    expect(box.x + box.width).toBeLessThanOrEqual(1440);
+    await page.locator('.sq').first().focus();
+    await expect(page.locator('.sq:focus')).toHaveAttribute('data-item', 'property-tax');
+    // Columns fill top to bottom: property tax has 33 squares, so square 34 (column 4, row 4) is the next group.
+    for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight');
+    for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown');
+    await expect(page.locator('.sq:focus')).toHaveAttribute('data-item', 'transfer-tax');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('[data-panel="transfer-tax"]')).toBeVisible();
+    await expect(page.locator('[data-panel="transfer-tax"]')).toContainText('$10 of every $100');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-tip]')).toBeHidden();
+    await ctx.close();
   });
 
   test('pace bars: behind, on pace, ahead', async ({ page }) => {
@@ -65,7 +83,7 @@ test.describe('revenue page', () => {
 
   test('the overview now links to this page', async ({ page }) => {
     await page.goto('/us/ca/berkeley/');
-    await expect(page.getByRole('link', { name: 'Explore revenue' })).toHaveAttribute('href', PAGE);
+    await expect(page.getByRole('link', { name: 'See where every $100 comes from' })).toHaveAttribute('href', PAGE);
     await expect(page.locator('nav.desktop').getByRole('link', { name: 'Revenue' })).toHaveAttribute('href', PAGE);
   });
 });
