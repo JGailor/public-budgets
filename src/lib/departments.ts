@@ -52,6 +52,28 @@ export function departmentItems(cityPath: string, b: CityBudget, shares: Share<D
   }));
 }
 
+/**
+ * The Ballot page's passes/fails switch (#36): a year's departments whose cut
+ * depends on the vote, biggest difference first, and the ones cut the same either
+ * way, deepest cut first. Rows are departmentsPage()'s, so both pages show the
+ * same figures and receipts.
+ */
+export function byOutcome<R extends { years: Record<Year, YearView> }>(rows: R[], y: Year) {
+  const gap = (r: R) => r.years[y].netIf.fails.value - r.years[y].netIf.passes.value;
+  const differs = rows.filter((r) => gap(r) !== 0).sort((a, c) => gap(c) - gap(a));
+  const same = rows
+    .filter((r) => gap(r) === 0)
+    .sort((a, c) => c.years[y].netIf.fails.value - a.years[y].netIf.fails.value)
+    .map((r) => {
+      const f = r.years[y].figures.net.fails;
+      // One figure for both outcomes, and its receipt says so (each outcome's figure needs its twin, #23).
+      return { r, figure: { ...f, label: f.label.replace(/if the sales tax fails \(the full proposed cut\)$/, 'if the sales tax passes or fails (the same either way)') } satisfies Figure };
+    });
+  for (const s of same) if (!/passes or fails/.test(s.figure.label)) throw new Error(`byOutcome: unexpected label "${s.figure.label}"`);
+  const max = Math.max(...differs.map((r) => r.years[y].netIf.fails.value));
+  return { differs, same, max };
+}
+
 export const YEARS = ['fy2027', 'fy2028'] as const;
 export const TAXES = ['passes', 'fails'] as const;
 export const SORTS = ['budget', 'cut'] as const;

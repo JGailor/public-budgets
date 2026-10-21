@@ -11,7 +11,8 @@ import Sourced from '../../../../components/Sourced.astro';
 import Base from '../../../../layouts/Base.astro';
 import { ballotFileFor, ballotPage, type Outcome } from '../../../../lib/ballot';
 import { budgetFor } from '../../../../lib/budget';
-import { shortNames } from '../../../../lib/departments';
+import { byOutcome, departmentsPage, shortNames } from '../../../../lib/departments';
+import { familiesFor } from '../../../../lib/families';
 import { cityStaticPaths, type City } from '../../../../lib/cities';
 import { shortMoney } from '../../../../lib/format';
 
@@ -37,6 +38,11 @@ const u = p.bond;
 const threshold = (s: string) => (s === '2/3' ? 'a two-thirds vote' : `a ${s}`);
 const resultLabel: Record<Outcome, string> = { passes: `If Measure ${v.letter} passes`, fails: `If Measure ${v.letter} fails` };
 const people = (filled: number) => Array.from({ length: p.pictogramSlots }, (_, i) => i < filled);
+// Each department's cut either way (#36): the Departments page's rows and receipts, FY2027.
+const depts = departmentsPage(budget, familiesFor(city, budget), shortNames(city.path, budget));
+const split = byOutcome(depts.rows, 'fy2027');
+const OUTCOMES = ['passes', 'fails'] as const;
+const barW = (v: number) => `${((v / split.max) * 100).toFixed(2)}%`;
 const list = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
 const planDate = longDate(p.plan.date!);
 ---
@@ -111,6 +117,68 @@ const planDate = longDate(p.plan.date!);
         {p.countsCaveat.text}
         <SourceChip city={city} source={p.countsCaveat.cites[0].source} at={p.countsCaveat.cites[0]} also={p.countsCaveat.cites.slice(1)} />
       </p>
+    </section>
+
+    <!-- Each department's cut either way (#36). One switch, two states styled identically; cuts are red on both sides. -->
+    <section class="dc-section" aria-labelledby="dc-h">
+      <h2 id="dc-h" class="section-h">Each department's cut in FY2027</h2>
+      <fieldset class="dc-switch">
+        <legend class="visually-hidden">Show the cuts</legend>
+        {
+          OUTCOMES.map((o, i) => (
+            <>
+              <input type="radio" class="visually-hidden" name="dc-outcome" id={`dc-${o}`} value={o} checked={i === 0} />
+              <label for={`dc-${o}`}>{resultLabel[o]}</label>
+            </>
+          ))
+        }
+      </fieldset>
+      <ol class="dc-list" role="list">
+        {
+          split.differs.map((r) => {
+            const v = r.years.fy2027;
+            return (
+              <li class="dc-row" data-dept={r.id}>
+                <span class="dc-name">{r.display}</span>
+                {OUTCOMES.map((o) => (
+                  <span class={`dc-out dc-out--${o}`} data-outcome={o}>
+                    <span class="dc-v num">
+                      <Sourced city={city} figure={v.figures.net[o]}>{shortMoney(v.netIf[o].value)}</Sourced>
+                    </span>
+                    <span class="dc-why">
+                      {o === 'passes' ? (
+                        <>
+                          {shortMoney(v.d.reduction)} proposed, softened by {shortMoney(v.d.salesTaxAllocation)} of one-time bridge money
+                        </>
+                      ) : (
+                        'the full proposed cut'
+                      )}
+                    </span>
+                  </span>
+                ))}
+                <span class="dc-bar" aria-hidden="true">
+                  <span class="dc-cut" style={`width:${barW(v.d.netReduction)}`} />
+                  <span class="dc-soft" style={`width:${barW(v.d.salesTaxAllocation)}`} />
+                </span>
+              </li>
+            );
+          })
+        }
+      </ol>
+      <details class="dc-same">
+        <summary>{words(split.same.length)[0].toUpperCase() + words(split.same.length).slice(1)} departments: same cut either way</summary>
+        <ul role="list">
+          {
+            split.same.map(({ r, figure }) => (
+              <li data-dept={r.id}>
+                <span>{r.display}</span>{' '}
+                <span class="num">{figure.value === 0 ? 'no cut' : <Sourced city={city} figure={figure}>{shortMoney(figure.value)}</Sourced>}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+      <a class="dc-all" href={`${city.path}departments/`}>All departments <span aria-hidden="true">→</span></a>
     </section>
 
     <!-- The measures themselves: one line each, the mechanics behind Details. Both cards: same parts, same order. -->
@@ -308,6 +376,121 @@ const planDate = longDate(p.plan.date!);
 
   .measures-section {
     padding-block: 3rem 2rem;
+  }
+
+  /* Each department's cut (#36). The switch's two labels share every rule; only :checked differs. */
+  .dc-section {
+    padding-block: 3rem 0;
+  }
+  .dc-switch {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0 0 1.25rem;
+    padding: 0.25rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: rgb(22 25 29 / 0.06);
+  }
+  .dc-switch label {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  .dc-switch input:checked + label {
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgb(22 25 29 / 0.12);
+  }
+  .dc-switch input:focus-visible + label {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .dc-section:has(#dc-passes:checked) .dc-out--fails,
+  .dc-section:has(#dc-fails:checked) .dc-out--passes {
+    display: none;
+  }
+  .dc-list {
+    display: grid;
+    gap: 1rem;
+    max-width: 42rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .dc-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 1rem;
+    align-items: baseline;
+  }
+  .dc-name {
+    font-weight: 700;
+  }
+  .dc-out {
+    display: contents;
+  }
+  .dc-v {
+    color: var(--red-text);
+    font-weight: 700;
+    text-align: right;
+  }
+  .dc-why {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    color: var(--muted);
+    font-size: 0.8125rem;
+  }
+  .dc-bar {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 0.625rem;
+    border-radius: 2px;
+    background: var(--rule);
+    overflow: hidden;
+  }
+  .dc-cut {
+    background: var(--red);
+  }
+  /* Softened by one-time bridge money: gold if the measure passes; if it fails, that part is cut too. */
+  .dc-soft {
+    background: var(--gold);
+  }
+  .dc-section:has(#dc-fails:checked) .dc-soft {
+    background: var(--red);
+  }
+  .dc-same {
+    max-width: 42rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 0.75rem;
+  }
+  .dc-same summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .dc-same ul {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+  }
+  .dc-same li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .dc-all {
+    display: inline-block;
+    margin-top: 1.25rem;
+    color: var(--bay);
+    font-weight: 700;
   }
   .section-h {
     margin: 0 0 1.25rem;
