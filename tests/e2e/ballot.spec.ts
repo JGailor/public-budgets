@@ -19,12 +19,61 @@ for (const width of [390, 1440]) {
   });
 }
 
-test('side by side on desktop, same height row', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+for (const width of [390, 1440]) {
+  test(`side by side at ${width}px, same height row`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(PAGE);
+    const [a, b] = await page.locator('.scenario').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
+    expect(a.top).toBe(b.top);
+    expect(a.right).toBeLessThan(b.left);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  });
+}
+
+// #31: what changes comes first. On a phone's first screen: both outcomes, their counts, and Fire Station 4.
+test('at 390px the first screen shows both outcomes and Fire Station 4', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(PAGE);
-  const [a, b] = await page.locator('.scenario').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
-  expect(a.top).toBe(b.top);
-  expect(a.right).toBeLessThan(b.left);
+  await page.evaluate(() => document.fonts.ready);
+  const inView = (loc: ReturnType<typeof page.locator>) => loc.evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.height > 0; }));
+  for (const [o, n, laid] of [['passes', '105', '20'], ['fails', '138', '38']]) {
+    const card = page.locator(`.scenario[data-outcome="${o}"]`);
+    await expect(card.locator('.big')).toContainText(new RegExp(`^\\s*${n}\\s*positions cut`));
+    await expect(card.locator('.pict-label')).toHaveText(`${laid} people laid off`);
+    expect(await inView(card.locator('.big-n, .pict-label, .pict, [data-row="fire-station"]'))).toEqual([true, true, true, true]);
+  }
+  await expect(page.locator('[data-row="fire-station"] dd')).toHaveText([/^\s*Tax revenue proposed to keep it open/, /^\s*Closure reconsidered for FY2028/]);
+});
+
+test('the mechanics sit behind Details, closed until asked', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(PAGE);
+  for (const [letter, hidden] of [['V', 'April 1, 2027'], ['U', '$22.14']]) {
+    const details = page.locator('.measure', { hasText: `Measure ${letter} ·` }).locator('details');
+    await expect(details.getByText(hidden)).toBeHidden();
+    await expect(details.getByRole('navigation')).toBeHidden();
+    await details.locator('summary').click();
+    await expect(details.getByText(hidden)).toBeVisible();
+    await expect(details.getByRole('navigation', { name: `Read Measure ${letter}` })).toBeVisible();
+  }
+});
+
+test('a deep link to a source cited only inside Details opens it, so focus can return there', async ({ page }) => {
+  await page.goto(PAGE);
+  const id = await page.evaluate(() => {
+    const firstFor = (s: string) => document.querySelector(`[data-source-chip~="${s}"]`);
+    const ids = [...document.querySelectorAll<HTMLElement>('details [data-source-chip]')].flatMap((el) => el.dataset.sourceChip!.split(' '));
+    return ids.find((s) => firstFor(s)!.closest('details'));
+  });
+  expect(id).toBeTruthy();
+  await page.goto(`${PAGE}?source=${id}`);
+  const d = page.locator('dialog[data-receipt-dialog]');
+  await expect(d).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(d).toBeHidden();
+  const chip = page.locator(`[data-source-chip~="${id}"]`).first();
+  await expect(chip).toBeFocused();
+  await expect(chip).toBeVisible();
 });
 
 test('the pictograms are labeled with the layoff counts', async ({ page }) => {
@@ -55,6 +104,7 @@ test('a scenario row opens a receipt with the PDF page and the sentence it quote
 test("each measure card links its own City documents, opening in a new tab", async ({ page }) => {
   await page.goto(PAGE);
   for (const letter of ['V', 'U']) {
+    await page.locator('summary', { hasText: `Details on Measure ${letter}` }).click();
     const nav = page.getByRole('navigation', { name: `Read Measure ${letter}` });
     await expect(nav.getByRole('link')).toHaveCount(3);
     const full = nav.getByRole('link', { name: 'Full text (PDF, opens in a new tab)' });

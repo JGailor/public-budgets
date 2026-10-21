@@ -49,75 +49,45 @@ const planDate = longDate(p.plan.date!);
       <p class="lede">{p.state.lede}</p>
     </section>
 
-    <ul class="measures" role="list">
-      <li class="card measure">
-        <p class="kicker">Measure {v.letter} · {thresholdLabel(t.threshold)}</p>
-        <h2><Sourced city={city} figure={v.figure}>{pct(t.rate)}</Sourced> local sales tax</h2>
-        <p class="official">Official title: “{v.official.title}” <SourceChip city={city} source={v.official.cite.source} at={v.official.cite} /></p>
-        <p>
-          A general tax: the money would go to the General Fund and could be spent on any city purpose. <SourceChip city={city} source={v.general.source} at={v.general} />{' '}
-          The City estimates it would raise <Sourced city={city} source={v.revenue.cites[0].source} at={v.revenue.cites[0]} also={v.revenue.cites.slice(1)}
-            >{range(v.revenue.low, v.revenue.high)}</Sourced
-          > a year and bring {city.name}'s sales-tax rate to {pct(t.newRate)}. It would start {longDate(v.term.start)} and last {v.term.until}.
-          <SourceChip city={city} source={v.term.cite.source} at={v.term.cite} />
-        </p>
-        <p>The city's FY27-28 plan was built in two versions, one for each outcome.</p>
-        <ReadMore city={city} letter={v.letter} links={v.read} />
-      </li>
-      <li class="card measure">
-        <p class="kicker">Measure {u.letter} · {thresholdLabel(bond.threshold)}</p>
-        <h2><Sourced city={city} figure={u.figure}>{millions(bond.amount)}</Sourced> infrastructure bond</h2>
-        <p class="official">Official title: “{u.official.title}” <SourceChip city={city} source={u.official.cite.source} at={u.official.cite} /></p>
-        <p>
-          Borrowing for streets, buildings and parks, repaid by a {bond.repaidBy}. The City estimates about <Sourced city={city} source={u.cost.cite.source} at={u.cost.cite}
-            >${u.cost.perHundredK.toFixed(2)}</Sourced
-          > a year per $100,000 of assessed value on average over {u.cost.years} years, raising about {millions(u.cost.perYear)} a year. Its highest
-          rate would be about <Sourced city={city} source={u.peak.cite.source} at={u.peak.cite}>${u.peak.perHundredK}</Sourced>, from {u.peak.from}.{' '}
-          The City Auditor would audit its spending at least every {words(u.audit.everyYears)} years. <SourceChip city={city} source={u.audit.cite.source} at={u.audit.cite} />
-        </p>
-        <p>
-          It doesn't touch the operating gap. The City's capital plan puts its unfunded capital and maintenance need at{' '}
-          <Sourced city={city} figure={u.need}>{billion(u.need.value)}</Sourced>; an earlier City estimate was{' '}
-          <Sourced city={city} figure={u.backlog}>{billions(u.backlog.ref.low, u.backlog.ref.high)}</Sourced>.
-        </p>
-        <ReadMore city={city} letter={u.letter} links={u.read} />
-      </li>
-    </ul>
-
+    <!-- What changes comes first (#31): both outcomes side by side at every width, one builder, one template. -->
     <section class="scenarios-section" aria-labelledby="scenarios-h">
-      <p class="eyebrow">If Measure {v.letter}, the sales tax…</p>
-      <h2 id="scenarios-h" class="section-h">Same budget gap, two different sets of cuts.</h2>
+      <p class="eyebrow" id="scenarios-h">If Measure {v.letter}, the sales tax…</p>
       <ul class="scenarios" role="list">
         {
           p.scenarios.map((s) => (
             <li class="card scenario" data-outcome={s.outcome}>
-              <h3 class="scenario-h">
+              <h2 class="scenario-h">
                 {resultLabel[s.outcome]}
                 {p.state.result === s.outcome && <span class="badge">Result</span>}
-              </h3>
+              </h2>
               <div class="scenario-body">
                 <p class="big">
                   <span class="num big-n">
                     <Sourced city={city} figure={s.positions.figure}>{s.positions.total}</Sourced>
                   </span>
-                  <span class="big-l">
-                    positions eliminated
-                    <span class="sub">
-                      {s.positions.vacant} vacant · {s.positions.filled} filled (layoffs)
-                    </span>
+                  <span class="big-l">positions cut</span>
+                  <span class="sub">
+                    {s.positions.vacant} vacant, {s.positions.filled} filled
                   </span>
                 </p>
-                <p class="caveat">
-                  {s.caveat.text}
-                  <SourceChip city={city} source={s.caveat.cites[0].source} at={s.caveat.cites[0]} also={s.caveat.cites.slice(1)} />
+                <p class="pict-label">
+                  <span class="num">{s.positions.filled}</span> people laid off
                 </p>
-                <p class="pict-label">People laid off</p>
                 <div class="pict" role="img" aria-label={`${s.positions.filled} people laid off, out of ${p.pictogramSlots} shown`}>
                   {people(s.positions.filled).map((on) => (
                     <span class:list={['person', { on }]} />
                   ))}
                 </div>
                 <dl class="facts">
+                  {s.rows.map((r) => (
+                    <div data-row={r.key}>
+                      <dt>{r.label}</dt>
+                      <dd>
+                        {r.text}
+                        <SourceChip city={city} source={r.cite.source} at={r.cite} also={r.also.map((source) => ({ source }))} />
+                      </dd>
+                    </div>
+                  ))}
                   <div>
                     <dt>Department cuts</dt>
                     <dd>
@@ -132,20 +102,68 @@ const planDate = longDate(p.plan.date!);
                       </span> FTE (from <span class="num">{fte(s.workforce.before)}</span>)
                     </dd>
                   </div>
-                  {s.rows.map((r) => (
-                    <div data-row={r.key}>
-                      <dt>{r.label}</dt>
-                      <dd>
-                        {r.text}
-                        <SourceChip city={city} source={r.cite.source} at={r.cite} also={r.also.map((source) => ({ source }))} />
-                      </dd>
-                    </div>
-                  ))}
                 </dl>
               </div>
             </li>
           ))
         }
+      </ul>
+      <!-- The same for both outcomes, so it's said once, under both. -->
+      <p class="caveat">
+        {p.countsCaveat.text}
+        <SourceChip city={city} source={p.countsCaveat.cites[0].source} at={p.countsCaveat.cites[0]} also={p.countsCaveat.cites.slice(1)} />
+      </p>
+    </section>
+
+    <!-- The measures themselves: one line each, the mechanics behind Details. Both cards: same parts, same order. -->
+    <section class="measures-section" aria-labelledby="measures-h">
+      <h2 id="measures-h" class="section-h">The two measures</h2>
+      <ul class="measures" role="list">
+        <li class="card measure">
+          <p class="kicker">Measure {v.letter} · {thresholdLabel(t.threshold)}</p>
+          <h3>
+            A <Sourced city={city} figure={v.figure}>{pct(t.rate)}</Sourced> sales tax for any city purpose.
+            <SourceChip city={city} source={v.general.source} at={v.general} />
+          </h3>
+          <p class="line">
+            The City estimates it would raise <Sourced city={city} source={v.revenue.cites[0].source} at={v.revenue.cites[0]} also={v.revenue.cites.slice(1)}
+              >{range(v.revenue.low, v.revenue.high)}</Sourced
+            > a year.
+          </p>
+          <details class="details">
+            <summary>Details<span class="visually-hidden"> on Measure {v.letter}</span></summary>
+            <p class="official">Official title: “{v.official.title}” <SourceChip city={city} source={v.official.cite.source} at={v.official.cite} /></p>
+            <p>
+              It's a general tax: the money would go to the General Fund. It would bring {city.name}'s sales-tax rate to {pct(t.newRate)}. It would start {
+                longDate(v.term.start)
+              } and last {v.term.until}.
+              <SourceChip city={city} source={v.term.cite.source} at={v.term.cite} />
+            </p>
+            <ReadMore city={city} letter={v.letter} links={v.read} />
+          </details>
+        </li>
+        <li class="card measure">
+          <p class="kicker">Measure {u.letter} · {thresholdLabel(bond.threshold)}</p>
+          <h3>A <Sourced city={city} figure={u.figure}>{millions(bond.amount)}</Sourced> bond for streets, buildings and parks.</h3>
+          <p class="line">It doesn't change this year's gap.</p>
+          <details class="details">
+            <summary>Details<span class="visually-hidden"> on Measure {u.letter}</span></summary>
+            <p class="official">Official title: “{u.official.title}” <SourceChip city={city} source={u.official.cite.source} at={u.official.cite} /></p>
+            <p>
+              It would be repaid by a {bond.repaidBy}. The City estimates about <Sourced city={city} source={u.cost.cite.source} at={u.cost.cite}
+                >${u.cost.perHundredK.toFixed(2)}</Sourced
+              > a year per $100,000 of assessed value on average over {u.cost.years} years, raising about {millions(u.cost.perYear)} a year. Its highest
+              rate would be about <Sourced city={city} source={u.peak.cite.source} at={u.peak.cite}>${u.peak.perHundredK}</Sourced>, from {u.peak.from}.{' '}
+              The City Auditor would audit its spending at least every {words(u.audit.everyYears)} years. <SourceChip city={city} source={u.audit.cite.source} at={u.audit.cite} />
+            </p>
+            <p>
+              The City's capital plan puts its unfunded capital and maintenance need at{' '}
+              <Sourced city={city} figure={u.need}>{billion(u.need.value)}</Sourced>; an earlier City estimate was{' '}
+              <Sourced city={city} figure={u.backlog}>{billions(u.backlog.ref.low, u.backlog.ref.high)}</Sourced>.
+            </p>
+            <ReadMore city={city} letter={u.letter} links={u.read} />
+          </details>
+        </li>
       </ul>
     </section>
 
@@ -178,20 +196,21 @@ const planDate = longDate(p.plan.date!);
     border-radius: 0.875rem;
     box-shadow: 0 1px 2px rgb(22 25 29 / 0.06), 0 8px 24px rgb(22 25 29 / 0.06);
   }
+  /* Short enough that both outcomes and the fire-station row fit on a phone's first screen (#31). */
   .intro {
-    padding-block: clamp(2rem, 5vw, 3.5rem) 2rem;
+    padding-block: clamp(1.25rem, 5vw, 3.5rem) clamp(1rem, 3vw, 2rem);
   }
   h1 {
     margin: 0;
     max-width: 52rem;
-    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-size: clamp(1.625rem, 5vw, 3.25rem);
   }
   .lede {
     max-width: 42rem;
-    margin: 1rem 0 0;
+    margin: 0.75rem 0 0;
     color: var(--muted);
     font-size: 1.0625rem;
-    line-height: 1.6;
+    line-height: 1.5;
   }
   ul[role='list'] {
     margin: 0;
@@ -199,64 +218,25 @@ const planDate = longDate(p.plan.date!);
     list-style: none;
   }
 
-  /* Both measures and both scenarios: same grid, same card, same accent. */
-  .measures,
+  /* Both outcomes: same grid, same card, same accent, side by side at every width. */
   .scenarios {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-    gap: 1.5rem;
-  }
-  .measure {
-    padding: 1.75rem;
-    border-top: 6px solid var(--bay);
-  }
-  .kicker {
-    margin: 0 0 0.5rem;
-    color: var(--bay);
-    font-weight: 800;
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-  .measure h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.75rem;
-  }
-  .measure p:not(.kicker) {
-    max-width: 30rem;
-    margin: 0 0 1rem;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-  .measure p.official {
-    margin-top: -0.25rem;
-    color: var(--ink);
-    font-size: 0.9375rem;
-  }
-  .chip-row {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-  }
-
-  .scenarios-section {
-    padding-block: 3.5rem 2rem;
-  }
-  .section-h {
-    margin: 0 0 1.75rem;
-    font-size: clamp(1.5rem, 3vw, 2rem);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(0.625rem, 2vw, 1.5rem);
   }
   .scenario {
     overflow: hidden;
   }
   .scenario-h {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: 0.25rem;
     margin: 0;
-    padding: 1rem 1.75rem;
+    padding: clamp(0.5rem, 2vw, 1rem) clamp(0.75rem, 3vw, 1.75rem);
     background: var(--bay-light);
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
   }
   .badge {
     padding: 0.25rem 0.75rem;
@@ -268,42 +248,41 @@ const planDate = longDate(p.plan.date!);
     text-transform: uppercase;
   }
   .scenario-body {
-    padding: 1.25rem 1.75rem 1.75rem;
+    padding: clamp(0.75rem, 2.5vw, 1.25rem) clamp(0.75rem, 3vw, 1.75rem) clamp(1rem, 3vw, 1.75rem);
   }
   .big {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    margin: 0 0 1.25rem;
+    display: grid;
+    margin: 0 0 clamp(0.75rem, 2.5vw, 1.25rem);
   }
   .big-n {
-    font: 800 3.5rem/1 var(--font-sans);
+    font: 800 clamp(2.5rem, 9vw, 3.5rem)/1 var(--font-sans);
   }
   .big-l {
-    display: grid;
-    color: var(--muted);
     font-weight: 700;
-    font-size: 1.0625rem;
+    font-size: clamp(1rem, 2.5vw, 1.1875rem);
   }
   .sub {
-    font-weight: 400;
+    color: var(--muted);
     font-size: 0.875rem;
   }
   .pict-label {
     margin: 0 0 0.5rem;
-    color: var(--muted);
     font-weight: 700;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: clamp(1rem, 2.5vw, 1.1875rem);
   }
   .pict {
     display: grid;
     grid-template-columns: repeat(20, 1fr);
     gap: 0.3rem;
     max-width: 27rem;
-    padding-bottom: 1.5rem;
+    padding-bottom: clamp(0.75rem, 2.5vw, 1.5rem);
     border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 47.99rem) {
+    .pict {
+      grid-template-columns: repeat(10, 1fr);
+      gap: 0.2rem;
+    }
   }
   /* A person: head and shoulders, drawn in CSS so both cards share one shape and color. */
   .person {
@@ -318,8 +297,8 @@ const planDate = longDate(p.plan.date!);
   }
   .facts {
     display: grid;
-    gap: 0.875rem;
-    margin: 1.25rem 0 0;
+    gap: clamp(0.625rem, 2vw, 0.875rem);
+    margin: clamp(0.75rem, 2.5vw, 1.25rem) 0 0;
   }
   .facts dt {
     color: var(--muted);
@@ -328,14 +307,85 @@ const planDate = longDate(p.plan.date!);
   .facts dd {
     margin: 0.125rem 0 0;
     font-weight: 700;
-    font-size: 1.0625rem;
+    font-size: clamp(0.9375rem, 2.5vw, 1.0625rem);
+    line-height: 1.35;
   }
   .caveat {
-    margin: -0.5rem 0 1.25rem;
+    max-width: 42rem;
+    margin: 0.875rem 0 0;
     color: var(--muted);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     line-height: 1.5;
   }
+
+  .measures-section {
+    padding-block: 3rem 2rem;
+  }
+  .section-h {
+    margin: 0 0 1.25rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+  .measures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 1.5rem;
+    align-items: start;
+  }
+  .measure {
+    padding: 1.5rem 1.75rem;
+    border-top: 6px solid var(--bay);
+  }
+  .kicker {
+    margin: 0 0 0.5rem;
+    color: var(--bay);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .measure h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+  .measure p:not(.kicker) {
+    max-width: 30rem;
+    margin: 0 0 1rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .measure p.line {
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .details summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    color: var(--bay);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+  }
+  .details summary::-webkit-details-marker {
+    display: none;
+  }
+  .details summary::before {
+    content: '▸';
+    transition: transform 0.15s;
+  }
+  .details[open] summary::before {
+    transform: rotate(90deg);
+  }
+  .details[open] summary {
+    margin-bottom: 0.5rem;
+  }
+  .measure p.official {
+    color: var(--ink);
+    font-size: 0.9375rem;
+  }
+
   .footnote {
     margin: 0 0 3.5rem;
     padding: 1.25rem 1.5rem;

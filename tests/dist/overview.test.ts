@@ -56,10 +56,9 @@ describe('the three cards, in plain language (#24)', () => {
     expect(text).toContain("For ten years, the City's costs grew about 8% a year and its income about 6.5%. So it starts each year short.");
   });
 
-  it('card 3 explains both measures and names the measure in each outcome', () => {
-    expect(text).toContain("Measure V would add a 0.5% sales tax. Measure U would let the City borrow $300M for repairs (a bond). The City's budget plan counts on the sales tax.");
-    expect(text).toContain('105 positions cut if Measure V passes');
-    expect(text).toContain('138 positions cut if Measure V fails');
+  it('card 3 states the fact: how deep the cuts go under each outcome (#31)', () => {
+    expect(text).toContain('The sales-tax vote changes how deep the cuts go. 105 positions cut if Measure V passes, 138 if it fails. Compare both outcomes');
+    expect(text).not.toContain('You get a say');
   });
 });
 

@@ -19,8 +19,11 @@ function reachable(r: Receipt): string[] {
 
 // The overview's "Don't take our word for it" strip showed six whole-document chips, as a sample of the
 // sources. It now says "Tap any number" and links to the Sources page, which lists every document; #33 cuts
-// the section. Nothing else may go missing.
-const RETIRED: Record<string, RegExp> = { '/us/ca/berkeley/': /^source \| {2}\| {2}\| S\d+ \| {2}\| $/ };
+// the section. And #31 rewrote overview card 3 to state only the two position counts, so the measures'
+// 0.5% and $300M figures now live on the Ballot page alone (checked below). Nothing else may go missing.
+const STRIP = /^source \| {2}\| {2}\| S\d+ \| {2}\| $/;
+const CARD3 = /^figure \| (0\.5%|\$300,000,000) \| Measure [A-Z]: proposed (local sales tax|infrastructure bond) on the /;
+const RETIRED: Record<string, RegExp> = { '/us/ca/berkeley/': new RegExp(`${STRIP.source}|${CARD3.source}`) };
 
 describe('every receipt that had a chip is still reachable on its page (#29)', () => {
   for (const [path, keys] of Object.entries(before)) {
@@ -35,6 +38,16 @@ describe('every receipt that had a chip is still reachable on its page (#29)', (
     const h = html('/us/ca/berkeley/');
     expect(h).toMatch(/<a class="btn btn--light" href="\/us\/ca\/berkeley\/sources\/"[^>]*>Browse all sources<\/a>/);
     expect(receipts(h).flatMap(reachable).filter((k) => RETIRED['/us/ca/berkeley/'].test(k))).toEqual([]);
+  });
+
+  it("the measures' figures card 3 dropped still open their receipts on the Ballot page (#31)", () => {
+    const ballot = receipts(html('/us/ca/berkeley/ballot/'));
+    const dropped = before['/us/ca/berkeley/'].filter((k) => CARD3.test(k));
+    expect(dropped).toHaveLength(2);
+    for (const k of dropped) {
+      const [, value, , sources] = k.split(' | ');
+      expect(ballot.some((r) => r.kind === 'figure' && r.value === value && r.sources.join('+') === sources), k).toBe(true);
+    }
   });
 });
 

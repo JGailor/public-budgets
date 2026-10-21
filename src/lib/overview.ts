@@ -94,10 +94,6 @@ export function overview(b: CityBudget, families: Families, revenueGroups: Reven
       withTax: { value: withTax.total, label: 'Positions cut if the sales tax passes', ref: withTax, format: 'number', tone: 'neutral' } satisfies Figure,
       withoutTax: { value: withoutTax.total, label: 'Positions cut if the sales tax fails', ref: withoutTax, format: 'number', tone: 'neutral' } satisfies Figure,
       salesTaxLetter: b.documentFacts.salesTaxMeasure.letter,
-      bondLetter: b.documentFacts.bondMeasure.letter,
-      salesTax: { value: b.citedFacts.salesTax.rate, label: `Measure ${b.documentFacts.salesTaxMeasure.letter}: proposed local sales tax on the ${b.citedFacts.salesTax.election} ballot`, ref: b.citedFacts.salesTax, format: 'percent', tone: 'neutral' } satisfies Figure,
-      bond: { value: b.citedFacts.bond.amount, label: `Measure ${b.documentFacts.bondMeasure.letter}: proposed infrastructure bond on the ${b.citedFacts.bond.election} ballot`, ref: b.citedFacts.bond, tone: 'neutral' } satisfies Figure,
-      election: b.citedFacts.salesTax.election,
     },
     growth: {
       series: growth,

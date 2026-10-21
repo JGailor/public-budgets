@@ -64,7 +64,8 @@ describe('ballot page figures', () => {
     expect(row(fails, 'fire-station')).toMatchObject({ label: 'Fire Station 4', text: 'Closure reconsidered for FY2028', cite: { source: 'S20', page: 55 } });
     expect(row(passes, 'police')).toMatchObject({ label: '21 police positions', cite: { source: 'S20', page: 96 } });
     expect(row(fails, 'police')).toMatchObject({ label: '21 police positions', cite: { source: 'S20', page: 96 } });
-    expect(passes.caveat).toBe(fails.caveat);
+    // Said once for both outcomes (#31), from the same file.
+    expect(p.countsCaveat).toBe(file.countsCaveat);
     expect(p.adoption).toMatchObject({ date: '2026-06-23', cite: { source: 'S20', page: 1 } });
   });
 
@@ -80,7 +81,9 @@ describe('ballot page figures', () => {
   });
 
   it('results are a data change: pending, passed and failed', () => {
-    expect(ballotState(withStatus('pending'))).toMatchObject({ decided: false, result: null, eyebrow: 'November 3, 2026', heading: 'On your ballot, and what it changes' });
+    expect(ballotState(withStatus('pending'))).toMatchObject({ decided: false, result: null, eyebrow: 'November 3, 2026', heading: 'What changes if the sales tax passes or fails' });
+    expect(ballotState(withStatus('passed')).heading).toMatch(/^The sales tax passed\./);
+    expect(ballotState(withStatus('pending'), 'Measure V').heading).toBe('What changes if Measure V passes or fails');
     expect(ballotState(withStatus('passed'), 'Measure V')).toMatchObject({ decided: true, result: 'passes', heading: expect.stringMatching(/^Measure V passed\./) });
     expect(ballotState(withStatus('failed'), 'Measure V')).toMatchObject({ decided: true, result: 'fails', heading: expect.stringMatching(/^Measure V failed\./) });
     expect(ballotPage(budget, withStatus('passed')).state.heading).toMatch(/^Measure V passed\./);
