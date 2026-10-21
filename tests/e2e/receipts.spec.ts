@@ -53,6 +53,7 @@ test.describe('source chips and receipts (desktop)', () => {
       /^\+ One-time money\s*\$2,100,000$/,
       /^= −\$29,249,339$/,
     ]);
+    // A table figure with no quoted page opens the PDF at its start (#30).
     await expect(d.getByRole('link', { name: 'Open the PDF ↗' })).toHaveAttribute('href', /berkeleyca\.gov\/.*\.pdf$/);
     await expect(d.getByRole('link', { name: 'CSV' })).toHaveAttribute('href', '/us/ca/berkeley/data/deficit-bridge.csv');
     await expect(d.locator('.caveat')).toContainText('subject to revision');
