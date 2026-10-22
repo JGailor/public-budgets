@@ -42,4 +42,35 @@ test.describe('the Gap page', () => {
     await expect(d.locator('.facts')).toContainText('Deficit Bridge FY27-28, row 11');
     await expect(d.locator('.built dl > div')).toHaveCount(6); // five steps and the total
   });
+
+  // #39: the step labels line up across the chart, first line to first line, whatever each bar's depth.
+  for (const width of [1440, 800, 768]) {
+    test(`step labels share one top edge, under their amounts, at ${width}px (#39)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(PAGE);
+      for (const year of ['fy2027', 'fy2028']) {
+        await page.locator(`label[for="year-${year}"]`).click();
+        const steps = page.locator(`[data-year="${year}"] .step`);
+        await expect(steps).toHaveCount(8);
+        const boxes = await steps.evaluateAll((els) =>
+          els.map((el) => {
+            const box = (sel: string) => el.querySelector(sel)!.getBoundingClientRect();
+            return { label: box('.label').top, value: box('.value'), bar: box('.bar').bottom };
+          }),
+        );
+        const tops = boxes.map((b) => b.label);
+        expect(Math.max(...tops) - Math.min(...tops), `${year} label tops ${tops.join(', ')}`).toBeLessThanOrEqual(1);
+        for (const b of boxes) {
+          // Each amount is still drawn just under its own bar…
+          expect(b.value.top).toBeGreaterThanOrEqual(b.bar);
+          expect(b.value.top - b.bar).toBeLessThan(16);
+          // …and clear of the label row.
+          expect(b.value.bottom).toBeLessThan(Math.min(...tops));
+        }
+        // Amounts stay on one line now, so check they never run into each other or past the page's 16px gutter.
+        for (let i = 1; i < boxes.length; i++) expect(boxes[i].value.left - boxes[i - 1].value.right).toBeGreaterThan(4);
+        expect(boxes.at(-1)!.value.right).toBeLessThanOrEqual(width - 16);
+      }
+    });
+  }
 });

@@ -340,10 +340,9 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
     .step {
       position: relative;
       display: grid;
-      grid-template-rows: var(--chart) auto auto;
+      grid-template-rows: var(--chart) auto;
       justify-items: center;
       text-align: center;
-      row-gap: 0.5rem;
     }
     /* The ⓘ panel opens under its step, as a popover; the right half of the chart opens leftward. */
     .step :global(.info-panel) {
@@ -368,11 +367,18 @@ const taxStart = new Date(`${budget.documentFacts.salesTaxTerm.start}T12:00:00Z`
       top: calc(var(--top) * 100%);
       height: max(calc(var(--h) * 100%), 3px);
     }
+    /* The amount hangs just under its bar, out of the layout, so its bar's depth and its own height can't move the label (#39). */
     .value {
-      margin-top: calc((var(--top) + var(--h)) * var(--chart) - var(--chart) + 0.5rem);
+      position: absolute;
+      top: calc((var(--top) + var(--h)) * var(--chart) + 0.5rem);
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
     }
+    /* Every label starts on one line across the chart, below where the deepest amount can reach, so first lines align (#39). */
     .label {
-      margin-top: 1.5rem;
+      align-self: start;
+      margin-top: 3.5rem;
       min-height: 2.5em;
     }
   }
